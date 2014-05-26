@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset='utf-8'/>
+		<title>Triangulation of simple polygons in near-linear time [Sei91]</title>
+
+		<script type="text/javascript" src="PolygonTestdata.js"></script>
+
+		<!-- script type="text/javascript" src="../build/pnltri.min.js"></script -->
+		<script type="text/javascript" src="../src/Pnltri.js"></script>
+		<script type="text/javascript" src="../src/PnltriMath.js"></script>
+		<script type="text/javascript" src="../src/PolygonData.js"></script>
+		<script type="text/javascript" src="../src/Trapezoider.js"></script>
+		<script type="text/javascript" src="../src/MonoSplitter.js"></script>
+		<script type="text/javascript" src="../src/MonoTriangulator.js"></script>
+		<script type="text/javascript" src="../src/Triangulator.js"></script>
+
+		<!-- just to display results graphically -->
+		<script type="text/javascript" src="PolygonDataTest.js"></script>
+		<script type="text/javascript" src="TestHelpers.js"></script>
+	</head>
+
+	<body>
+		<h4>Triangulator for Simple Polygons with Holes</h4>
+		<div id="simple polygon with holes"></div>
+
+		<script type="text/javascript">
+			var	testData = new PolygonTestdata();
+			var polyDataNames = [ "article_poly", "trap_2up_2down", "pt_3_diag_max",
+									"squares_perftest_max", "tree_full", "xy_bad_saw",
+								];
+
+			var myTriangulator = new PNLTRI.Triangulator();
+
+			var startTS = new Date();
+			var resultStr='', dataName, example_data, triangList;
+			for ( var dataIdx in polyDataNames ) {
+				dataName = polyDataNames[dataIdx];
+				example_data = testData.get_polygon_with_holes( dataName );
+				triangList = myTriangulator.triangulate_polygon( example_data );
+
+				resultStr += '<p/><p/>' + dataName + ':<br/>';
+				resultStr += ( triangList ) ?
+					triangList.map( function(tri) { return "[ "+tri.join(", ")+" ]" } ).join(", ") :
+					'NO Triangle-List!';
+				var endTS = new Date();
+				resultStr += '<p/>&nbsp;&nbsp;&nbsp;milliseconds: ' + ( endTS.getTime()-startTS.getTime() );
+				startTS = endTS;
+			}
+
+			inResultTarget = document.getElementById( "simple polygon with holes" );
+			inResultTarget.innerHTML = resultStr;
+			
+			// display last result
+			drawPolygonLayers( { "poly": example_data, "triang": myTriangulator.lastPolyData.triangles_2_polygons() }, 2 );
+		</script>
+	</body>
+
+</html>

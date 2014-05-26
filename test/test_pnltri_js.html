@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+	
+	<head>
+		<meta charset='utf-8'/>
+		<title>Triangulation of simple polygons in near-linear time [Sei91] - Tests with QUnit</title>
+
+		<link rel="stylesheet" href="../vendor/qunit.css">
+		<script src="../vendor/qunit.js"></script>
+
+		<script type="text/javascript" src="PolygonTestdata.js"></script>
+
+		<script type="text/javascript" src="../src/Pnltri.js"></script>
+		<script type="text/javascript" src="../src/PnltriMath.js"></script>
+		<script type="text/javascript" src="../src/PolygonData.js"></script>
+		<script type="text/javascript" src="../src/Trapezoider.js"></script>
+		<script type="text/javascript" src="../src/MonoSplitter.js"></script>
+		<script type="text/javascript" src="../src/MonoTriangulator.js"></script>
+		<script type="text/javascript" src="../src/Triangulator.js"></script>
+
+		
+		<script type="text/javascript" src="TestHelpers.js"></script>
+
+		<script type="text/javascript" src="PnltriMathTest.js"></script>
+		<script type="text/javascript" src="PolygonDataTest.js"></script>
+		<script type="text/javascript" src="TrapezoiderTest.js"></script>
+		<script type="text/javascript" src="MonoSplitterTest.js"></script>
+		<script type="text/javascript" src="MonoTriangulatorTest.js"></script>
+		<script type="text/javascript" src="TriangulatorTest.js"></script>
+		
+	</head>
+	
+	<body>
+		<div id="qunit"></div>
+		<div id="qunit-fixture"></div>
+		
+		see also: <a href="http://qunitjs.com/cookbook/">QUnit Cookbook</a>
+		
+		<div>
+			<script type="text/javascript">
+				// Test
+				test_random_with_seed();
+			</script>
+		</div>
+		
+		<div>
+			<h4>Random Array Shuffle/Iteraror</h4>
+			<div id="random_array_shuffle"></div>
+			<div id="random_array_shuffle_iterator"></div>
+			
+			<script type="text/javascript">
+				// Tests
+				test_array_shuffle();
+				test_array_shuffle_iterator();
+			
+				// example computation
+				compute_array_shuffle( document.getElementById( "random_array_shuffle" ) );
+				compute_array_shuffle_iterator( document.getElementById( "random_array_shuffle_iterator" ) );
+			</script>
+		</div>
+		
+		<div>
+			<h4>Polygon Data</h4>
+			<div id="polygon data"></div>
+			
+			<script type="text/javascript">
+				// Test
+				test_PolygonData();
+			
+				// example computation
+				compute_PolygonData( document.getElementById( "polygon data" ) );
+			</script>
+		</div>
+		
+		<div>
+			<script type="text/javascript">
+				// Test
+				test_QueryStructure();
+			</script>
+		</div>
+		
+		<div>
+			<h4>Simple Polygon Trapezoider</h4>
+			
+			<script type="text/javascript">
+				// Test
+				test_Trapezoider();
+			
+				// Beispiel Berechnung
+				compute_Trapezoider();
+			</script>
+		</div>
+		
+		<div>
+			<script type="text/javascript">
+				// Tests
+				test_MonoSplitter();
+				test_MonoTriangulator();
+				test_Triangulator();
+			</script>
+		</div>
+
+	</body>
+	
+</html>
