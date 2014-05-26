@@ -18,7 +18,7 @@ In the future it shall handle crossing edges too - along the lines presented by 
 
 ### Usage ###
 
-Download the [minified library](build/pnltri.min.js) and include it in your html.
+Download the [minified library](https://raw.github.com/jahting/pnltri.js/master/build/pnltri.min.js) and include it in your html.
 
 ```html
 <script src="js/pnltri.min.js"></script>
@@ -61,7 +61,7 @@ If everything went well you should see this list - probably in a different order
 
 #### Integration into Three.js ####
 
-Replace THREE.Shape.Utils.triangulateShape with:
+In [Three.js](https://github.com/mrdoob/three.js) replace THREE.Shape.Utils.triangulateShape with:
 
 ```html
 	triangulateShape: function ( contour, holes ) {
@@ -69,6 +69,8 @@ Replace THREE.Shape.Utils.triangulateShape with:
 		return	myTriangulator.triangulate_polygon( [ contour ].concat(holes) );
 	},
 ```
+
+This works with all examples included in Three.js .
 
 ### Change log ###
 
