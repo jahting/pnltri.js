@@ -38,7 +38,9 @@
 			for ( var dataIdx in polyDataNames ) {
 				dataName = polyDataNames[dataIdx];
 				example_data = testData.get_polygon_with_holes( dataName );
+//				console.profile();
 				triangList = myTriangulator.triangulate_polygon( example_data );
+//				console.profileEnd();
 
 				resultStr += '<p/><p/>' + dataName + ':<br/>';
 				resultStr += ( triangList ) ?
