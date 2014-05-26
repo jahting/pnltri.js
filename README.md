@@ -8,7 +8,7 @@ This project implements an algorithm by Raimund Seidel [Sei91] for the triangula
 At present the algorithm handles simple polygons (no crossing edges) with holes. The contour and the holes are specified as vertex sequences. Since the first sequence is the contour and all others the holes, there is no need for a specific winding order clock-wise or counter-clock-wise.
 Repeating points (zero-length edges) and crossing edges are not allowed.
 
-The output is a list of triangles. Each triangle is a tripple of vertex indices. These refer to the order of the vertices in the input sequences, as if those had all been concatenated (numberung starts at 0). No Steiner points are added.
+The output is a list of triangles. Each triangle is a triple of vertex indices. These refer to the order of the vertices in the input sequences, as if those had all been concatenated (numbering starts at 0). No Steiner points are added.
 The output triangles for a specific polygon (with holes) are always the same, but since there is a random part in the algorithm and output is not sorted, their order changes.
 
 At present this implementation handles some cases of co-linear segments gracefully, but no effort for completeness has been made yet.
@@ -18,7 +18,7 @@ In the future it shall handle crossing edges too - along the lines presented by 
 
 ### Usage ###
 
-Download the [minified library](URL) and include it in your html.
+Download the [minified library](build/pnltri.min.js) and include it in your html.
 
 ```html
 <script src="js/pnltri.min.js"></script>
@@ -54,10 +54,12 @@ This code specifies a polygon with 3 holes. It then creates the Triangulator and
 
 If everything went well you should see this list - probably in a different order.
 ```html
-[ 0, 1, 11 ], [ 0, 4, 3 ], [ 0, 10, 4 ], [ 0, 11, 10 ], [ 1, 2, 7 ], [ 1, 7, 12 ], [ 1, 12, 11 ], [ 2, 3, 8 ], [ 2, 8, 7 ], [ 3, 4, 5 ], [ 3, 5, 8 ], [ 4, 7, 9 ], [ 4, 9, 6 ], [ 4, 10, 7 ], [ 5, 6, 8 ], [ 6, 9, 8 ], [ 7, 10, 12 ]
+[ 0, 1, 11 ], [ 0, 4, 3 ], [ 0, 10, 4 ], [ 0, 11, 10 ], [ 1, 2, 7 ], [ 1, 7, 12 ],
+[ 1, 12, 11 ], [ 2, 3, 8 ], [ 2, 8, 7 ], [ 3, 4, 5 ], [ 3, 5, 8 ], [ 4, 7, 9 ],
+[ 4, 9, 6 ], [ 4, 10, 7 ], [ 5, 6, 8 ], [ 6, 9, 8 ], [ 7, 10, 12 ]
 ```
 
-## Integration into Three.js ##
+#### Integration into Three.js ####
 
 Replace THREE.Shape.Utils.triangulateShape with:
 
