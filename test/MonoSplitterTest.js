@@ -1057,6 +1057,7 @@ function test_MonoSplitter() {
 		// for random-error detection - default seed: 73
 //		PNLTRI.Math.myRandom( 1 );		// 3: 1 missing; 4,8: 2 missing; 10,11: nur weniger Chains
 //		PNLTRI.Math.random = PNLTRI.Math.myRandom;
+//		PNLTRI.Math.random = Math.random;
 		//
 		var	testData = new PolygonTestdata();
 		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( inDataName ) );

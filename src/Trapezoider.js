@@ -1,8 +1,7 @@
 /**
  * @author jahting / http://www.ameco.tv/
  */
-
-
+ 
 PNLTRI.trapCounter = 0;
 
 /** @constructor */
@@ -10,8 +9,8 @@ PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 	
 	this.trapID = PNLTRI.trapCounter++;			// for Debug
 
-	this.hiPt = inHigh ? inHigh : { x: PNLTRI.Math.INFINITY, y: PNLTRI.Math.INFINITY };
-	this.loPt = inLow ? inLow : { x: -PNLTRI.Math.INFINITY, y: -PNLTRI.Math.INFINITY };
+	this.hiPt = inHigh ? inHigh : { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY };
+	this.loPt = inLow ? inLow : { x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY };
 	
 	this.lseg = inLeft;
 	this.rseg = inRight;
@@ -254,24 +253,28 @@ PNLTRI.QueryStructure.prototype = {
 	//
 	//	ATTENTION: always viewed from -y, not as if moving along the segment chain !!
 	 
-	is_left_of: function ( inSeg, inPt ) {
-		var	retVal;
+	is_left_of: function ( inSeg, inPt, inBetweenY ) {
+		var	retVal, retVal2;
+		var dXfrom = inSeg.vFrom.pt.x - inPt.x;
+		var dXto = inSeg.vTo.pt.x - inPt.x;
 		if ( Math.abs( inSeg.vTo.pt.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
-			retVal = inSeg.vTo.pt.x - inPt.x;
+			retVal = dXto; retVal2 = dXfrom;
 		} else if ( Math.abs( inSeg.vFrom.pt.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
-			retVal = inSeg.vFrom.pt.x - inPt.x;
+			retVal = dXfrom; retVal2 = dXto;
+		} else if ( inBetweenY && ( dXfrom * dXto > 0 ) ) {
+			// both x-coordinates of inSeg are on the same side of inPt
+			retVal = dXto; retVal2 = dXfrom;
 		} else {
-			var segLowPt, segHighPt;
 			if ( inSeg.upward ) {
-				segLowPt = inSeg.vFrom.pt;
-				segHighPt = inSeg.vTo.pt;
+				return	PNLTRI.Math.ptsCrossProd( inSeg.vFrom.pt, inSeg.vTo.pt, inPt );
 			} else {
-				segLowPt = inSeg.vTo.pt;
-				segHighPt = inSeg.vFrom.pt;
+				return	PNLTRI.Math.ptsCrossProd( inSeg.vTo.pt, inSeg.vFrom.pt, inPt );
 			}
-			retVal = PNLTRI.Math.ptsCrossProd( segLowPt, segHighPt, inPt );
 		}
-		if ( Math.abs( retVal ) < PNLTRI.Math.EPSILON_P )	return	0;
+		if ( Math.abs( retVal ) < PNLTRI.Math.EPSILON_P ) {
+			if ( Math.abs( retVal2 ) < PNLTRI.Math.EPSILON_P )	return	0;
+			return	retVal2;
+		}
 		return	retVal;
 	},
 
@@ -308,7 +311,7 @@ PNLTRI.QueryStructure.prototype = {
 						if ( inPtOther.x < inPt.x )		sideRightAbove = false;		// left
 						break;
 					} else {
-						compRes = this.is_left_of( inQsNode.seg, inPtOther );
+						compRes = this.is_left_of( inQsNode.seg, inPtOther, false );
 						if ( compRes > 0 )				sideRightAbove = false;		// left
 						else if ( compRes == 0 ) {
 							// co-linear reversal
@@ -337,7 +340,7 @@ PNLTRI.QueryStructure.prototype = {
 						console.log("ptNode: Pts too close together#2: ", compPt, inQsNode.seg );
 					}		*/
 					compPt = inPt;
-					compRes = this.is_left_of( inQsNode.seg, compPt );
+					compRes = this.is_left_of( inQsNode.seg, compPt, true );
 					if ( compRes > 0 )				sideRightAbove = false;		// left
 					else if ( compRes == 0 ) {
 						// ???TODO: for test_add_segment_spezial_4B !!
@@ -364,7 +367,7 @@ PNLTRI.QueryStructure.prototype = {
 		
 		function	continue_chain_from_above() {
 			if ( trCurrent.usave ) {
-				// console.log( "continue_chain_from_above: (three upper neighbours)" );
+				// console.log( "continue_chain_from_above: (three upper neighbors)" );
 				if ( trCurrent.uside == PNLTRI.S_LEFT ) {
 					// intersects in the left
 					// => left gets one, right gets two of the upper neighbors
@@ -436,9 +439,8 @@ PNLTRI.QueryStructure.prototype = {
 			}
  		}
 		
-		// only one trapezoid below. partition trCurrent into two and make the
-		// two resulting trapezoids trNewLeft and trNewRight as the upper neighbours of
-		// the sole lower trapezoid
+		// only one trapezoid below.
+		// make trNewLeft and trNewRight the upper neighbors of this sole lower trapezoid
 		
 		function	only_one_trap_below( inTrNext ) {
 			// console.log( "only_one_trap_below: (act.loPt.y, last.loPt.y)", trCurrent.loPt.y, trLast.loPt.y );
@@ -489,8 +491,9 @@ PNLTRI.QueryStructure.prototype = {
 			}
 		}
 	
-		// two trapezoids below. Find out which one is intersected by
-		// this segment and proceed down that one
+		// two trapezoids below.
+		// Find out which one (d0,d1) is intersected by this segment and
+		//	continue down that one
 
 		function two_trap_below() {
 
@@ -513,7 +516,7 @@ PNLTRI.QueryStructure.prototype = {
 				trNext = null;	      	// segment finished
 			} else {
 				// passes left or right of an already inserted NOT connected segment
-				var compRes = scope.is_left_of( inSegment, trCurrent.loPt );
+				var compRes = scope.is_left_of( inSegment, trCurrent.loPt, true );
 				if ( compRes > 0 ) {				// trCurrent.loPt is left of inSegment
 					// console.log( "two_trap_below: (intersecting d1)" );
 					trNext = trCurrent.d1;
@@ -537,6 +540,7 @@ PNLTRI.QueryStructure.prototype = {
 				} else {							// trCurrent.loPt lies ON inSegment
 //					console.log( "two_trap_below: loPt ON new segment" );
 					trNext = trCurrent.d0;				// TODO: for test_add_segment_spezial_4A -> like intersecting d0
+//					trNext = trCurrent.d1;				// TODO: for test_add_segment_spezial_9 -> like intersecting d1
 		
 					trCurrent.d0.setAbove( trNewLeft, trNewRight );
 					trCurrent.d1.setAbove( trNewRight, null );

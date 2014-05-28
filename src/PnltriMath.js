@@ -35,12 +35,9 @@ PNLTRI.Math = {
 
 }
 
-// maximal absolute allowed value for x and y coordinates
-	PNLTRI.Math.INFINITY = 1<<30;
-
 // precision of floating point arithmetic
-//	PNLTRI.Math.EPSILON_P = 0.000000000000001;	three_error#1: Error
-	PNLTRI.Math.EPSILON_P = 0.00000000000001;
+//	PNLTRI.Math.EPSILON_P = Math.pow(2,-32);	// ~ 0.0000000001
+	PNLTRI.Math.EPSILON_P = Math.pow(2,-45);	// ~ 0.00000000000001
 	PNLTRI.Math.EPSILON_N = -PNLTRI.Math.EPSILON_P;
 
 

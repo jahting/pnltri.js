@@ -8,12 +8,12 @@
 
 
 @rem	simple concatenation of source files
-@echo %LICENSE% > %DESTPLAIN%
+@echo %LICENSE%> %DESTPLAIN%
 @FOR %%f in (%SRCFILES%) DO @type %%f >> %DESTPLAIN%
 
 
 @rem	minified concatenation of source files
-@echo %LICENSE% > %DESTMINI%
+@echo %LICENSE%> %DESTMINI%
 @java -jar compiler/compiler.jar --warning_level=VERBOSE --language_in=ECMASCRIPT5_STRICT --js %SRCFILES% >> %DESTMINI%
 @rem further options:	--jscomp_off=globalThis --jscomp_off=checkTypes --externs externs.js
 

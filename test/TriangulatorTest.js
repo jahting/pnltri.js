@@ -64,7 +64,7 @@ function test_Triangulator() {
 		test_triangulate_polygon( "many_ears", 11, 0 );					// 2; from slides3.pdf
 		test_triangulate_polygon( "y_monotone", 13, 0 );				// 2; from slides3.pdf
 		test_triangulate_polygon( "for_sweep1", 9, 0 );					// 2; from slides3.pdf
-		test_triangulate_polygon( "for_sweep2", 8, 0 );					// 2; from slides3.pdf
+		test_triangulate_polygon( "for_sweep2", 8, 0 );				// 2; from slides3.pdf
 		test_triangulate_polygon( "for_sweep3", 19, 0 );				// 2; from slides3.pdf
 		test_triangulate_polygon( "xy_bad_saw", 11, 0 );				// 2; from handout6.pdf
 		//
@@ -79,6 +79,7 @@ function test_Triangulator() {
 		test_triangulate_polygon( "three_error#1", 18, 0 );				// 1; 1.Error, integrating into Three.js (letter "t")
 		test_triangulate_polygon( "three_error#2", 12, 0 );				// 0.7; 2.Error, integrating into Three.js (letter "1")
 		test_triangulate_polygon( "three_error#3", 28, 0 );				// 3000; 3.Error, integrating into Three.js (logbuffer)
+		test_triangulate_polygon( "three_error#4", 32, 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
 		//
 		test_triangulate_polygon( "squares_perftest_min", 14, 0 );		// 1: 3x3 squares in square, performance test
 //		test_triangulate_polygon( "squares_perftest_mid", 422, 1 );		// 1: 15x15 squares in square, performance test

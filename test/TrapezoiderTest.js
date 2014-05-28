@@ -103,14 +103,15 @@ PNLTRI.QueryStructure.prototype.check_trapezoids_segment_orientation = function 
 PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId, inSollU0, inSollU1, inSollD0, inSollD1, inTestName ) {
 	var trapezoid = this.getTrapByIdx(inTrapId);
 	if ( trapezoid ) {
-		if ( inSollU0 == null )		ok( !trapezoid.u0, inTestName + ": !u0" )
-		else	ok( ( trapezoid.u0 && ( trapezoid.u0.trapID == inSollU0 ) ), inTestName + ": u0 == " + inSollU0 );
-		if ( inSollU1 == null )		ok( !trapezoid.u1, inTestName + ": !u1" )
-		else	ok( ( trapezoid.u1 && ( trapezoid.u1.trapID == inSollU1 ) ), inTestName + ": u1 == " + inSollU1 );
-		if ( inSollD0 == null )		ok( !trapezoid.d0, inTestName + ": !d0" )
-		else	ok( ( trapezoid.d0 && ( trapezoid.d0.trapID == inSollD0 ) ), inTestName + ": d0 == " + inSollD0 );
-		if ( inSollD1 == null )		ok( !trapezoid.d1, inTestName + ": !d1" )
-		else	ok( ( trapezoid.d1 && ( trapezoid.d1.trapID == inSollD1 ) ), inTestName + ": d1 == " + inSollD1 );
+		var u0ID = trapezoid.u0 ? trapezoid.u0.trapID : null;
+		var u1ID = trapezoid.u1 ? trapezoid.u1.trapID : null;
+		var d0ID = trapezoid.d0 ? trapezoid.d0.trapID : null;
+		var d1ID = trapezoid.d1 ? trapezoid.d1.trapID : null;
+		//
+		equal( u0ID, inSollU0, inTestName + ": u0 == " + inSollU0 );
+		equal( u1ID, inSollU1, inTestName + ": u1 == " + inSollU1 );
+		equal( d0ID, inSollD0, inTestName + ": d0 == " + inSollD0 );
+		equal( d1ID, inSollD1, inTestName + ": d1 == " + inSollD1 );
 	} else {
 		ok( trapezoid, inTestName + ": trapezoid exists" );
 	}
@@ -150,8 +151,14 @@ function test_QueryStructure() {
 		ok( qs.is_left_of(segment, { x: 0, y: 13 } ) > 0,  "is_left_of:  0, 13 (yes)" );
 		ok( qs.is_left_of(segment, { x: 20, y: 10 } ) < 0, "is_left_of: 20, 10 (no)" );
 		ok( qs.is_left_of(segment, { x: 20, y: 13 } ) < 0, "is_left_of: 20, 13 (no)" );
+		//
+		ok( qs.is_left_of(segment, { x: 0, y: 10 }, true ) > 0,  "is_left_of:  0, 10 (yes, between Y)" );
+		ok( qs.is_left_of(segment, { x: 0, y: 13 }, true ) > 0,  "is_left_of:  0, 13 (yes, between Y)" );
+		ok( qs.is_left_of(segment, { x: 20, y: 10 }, true ) < 0, "is_left_of: 20, 10 (no, between Y)" );
+		ok( qs.is_left_of(segment, { x: 20, y: 13 }, true ) < 0, "is_left_of: 20, 13 (no, between Y)" );
 		//	on the line
 		ok( qs.is_left_of(segment, { x: 13.5, y: 11.5 } ) == 0,  "is_left_of:  13.5, 11.5 (co-linear)" );
+		ok( qs.is_left_of(segment, { x: 13.5, y: 11.5 }, true ) == 0,  "is_left_of:  13.5, 11.5 (co-linear, between Y)" );
 		ok( qs.is_left_of(segment, { x:  3, y:  7 } ) == 0, "is_left_of:  3,  7 (co-linear)" );
 		ok( qs.is_left_of(segment, { x: 24, y: 16 } ) == 0, "is_left_of: 24, 16 (co-linear)" );
 		//	general case
@@ -159,15 +166,19 @@ function test_QueryStructure() {
 		ok( qs.is_left_of(segment, { x: 0, y:  0 } ) < 0, "is_left_of: 0,  0 (no)" );
 		ok( qs.is_left_of(segment, { x: 4, y:  8 } ) > 0, "is_left_of: 4,  8 (yes)" );
 		ok( qs.is_left_of(segment, { x: 7, y: 11 } ) > 0, "is_left_of: 7, 11 (yes)" );
+		ok( qs.is_left_of(segment, { x: 7, y: 11 }, true ) > 0, "is_left_of: 7, 11 (yes, between Y)" );
 		ok( qs.is_left_of(segment, { x: 6, y: 15 } ) > 0, "is_left_of: 6, 15 (yes)" );
 		//		x0 <  < x1
 		ok( qs.is_left_of(segment, { x: 12, y:  8 } ) < 0, "is_left_of: 12,  8 (no)" );
 		ok( qs.is_left_of(segment, { x: 15, y: 12 } ) < 0, "is_left_of: 15, 12 (no)" );
+		ok( qs.is_left_of(segment, { x: 15, y: 12 }, true ) < 0, "is_left_of: 15, 12 (no, between Y)" );
 		ok( qs.is_left_of(segment, { x: 12, y: 11 } ) > 0, "is_left_of: 12, 11 (yes)" );
+		ok( qs.is_left_of(segment, { x: 12, y: 11 }, true ) > 0, "is_left_of: 12, 11 (yes, between Y)" );
 		ok( qs.is_left_of(segment, { x: 14, y: 15 } ) > 0, "is_left_of: 14, 15 (yes)" );
 		//		> x1
 		ok( qs.is_left_of(segment, { x: 25, y:  8 } ) < 0, "is_left_of: 12,  8 (no)" );
 		ok( qs.is_left_of(segment, { x: 23, y: 12 } ) < 0, "is_left_of: 15, 12 (no)" );
+		ok( qs.is_left_of(segment, { x: 23, y: 12 }, true ) < 0, "is_left_of: 15, 12 (no, between Y)" );
 		ok( qs.is_left_of(segment, { x: 20, y: 14 } ) < 0, "is_left_of: 12, 11 (no)" );
 		ok( qs.is_left_of(segment, { x: 21, y: 15 } ) > 0, "is_left_of: 21, 15 (yes)" );
 		//
@@ -178,8 +189,14 @@ function test_QueryStructure() {
 		ok( qs.is_left_of(segment, { x: 0, y: 13 } ) > 0,  "is_left_of:  0, 13 (yes)" );
 		ok( qs.is_left_of(segment, { x: 20, y: 10 } ) < 0, "is_left_of: 20, 10 (no)" );
 		ok( qs.is_left_of(segment, { x: 20, y: 13 } ) < 0, "is_left_of: 20, 13 (no)" );
+		//
+		ok( qs.is_left_of(segment, { x: 0, y: 10 }, true ) > 0,  "is_left_of:  0, 10 (yes, between Y)" );
+		ok( qs.is_left_of(segment, { x: 0, y: 13 }, true ) > 0,  "is_left_of:  0, 13 (yes, between Y)" );
+		ok( qs.is_left_of(segment, { x: 20, y: 10 }, true ) < 0, "is_left_of: 20, 10 (no, between Y)" );
+		ok( qs.is_left_of(segment, { x: 20, y: 13 }, true ) < 0, "is_left_of: 20, 13 (no, between Y)" );
 		//	on the line
 		ok( qs.is_left_of(segment, { x: 13.5, y: 11.5 } ) == 0,  "is_left_of:  13.5, 11.5 (co-linear)" );
+		ok( qs.is_left_of(segment, { x: 13.5, y: 11.5 }, true ) == 0,  "is_left_of:  13.5, 11.5 (co-linear, between Y)" );
 		ok( qs.is_left_of(segment, { x:  3, y:  7 } ) == 0, "is_left_of:  3,  7 (co-linear)" );
 		ok( qs.is_left_of(segment, { x: 24, y: 16 } ) == 0, "is_left_of: 24, 16 (co-linear)" );
 		//	general case
@@ -187,15 +204,19 @@ function test_QueryStructure() {
 		ok( qs.is_left_of(segment, { x: 0, y:  0 } ) < 0, "is_left_of: 0,  0 (no)" );
 		ok( qs.is_left_of(segment, { x: 4, y:  8 } ) > 0, "is_left_of: 4,  8 (yes)" );
 		ok( qs.is_left_of(segment, { x: 7, y: 11 } ) > 0, "is_left_of: 7, 11 (yes)" );
+		ok( qs.is_left_of(segment, { x: 7, y: 11 }, true ) > 0, "is_left_of: 7, 11 (yes, between Y)" );
 		ok( qs.is_left_of(segment, { x: 6, y: 15 } ) > 0, "is_left_of: 6, 15 (yes)" );
 		//		x0 <  < x1
 		ok( qs.is_left_of(segment, { x: 12, y:  8 } ) < 0, "is_left_of: 12,  8 (no)" );
 		ok( qs.is_left_of(segment, { x: 15, y: 12 } ) < 0, "is_left_of: 15, 12 (no)" );
+		ok( qs.is_left_of(segment, { x: 15, y: 12 }, true ) < 0, "is_left_of: 15, 12 (no, between Y)" );
 		ok( qs.is_left_of(segment, { x: 12, y: 11 } ) > 0, "is_left_of: 12, 11 (yes)" );
+		ok( qs.is_left_of(segment, { x: 12, y: 11 }, true ) > 0, "is_left_of: 12, 11 (yes, between Y)" );
 		ok( qs.is_left_of(segment, { x: 14, y: 15 } ) > 0, "is_left_of: 14, 15 (yes)" );
 		//		> x1
 		ok( qs.is_left_of(segment, { x: 25, y:  8 } ) < 0, "is_left_of: 12,  8 (no)" );
 		ok( qs.is_left_of(segment, { x: 23, y: 12 } ) < 0, "is_left_of: 15, 12 (no)" );
+		ok( qs.is_left_of(segment, { x: 23, y: 12 }, true ) < 0, "is_left_of: 15, 12 (no, between Y)" );
 		ok( qs.is_left_of(segment, { x: 20, y: 14 } ) < 0, "is_left_of: 12, 11 (no)" );
 		ok( qs.is_left_of(segment, { x: 21, y: 15 } ) > 0, "is_left_of: 21, 15 (yes)" );
 	}
@@ -236,7 +257,7 @@ function test_QueryStructure() {
 			// tr4
 		var tr4 = qs2.trap;
 		equal( tr4.sink, qs2, "init_query_structure_up: root.above->tr.sink: this qs" );
-		equal( tr4.hiPt.y, PNLTRI.Math.INFINITY, "init_query_structure_up: root.above->tr.hiPt.y: INFINITY" );
+		equal( tr4.hiPt.y, Number.POSITIVE_INFINITY, "init_query_structure_up: root.above->tr.hiPt.y: +INFINITY" );
 		equal( tr4.loPt, base_segment.vTo.pt, "init_query_structure_up: root.above->tr.loPt: vTo.pt" );
 		// segMin(vFrom): below root
 		var qs3 = myQsRoot.left;
@@ -249,7 +270,7 @@ function test_QueryStructure() {
 			// tr3
 		var tr3 = qs4.trap;
 		equal( tr3.sink, qs4, "init_query_structure_up: segMin.below->tr.sink: this qs" );
-		equal( tr3.loPt.y, -PNLTRI.Math.INFINITY, "init_query_structure_up: segMin.below->tr.loPt.y: -INFINITY" );
+		equal( tr3.loPt.y, Number.NEGATIVE_INFINITY, "init_query_structure_up: segMin.below->tr.loPt.y: -INFINITY" );
 		equal( tr3.hiPt, base_segment.vFrom.pt, "init_query_structure_up: segMin.below->tr.hiPt: vFrom.pt" );
 		//
 		// Segment - below segMax, above segMin
@@ -686,29 +707,29 @@ function test_QueryStructure() {
 		var qs_tr1 = qs5.left;					// tr1 = qs5.left.trap;
 		var qs_tr2 = qs5.right;					// tr2 = qs5.right.trap;
 		//	T_SINK
-		strictEqual( qs.ptNode( { x: 2, y: 5 }, { x: 3, y: 6 }, qs3.left ), qs_tr3, "ptNode: Sink direct -> qs_tr3" );
+		ok( ( qs.ptNode( { x: 2, y: 5 }, { x: 3, y: 6 }, qs3.left ) == qs_tr3 ), "ptNode A: Sink direct -> qs_tr3" );
 		//	T_Y
-		strictEqual( qs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ), qs_tr4, "ptNode: T_Y(root), above -> qs_tr4" );
-		strictEqual( qs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ), qs_tr3, "ptNode: T_Y(qs3), below -> qs_tr3" );
+		ok( ( qs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ) == qs_tr4 ), "ptNode A: T_Y(root), above -> qs_tr4" );
+		ok( ( qs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ) == qs_tr3 ), "ptNode A: T_Y(qs3), below -> qs_tr3" );
 		//		T_Y: 1.end point hit
-		strictEqual( qs.ptNode( firstPoint, { x: 4, y: 0 }, qs3 ), qs_tr3, "ptNode: T_Y(qs3), =vFrom, below -> qs_tr3" );
+		ok( ( qs.ptNode( firstPoint, { x: 4, y: 0 }, qs3 ) == qs_tr3 ), "ptNode A: T_Y(qs3), =vFrom, below -> qs_tr3" );
 		//		T_Y: 2.end point hit
-		strictEqual( qs.ptNode( secondPoint, { x: 0, y: 5 }, myQsRoot ), qs_tr4, "ptNode: T_Y(root), =vTo, above -> qs_tr4" );
+		ok( ( qs.ptNode( secondPoint, { x: 0, y: 5 }, myQsRoot ) == qs_tr4 ), "ptNode A: T_Y(root), =vTo, above -> qs_tr4" );
 		//	T_X
-		ok( ( qs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ) == qs_tr1 ), "ptNode: T_X(qs5) -> qs_tr1" );
-		ok( ( qs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ) == qs_tr2 ), "ptNode: T_X(qs5) -> qs_tr2" );
+		ok( ( qs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5) -> qs_tr1" );
+		ok( ( qs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5) -> qs_tr2" );
 		//		T_X: 1.end point hit - not horizontal
-		ok( ( qs.ptNode( firstPoint, { x: 0, y: 0 }, qs5 ) == qs_tr1 ), "ptNode: T_X(qs5), =vFrom -> qs_tr1" );
-		ok( ( qs.ptNode( firstPoint, { x: 2, y: 2 }, qs5 ) == qs_tr2 ), "ptNode: T_X(qs5), =vFrom -> qs_tr2" );
+		ok( ( qs.ptNode( firstPoint, { x: 0, y: 0 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vFrom -> qs_tr1" );
+		ok( ( qs.ptNode( firstPoint, { x: 2, y: 2 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vFrom -> qs_tr2" );
 		//		T_X: 2.end point hit - not horizontal
-		ok( ( qs.ptNode( secondPoint, { x: 3, y: 5 }, qs5 ) == qs_tr1 ), "ptNode: T_X(qs5), =vTo -> qs_tr1" );
-		ok( ( qs.ptNode( secondPoint, { x: 4, y: 5 }, qs5 ) == qs_tr2 ), "ptNode: T_X(qs5), =vTo -> qs_tr2" );
+		ok( ( qs.ptNode( secondPoint, { x: 3, y: 5 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vTo -> qs_tr1" );
+		ok( ( qs.ptNode( secondPoint, { x: 4, y: 5 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vTo -> qs_tr2" );
 		//		T_X: 1.end point hit - horizontal
-		strictEqual( qs.ptNode( firstPoint, { x: 0, y: 1 }, qs5 ), qs_tr1, "ptNode: T_X(qs5), =vFrom, horiz -> qs_tr1" );
-		strictEqual( qs.ptNode( firstPoint, { x: 2, y: 1 }, qs5 ), qs_tr2, "ptNode: T_X(qs5), =vFrom, horiz -> qs_tr2" );
+		ok( ( qs.ptNode( firstPoint, { x: 0, y: 1 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vFrom, horiz -> qs_tr1" );
+		ok( ( qs.ptNode( firstPoint, { x: 2, y: 1 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vFrom, horiz -> qs_tr2" );
 		//		T_X: 2.end point hit - horizontal
-		strictEqual( qs.ptNode( secondPoint, { x: 2.5, y: 4 }, qs5 ), qs_tr1, "ptNode: T_X(qs5), =vTo, horiz -> qs_tr1" );
-		strictEqual( qs.ptNode( secondPoint, { x: 4, y: 4 }, qs5 ), qs_tr2, "ptNode: T_X(qs5), =vTo, horiz -> qs_tr2" );
+		ok( ( qs.ptNode( secondPoint, { x: 2.5, y: 4 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vTo, horiz -> qs_tr1" );
+		ok( ( qs.ptNode( secondPoint, { x: 4, y: 4 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vTo, horiz -> qs_tr2" );
 		//
 		// point objects
 		firstPoint = { x: 1, y: 4 };
@@ -736,29 +757,29 @@ function test_QueryStructure() {
 		qs_tr1 = qs5.left;
 		qs_tr2 = qs5.right;
 		//	T_SINK
-		strictEqual( qs.ptNode( { x: 2, y: 5 }, { x: 3, y: 6 }, qs3.left ), qs_tr3, "ptNode: Sink direct -> qs_tr3" );
+		ok( ( qs.ptNode( { x: 2, y: 5 }, { x: 3, y: 6 }, qs3.left ) == qs_tr3 ), "ptNode B: Sink direct -> qs_tr3" );
 		//	T_Y
-		strictEqual( qs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ), qs_tr4, "ptNode: T_Y(root), above -> qs_tr4" );
-		strictEqual( qs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ), qs_tr3, "ptNode: T_Y(qs3), below -> qs_tr3" );
+		ok( ( qs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ) == qs_tr4 ), "ptNode B: T_Y(root), above -> qs_tr4" );
+		ok( ( qs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ) == qs_tr3 ), "ptNode B: T_Y(qs3), below -> qs_tr3" );
 		//		T_Y: 1.end point hit
-		strictEqual( qs.ptNode( firstPoint, { x: 0, y: 5 }, myQsRoot ), qs_tr4, "ptNode: T_Y(root), =vFrom, above -> qs_tr4" );
+		ok( ( qs.ptNode( firstPoint, { x: 0, y: 5 }, myQsRoot ) == qs_tr4 ), "ptNode B: T_Y(root), =vFrom, above -> qs_tr4" );
 		//		T_Y: 2.end point hit
-		strictEqual( qs.ptNode( secondPoint, { x: 4, y: 0 }, qs3 ), qs_tr3, "ptNode: T_Y(qs3), =vTo, below -> qs_tr3" );
+		ok( ( qs.ptNode( secondPoint, { x: 4, y: 0 }, qs3 ) == qs_tr3 ), "ptNode B: T_Y(qs3), =vTo, below -> qs_tr3" );
 		//	T_X
-		strictEqual( qs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ), qs_tr1, "ptNode: T_X(qs5) -> qs_tr1" );
-		strictEqual( qs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ), qs_tr2, "ptNode: T_X(qs5) -> qs_tr2" );
+		ok( ( qs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5) -> qs_tr1" );
+		ok( ( qs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5) -> qs_tr2" );
 		//		T_X: 1.end point hit - not horizontal
-		strictEqual( qs.ptNode( firstPoint, { x: 0, y: 5 }, qs5 ), qs_tr1, "ptNode: T_X(qs5), =vFrom -> qs_tr1" );
-		strictEqual( qs.ptNode( firstPoint, { x: 0, y: 6 }, qs5 ), qs_tr2, "ptNode: T_X(qs5), =vFrom -> qs_tr2" );
+		ok( ( qs.ptNode( firstPoint, { x: 0, y: 5 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vFrom -> qs_tr1" );
+		ok( ( qs.ptNode( firstPoint, { x: 0, y: 6 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vFrom -> qs_tr2" );
 		//		T_X: 2.end point hit - not horizontal
-		strictEqual( qs.ptNode( secondPoint, { x: 4, y: -1 }, qs5 ), qs_tr1, "ptNode: T_X(qs5), =vTo -> qs_tr1" );
-		strictEqual( qs.ptNode( secondPoint, { x: 4, y:  0 }, qs5 ), qs_tr2, "ptNode: T_X(qs5), =vTo -> qs_tr2" );
+		ok( ( qs.ptNode( secondPoint, { x: 4, y: -1 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vTo -> qs_tr1" );
+		ok( ( qs.ptNode( secondPoint, { x: 4, y:  0 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vTo -> qs_tr2" );
 		//		T_X: 1.end point hit - horizontal
-		strictEqual( qs.ptNode( firstPoint, { x: 0, y: 4 }, qs5 ), qs_tr1, "ptNode: T_X(qs5), =vFrom, horiz -> qs_tr1" );
-		strictEqual( qs.ptNode( firstPoint, { x: 2, y: 4 }, qs5 ), qs_tr2, "ptNode: T_X(qs5), =vFrom, horiz -> qs_tr2" );
+		ok( ( qs.ptNode( firstPoint, { x: 0, y: 4 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vFrom, horiz -> qs_tr1" );
+		ok( ( qs.ptNode( firstPoint, { x: 2, y: 4 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vFrom, horiz -> qs_tr2" );
 		//		T_X: 2.end point hit - horizontal
-		strictEqual( qs.ptNode( secondPoint, { x: 2, y: 1 }, qs5 ), qs_tr1, "ptNode: T_X(qs5), =vTo, horiz -> qs_tr1" );
-		strictEqual( qs.ptNode( secondPoint, { x: 4, y: 1 }, qs5 ), qs_tr2, "ptNode: T_X(qs5), =vTo, horiz -> qs_tr2" );
+		ok( ( qs.ptNode( secondPoint, { x: 2, y: 1 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vTo, horiz -> qs_tr1" );
+		ok( ( qs.ptNode( secondPoint, { x: 4, y: 1 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vTo, horiz -> qs_tr2" );
 	}
 
 	
@@ -1074,10 +1095,6 @@ function test_QueryStructure() {
 			] ] );
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
-		
-		var epsSave = PNLTRI.Math.EPSILON_P;
-		PNLTRI.Math.EPSILON_P = 0.0000000000000001;		// smaller epsilon				// TODO
-
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
@@ -1097,53 +1114,9 @@ function test_QueryStructure() {
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 30000 );
-		
-		PNLTRI.Math.EPSILON_P = epsSave;			// reset epsilon
 	}
 
-	function test_add_segment_spezial_6() {
 
-		var myPolygonData = new PNLTRI.PolygonData( [ [
-			{ x: 10.51, y: 0.8420000000000001 },
-			{ x: 9.725, y: 1.0625 },
-			{ x: 6.130000000000002, y: 4.014000000000001 },
-			{ x: 5.83, y: 4.6715 },
-			{ x: 19.450000000000003, y: 8.15 },
-			{ x: 19.560500000000005, y: 8.150000000000002 },
-			{ x: 19.672000000000008, y: 8.150000000000002 },
-			{ x: 19.7845, y: 8.15 },
-			].reverse() ] );
-//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
-//		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
-		
-		var epsSave = PNLTRI.Math.EPSILON_P;
-		PNLTRI.Math.EPSILON_P = 0.0000000001;
-//		PNLTRI.Math.EPSILON_P = 0.0000000000000001;		// smaller epsilon				// TODO
-
-		//
-		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray().concat();
-		//
-		var idxList = [ 4, 6, 2, 0 ];
-		segListArray = idxList.map( function (val) { return segListArray[val] } );
-		//
-//		var idxList = [ 3, 1, 5, 7 ];
-		for (var i=0; i<segListArray.length; i++) {
-			myQs.add_segment_consistently( segListArray[i], 'New#'+i );
-/*			var info = document.createElement( 'div' );
-			info.innerHTML = i;
-			document.body.appendChild( info );
-			drawTrapezoids( myQsRoot, false, 5 );		*/
-		}
-		//
-//		showDataStructure( myQsRoot );
-//		drawTrapezoids( myQsRoot, false, 5 );
-		
-		PNLTRI.Math.EPSILON_P = epsSave;			// reset epsilon
-	}
-
-			
 	function test_add_segment_5ccw() {
 		// CCW-Ordering (Shapes)
 		var	segment_top = { vFrom: { pt: { x: 30, y: 40 }}, vTo: { pt: { x: 20, y: 20 }}, upward: false }
@@ -1282,7 +1255,7 @@ function test_QueryStructure() {
 	function test_add_segment_NEW() {
 
 //		var	testData = new PolygonTestdata();
-//		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "three_error#2" ) );
+//		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "three_error#3" ) );
 		
 		var myPolygonData = new PNLTRI.PolygonData( [ [
 			{ x: 16.5, y: 30 }, { x: 10, y: 23.5 }, { x: 15, y: 20 },
@@ -1343,7 +1316,6 @@ function test_QueryStructure() {
 		test_add_segment_spezial_3();
 		test_add_segment_spezial_4();
 		test_add_segment_spezial_5();
-		test_add_segment_spezial_6();
 		// polygons
 		test_add_segment_5ccw();
 		test_add_segment_5cw();
@@ -1521,6 +1493,7 @@ function test_Trapezoider() {
 		test_trapezoide_polygon( "three_error#1", 92, 185, 36, 0 );			// 1; 1.Error, integrating into Three.js (letter "t")
 		test_trapezoide_polygon( "three_error#2", 51, 103, 28, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
 		test_trapezoide_polygon( "three_error#3", 91, 183, 22, 0 );			// 3000; 3.Error, integrating into Three.js (logbuffer)
+		test_trapezoide_polygon( "three_error#4", 102, 205, 15, 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
 		//
 //		console.perform();
 //		test_trapezoide_polygon( "squares_perftest_mid", 904, 1809, 505, 1 );	// 1: 15x15 Squares in Squares Performance Test
