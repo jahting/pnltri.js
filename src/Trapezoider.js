@@ -15,6 +15,8 @@ PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 	this.lseg = inLeft;
 	this.rseg = inRight;
 	
+	this.depth = -1;			// no depth assigned yet
+	
 	this.monoDiag = null;		// splitting diagonal during monotonization ?
 	
 };
@@ -261,9 +263,9 @@ PNLTRI.QueryStructure.prototype = {
 			retVal = dXto; retVal2 = dXfrom;
 		} else if ( Math.abs( inSeg.vFrom.pt.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
 			retVal = dXfrom; retVal2 = dXto;
-		} else if ( inBetweenY && ( dXfrom * dXto > 0 ) ) {
+//		} else if ( inBetweenY && ( dXfrom * dXto > 0 ) ) {
 			// both x-coordinates of inSeg are on the same side of inPt
-			retVal = dXto; retVal2 = dXfrom;
+//			retVal = dXto; retVal2 = dXfrom;
 		} else {
 			if ( inSeg.upward ) {
 				return	PNLTRI.Math.ptsCrossProd( inSeg.vFrom.pt, inSeg.vTo.pt, inPt );

@@ -246,6 +246,17 @@ function test_PolygonData() {
 		equal( result,  0, "A==B, trotz Y" );
 		var result = myPolygonData.compare_pts_yx( { x:20, y:20 }, { x:20 + PNLTRI.Math.EPSILON_P * 0.8, y:20 } );
 		equal( result,  0, "A==B, trotz X" );
+		// complex 3-way comparisons - Assumption: all Y are equal because of EPS
+		//  if Error: EPS with Lexicographic ordering leads to wrong result !!
+		var coordLow	= { x: 101, y: 100.40000000000002 };
+		var coordHigh = { x: 104, y: 100.39999999999998 };
+		var coordMiddle	= { x: 102, y: 100.4 };
+		var result = myPolygonData.compare_pts_yx( coordHigh, coordMiddle );
+		equal( result, 1, "High > Middle" );
+		var result = myPolygonData.compare_pts_yx( coordHigh, coordLow );
+		equal( result, 1, "High > Low" );
+		var result = myPolygonData.compare_pts_yx( coordMiddle, coordLow );
+		equal( result, 1, "Middle > Low" );
 	}
 
 	function test_polygon_area() {

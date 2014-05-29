@@ -26,6 +26,31 @@ PNLTRI.QueryStructure.prototype.nbTrapezoids = function () {
 PNLTRI.QueryStructure.prototype.getTrapByIdx = function ( inIdx ) {
 	return	this.trapezoids[inIdx];
 };
+// Assign a depth to the trapezoids; 0: outside, -1: other;  // future: 1: main polygon, 2: holes
+PNLTRI.QueryStructure.prototype.assignDepth = function ( inTrap, inDepth ) {
+	if (! inTrap)				return;
+	if (inTrap.depth != -1)		return;
+	inTrap.depth = inDepth;
+	this.assignDepth( inTrap.u0, inDepth );
+	this.assignDepth( inTrap.u1, inDepth );
+	this.assignDepth( inTrap.d0, inDepth );
+	this.assignDepth( inTrap.d1, inDepth );
+};
+PNLTRI.QueryStructure.prototype.assignDepths = function () {
+	this.assignDepth( this.trapezoids[0], 0 );
+};
+PNLTRI.QueryStructure.prototype.minDepth = function () {
+	var myMinDepth = 1000;
+	for (var i=0,j=this.trapezoids.length; i<j; i++) {
+		if ( this.trapezoids[i].depth < myMinDepth ) {
+			myMinDepth = this.trapezoids[i].depth;
+		}
+	}
+	return	myMinDepth;
+};
+PNLTRI.QueryStructure.prototype.maxDepth = function () {
+	return	this.trapezoids[0].depth;
+};
 // check all trapezoids for link consistency
 PNLTRI.QueryStructure.prototype.check_trapezoids_link_consistency = function () {
 
@@ -783,6 +808,56 @@ function test_QueryStructure() {
 	}
 
 	
+	function test_assign_depths() {
+		var testPolygon = [ { x: 5, y: 5 }, { x: 15, y: 40 }, { x: 45, y: 20 } ];
+
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		//
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+		var segListArray = myQs.getSegListArray();
+		//
+		myQs.add_segment_consistently( segListArray[0], 'assign_depths #0' );
+		myQs.add_segment_consistently( segListArray[1], 'assign_depths #1' );
+		myQs.add_segment_consistently( segListArray[2], 'assign_depths #2' );
+		ok( myPolygonData.allSegsInQueryStructure(), "assign_depths: all segments inserted" );
+		//
+		var startTrap = myQs.find_first_inside();
+		equal( startTrap.trapID, 2, "assign_depths: Start-Trap-ID" );
+		//
+		//	Main test: standard case
+		//
+		equal( myQs.minDepth(), -1, "assign_depths: Min depth: -1" );
+		equal( myQs.maxDepth(), -1, "assign_depths: Max depth: -1" );
+		myQs.assignDepths();			// marks outside trapezoids
+		equal( myQs.minDepth(), -1, "assign_depths: Min depth: -1" );
+		equal( myQs.maxDepth(), 0, "assign_depths: Max depth: 0" );
+		//
+		equal( startTrap.depth, -1, "assign_depths: Max depth of startTrap == -1" );		// still unasigned
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+		//
+		//
+		var myQs = new PNLTRI.QueryStructure( new PNLTRI.PolygonData( [ testPolygon ] ) );
+		var myQsRoot = myQs.getRoot();
+		var segListArray = myQs.getSegListArray();
+		//	not closed !!
+		myQs.add_segment_consistently( segListArray[0], 'assign_depths #0' );
+		myQs.add_segment_consistently( segListArray[1], 'assign_depths #1' );
+		//
+		//	Main test: all outside
+		//
+		myQs.assignDepths();			// marks outside trapezoids
+		equal( myQs.minDepth(), 0, "assign_depths: Min depth: 0" );
+		equal( myQs.maxDepth(), 0, "assign_depths: Max depth: 0" );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+	}
+
+	
+	
 	/*    
 	 *					4
 	 *   -----------------------------------		y=40
@@ -1088,35 +1163,29 @@ function test_QueryStructure() {
 	function test_add_segment_spezial_5() {
 
 		var myPolygonData = new PNLTRI.PolygonData( [ [
-			{ x: 0.00132375, y: 0.0009032 }, { x: 0.00125, y: 0.0009 },
-			{ x: 0.00122764, y: 0.000900347 }, { x: 0.001204, y: 0.0009014 },
-			{ x: 0.00117875, y: 0.000903125 },
-			{ x: 0.0013, y: 0.00011 },			// for CCW
+			{ x: 105, y: 100.4 },
+			{ x: 104, y: 100.39999999999998 },
+			{ x: 103, y: 100.40000000000003 },
+			{ x: 102, y: 100.4 },
+			{ x: 101, y: 100.40000000000002 },
 			] ] );
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray().concat();
+		var segListArray = myQs.getSegListArray();
 		//
 		myQs.add_segment_consistently( segListArray[0], 'Spec_5 #1' );
-		myQs.add_segment_consistently( segListArray[3], 'Spec_5 #2' );
-		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_5 #2, n#0" );
-		myQs.check_trapezoid_neighbors(  1, 0, null, 4, 6, "Spec_5 #2, n#1" );
-		myQs.check_trapezoid_neighbors(  2, 5, 3, null, null, "Spec_5 #2, n#2" );
-		myQs.check_trapezoid_neighbors(  3, 0, null, 2, null, "Spec_5 #2, n#3" );
-		myQs.check_trapezoid_neighbors(  4, 1, null, 5, null, "Spec_5 #2, n#4" );
-		myQs.check_trapezoid_neighbors(  5, 4, 6, 2, null, "Spec_5 #2, n#5" );
-		myQs.check_trapezoid_neighbors(  6, 1, null, 5, null, "Spec_5 #2, n#6" );
-		// complex case: 
-		myQs.add_segment_consistently( segListArray[2], 'Spec_5 Main' );
+		myQs.add_segment_consistently( segListArray[1], 'Spec_5 #2' );
+		// complex case: EPSILON > rounding effect on coordinates
+		myQs.add_segment_consistently( segListArray[3], 'Spec_5 Main' );
 		//
 //		showDataStructure( myQsRoot );
-//		drawTrapezoids( myQsRoot, false, 30000 );
+//		drawTrapezoids( myQsRoot, false, 0.4 );
 	}
 
-
+	
 	function test_add_segment_5ccw() {
 		// CCW-Ordering (Shapes)
 		var	segment_top = { vFrom: { pt: { x: 30, y: 40 }}, vTo: { pt: { x: 20, y: 20 }}, upward: false }
@@ -1288,6 +1357,8 @@ function test_QueryStructure() {
 		}
 		ok( myPolygonData.allSegsInQueryStructure(), "add_segment_NEW: all segments inserted" );
 		console.log("add_segment_NEW: Number of Trapezoids: ", myQs.nbTrapezoids() );
+		myQs.assignDepths();			// marks outside trapezoids
+		equal( myQs.minDepth(), -1, "add_segment_Error: Min depth == -1 (closed polygon)" );		
 		//
 //		showDataStructure( myQsRoot );
 		drawTrapezoids( myQsRoot, false, 1 );
@@ -1305,6 +1376,9 @@ function test_QueryStructure() {
 		test_splitNodeAtPoint1();
 		test_splitNodeAtPoint2();
 		test_ptNode();
+		//
+		test_assign_depths();
+		//
 		// 2 unconnected segments
 		test_add_segment_1();
 		test_add_segment_2();
@@ -1384,7 +1458,6 @@ function test_Trapezoider() {
 	}
 
 
-	
 	function test_trapezoide_polygon( inDataName, inExpectedSegs, inExpectedTraps, inExpectedStartTrap, inDebug ) {
 		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
 		//
@@ -1494,6 +1567,7 @@ function test_Trapezoider() {
 		test_trapezoide_polygon( "three_error#2", 51, 103, 28, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
 		test_trapezoide_polygon( "three_error#3", 91, 183, 22, 0 );			// 3000; 3.Error, integrating into Three.js (logbuffer)
 		test_trapezoide_polygon( "three_error#4", 102, 205, 15, 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
+		test_trapezoide_polygon( "three_error#4b", 102, 205, 15, 0 );		// 0.04; 4.Error, integrating into Three.js (USA Maine)
 		//
 //		console.perform();
 //		test_trapezoide_polygon( "squares_perftest_mid", 904, 1809, 505, 1 );	// 1: 15x15 Squares in Squares Performance Test

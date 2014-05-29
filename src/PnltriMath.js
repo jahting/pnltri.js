@@ -37,7 +37,11 @@ PNLTRI.Math = {
 
 // precision of floating point arithmetic
 //	PNLTRI.Math.EPSILON_P = Math.pow(2,-32);	// ~ 0.0000000001
-	PNLTRI.Math.EPSILON_P = Math.pow(2,-45);	// ~ 0.00000000000001
+	PNLTRI.Math.EPSILON_P = Math.pow(2,-43);	// ~ 0.0000000000001
 	PNLTRI.Math.EPSILON_N = -PNLTRI.Math.EPSILON_P;
 
-
+//	Problem with EPSILON-compares:
+//	- especially when there is a x-coordinate ordering on equal y-coordinates
+//		=> either NO EPSILON-compares on y-coordinates, since almost equal y
+//			can have very different x - so they are not nearly close
+//		or EPSILON must be bigger: Solution so far.
