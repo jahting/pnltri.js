@@ -462,15 +462,15 @@ PNLTRI.TRAP_RIGHT	= 2;		// right: point lies on the right segment
 PNLTRI.TRAP_CUSP	= 1+2;		// cusp: point is the tip of a cusp of a triangular trapezoid
 								//	lying on the left and right segment
 
-PNLTRI.trapCounter = 0;
+PNLTRI.trapCnt = 0;		// Sequence for trapezoid IDs
 
 /** @constructor */
 PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 	
-	this.trapID = PNLTRI.trapCounter++;			// for Debug
+	this.trapID = PNLTRI.trapCnt++;			// for Debug
 
 	this.vHigh = inHigh ? inHigh : { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY };
-	this.vLow = inLow ? inLow : { x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY };
+	this.vLow  = inLow  ? inLow  : { x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY };
 	
 	this.lseg = inLeft;
 	this.rseg = inRight;
@@ -608,7 +608,7 @@ PNLTRI.QsNode.prototype = {
 /** @constructor */
 PNLTRI.QueryStructure = function ( inPolygonData ) {
 	// initialise the query structure and trapezoid list
-	PNLTRI.trapCounter = 0;
+	PNLTRI.trapCnt = 0;
 	PNLTRI.qsCounter = 0;
 	
 	this.root = new PNLTRI.QsNode( PNLTRI.T_SINK, null, null );
@@ -617,7 +617,7 @@ PNLTRI.QueryStructure = function ( inPolygonData ) {
 	initialTrap.setSink( this.root );
 	this.root.trap = initialTrap;
 
-	this.trapezoids = [ initialTrap ];
+	this.trapArray = [ initialTrap ];
 
 	this.segListArray = null;
 	if ( inPolygonData ) {
@@ -654,7 +654,7 @@ PNLTRI.QueryStructure.prototype = {
 	
 	cloneTrap: function ( inTrapezoid ) {
 		var trap = inTrapezoid.clone();
-		this.trapezoids.push( trap );
+		this.trapArray.push( trap );
 		return	trap;
 	},
 	
@@ -665,7 +665,7 @@ PNLTRI.QueryStructure.prototype = {
 		if (trUpper.vHigh == inPoint)	return	inNode;				// (ERROR) inPoint is already inserted
 		if (trUpper.vLow == inPoint)	return	inNode;				// (ERROR) inPoint is already inserted
 		var trLower = trUpper.splitOffLower( inPoint );		// trLower: new lower trapezoid
-		this.trapezoids.push( trLower );
+		this.trapArray.push( trLower );
 		
 		inNode.nodetype = PNLTRI.T_Y;
 		inNode.yval = inPoint;
@@ -1079,7 +1079,7 @@ PNLTRI.QueryStructure.prototype = {
 		var trNewLeft, trNewRight, trPrevLeft, trPrevRight;
 		var changeLeftUp, changeRightUp;
 		
-		var counter = this.trapezoids.length + 2;		// just to prevent infinite loop
+		var counter = this.trapArray.length + 2;		// just to prevent infinite loop
 		var trNext;
 		while ( trCurrent ) {
 			if ( --counter < 0 ) {
@@ -1172,9 +1172,9 @@ PNLTRI.QueryStructure.prototype = {
 	// Find one triangular trapezoid which lies inside the polygon
 	
 	find_first_inside: function () {
-		for (var i=0, j=this.trapezoids.length; i<j; i++) { 
-			if ( this.inside_polygon( this.trapezoids[i] ) ) {
-				return this.trapezoids[i];
+		for (var i=0, j=this.trapArray.length; i<j; i++) { 
+			if ( this.inside_polygon( this.trapArray[i] ) ) {
+				return this.trapArray[i];
 			}
 		}
 		return	null;
@@ -1187,12 +1187,11 @@ PNLTRI.QueryStructure.prototype = {
 
 	update_trapezoids: function () {
 		var thisTrap;
-		for ( var i=0, j=this.trapezoids.length; i<j; i++ ) {
-			thisTrap = this.trapezoids[i];
+		for ( var i=0, j=this.trapArray.length; i<j; i++ ) {
+			thisTrap = this.trapArray[i];
 			// Top
 			if ( thisTrap.u0 && thisTrap.u1 ) {
 				// TM
-//				thisTrap.vHigh = thisTrap.u0.rseg.vFrom;		// == thisTrap.u1.lseg.vTo
 				thisTrap.topLoc = PNLTRI.TRAP_MIDDLE;
 			} else if ( thisTrap.lseg && ( thisTrap.vHigh == thisTrap.lseg.vFrom ) ) {
 				// TL
@@ -1201,31 +1200,25 @@ PNLTRI.QueryStructure.prototype = {
 					PNLTRI.TRAP_LEFT;	// TL
 			} else if ( thisTrap.rseg ) {		// exclude infinite borders
 				// TR
-//				thisTrap.vHigh = thisTrap.rseg.vTo;
 				thisTrap.topLoc = PNLTRI.TRAP_RIGHT;
 			} else if ( thisTrap.lseg && ( thisTrap.vHigh == thisTrap.lseg.vTo ) ) {
 				// TL, for outside polygons: wrong segment direction
-//				thisTrap.vHigh = thisTrap.lseg.vTo;
 				thisTrap.topLoc = PNLTRI.TRAP_LEFT;
 			}
 			// Bottom
 			if ( thisTrap.d0 && thisTrap.d1 ) {
 				// BM
-//				thisTrap.vLow = thisTrap.d1.lseg.vFrom;		// == thisTrap.d0.rseg.vTo
 				thisTrap.botLoc = PNLTRI.TRAP_MIDDLE;
 			} else if ( thisTrap.lseg && ( thisTrap.vLow == thisTrap.lseg.vTo ) ) {
 				// BL
-//				thisTrap.vLow = thisTrap.lseg.vTo;
 				thisTrap.botLoc = ( !thisTrap.d0 && !thisTrap.d1 ) ?
 					PNLTRI.TRAP_CUSP :	// BLR, highVert == thisTrap.rseg.vFrom
 					PNLTRI.TRAP_LEFT;	// BL
 			} else if ( thisTrap.rseg ) {		// exclude infinite borders
 				// BR
-//				thisTrap.vLow = thisTrap.rseg.vFrom;
 				thisTrap.botLoc = PNLTRI.TRAP_RIGHT;
 			} else if ( thisTrap.lseg && ( thisTrap.vLow == thisTrap.lseg.vFrom ) ) {
 				// BL, for outside polygons: wrong segment direction
-//				thisTrap.vLow = thisTrap.lseg.vFrom;
 				thisTrap.botLoc = PNLTRI.TRAP_LEFT;
 			}
 		}
