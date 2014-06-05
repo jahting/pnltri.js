@@ -31,10 +31,10 @@ PNLTRI.PolygonData.prototype.check_segments_consistency = function () {
 		if ( this.segments[i].vTo == null )			bugList.push( "SegNo#"+i+".vTo: missing" );
 		if ( this.segments[i].vFrom == this.segments[i].vTo )		bugList.push( "SegNo#"+i+": equal endpoints" );
 		if ( this.segments[i].upward == null )		bugList.push( "SegNo#"+i+".upward: missing" );
-/*		if ( compare_pts_yx( this.segments[i].vTo.pt, this.segments[i].vFrom.pt ) == 1 ) {		// upward
-			if ( !this.segments[i].upward )			bugList.push( "SegNo#"+i+".upward: should be TRUE, from ("+this.segments[i].vFrom.pt.x+"/"+this.segments[i].vFrom.pt.y+"), to ("+this.segments[i].vTo.pt.x+"/"+this.segments[i].vTo.pt.y+")" );
+/*		if ( compare_pts_yx( this.segments[i].vTo, this.segments[i].vFrom ) == 1 ) {		// upward
+			if ( !this.segments[i].upward )			bugList.push( "SegNo#"+i+".upward: should be TRUE, from ("+this.segments[i].vFrom.x+"/"+this.segments[i].vFrom.y+"), to ("+this.segments[i].vTo.x+"/"+this.segments[i].vTo.y+")" );
 		} else {
-			if ( this.segments[i].upward )			bugList.push( "SegNo#"+i+".upward: should be FALSE, from ("+this.segments[i].vFrom.pt.x+"/"+this.segments[i].vFrom.pt.y+"), to ("+this.segments[i].vTo.pt.x+"/"+this.segments[i].vTo.pt.y+")" );
+			if ( this.segments[i].upward )			bugList.push( "SegNo#"+i+".upward: should be FALSE, from ("+this.segments[i].vFrom.x+"/"+this.segments[i].vFrom.y+"), to ("+this.segments[i].vTo.x+"/"+this.segments[i].vTo.y+")" );
 		}	*/
 		if ( this.segments[i].sprev == null )		bugList.push( "SegNo#"+i+".sprev: missing" );
 		if ( this.segments[i].snext == null )		bugList.push( "SegNo#"+i+".snext: missing" );
@@ -155,7 +155,7 @@ PNLTRI.PolygonData.prototype.monotone_chains_2_polygons = function () {
 		polygon = [];
 		monoChain = firstEntry = this.monoSubPolyChains[i];
 		do {
-			polygon.push( monoChain.vFrom.pt );
+			polygon.push( monoChain.vFrom );
 			monoChain = monoChain.mnext;
 		} while ( monoChain != firstEntry );	// monoChain not yet closed
 		polygons.push( polygon );
@@ -167,9 +167,9 @@ PNLTRI.PolygonData.prototype.triangles_2_polygons = function ( inTriangles ) {
 	var	triangles = inTriangles ?  inTriangles : this.triangles;
 	var polygons = [];
 	for (var i=0; i<triangles.length; i++) {
-		polygons.push( [ this.vertices[ triangles[i][0] ].pt,
-						 this.vertices[ triangles[i][1] ].pt,
-						 this.vertices[ triangles[i][2] ].pt ] );
+		polygons.push( [ this.vertices[ triangles[i][0] ],
+						 this.vertices[ triangles[i][1] ],
+						 this.vertices[ triangles[i][2] ] ] );
 	}
 	return	polygons;
 };
@@ -187,12 +187,12 @@ PNLTRI.PolygonData.prototype.map_segments_and_vertices = function ( inSegListArr
 	for (i=0; i<idxList.length; i++) {
 		segment = inSegListArray[idxList[i]];
 		from = segment.vFrom;
-		resStr += 'From: ID='+from.id+',{x:'+from.pt.x+',y:'+from.pt.y+'}, ';
-		vertMap[from.id] = { pt: from.pt };
+		resStr += 'From: ID='+from.id+',{x:'+from.x+',y:'+from.y+'}, ';
+		vertMap[from.id] = from;
 		if ( from.id > vertIdMax )		vertIdMax = from.id;
 		to = segment.vTo;
-		resStr += 'To: ID='+to.id+',{x:'+to.pt.x+',y:'+to.pt.y+"},<br/>";
-		vertMap[to.id] = { pt: to.pt };
+		resStr += 'To: ID='+to.id+',{x:'+to.x+',y:'+to.y+"},<br/>";
+		vertMap[to.id] = to;
 		if ( to.id > vertIdMax )		vertIdMax = to.id;
 	}
 	var j=0;
@@ -202,7 +202,7 @@ PNLTRI.PolygonData.prototype.map_segments_and_vertices = function ( inSegListArr
 		if ( vertMap[i] ) {
 			vertMap[i].id=j;
 			resStr += i+' -> '+j+', ';
-			newVertStr += '{ x: '+vertMap[i].pt.x+', y: '+vertMap[i].pt.y+' },<br/>';
+			newVertStr += '{ x: '+vertMap[i].x+', y: '+vertMap[i].y+' },<br/>';
 			j++;
 		}
 	}

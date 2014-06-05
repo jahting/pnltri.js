@@ -161,16 +161,16 @@ function test_QueryStructure() {
 		ok( !qs.inside_polygon( myTrap ), "inside_polygon: Trap no lseg!" );
 		myTrap = { lseg: {}, rseg: {}, u0: {}, d0: {} };
 		ok( !qs.inside_polygon( myTrap ), "inside_polygon: Trap no triangle!" );
-		myTrap = { lseg: {}, rseg: { vFrom: { pt: { x:0, y:10 }}, vTo: { pt: { x:10, y:0 }}, upward: false } };
+		myTrap = { lseg: {}, rseg: { vFrom: { x:0, y:10 }, vTo: { x:10, y:0 }, upward: false } };
 		ok( !qs.inside_polygon( myTrap ), "inside_polygon: Trap rseg going downwards!" );
-		myTrap = { lseg: {}, rseg: { vFrom: { pt: { x:10, y:0 }}, vTo: { pt: { x:0, y:10 }}, upward: true } };
+		myTrap = { lseg: {}, rseg: { vFrom: { x:10, y:0 }, vTo: { x:0, y:10 }, upward: true } };
 		ok( qs.inside_polygon( myTrap ), "inside_polygon: Trap rseg going upwards!" );
 	}
 
 	function test_is_left_of() {
 		var	qs = new PNLTRI.QueryStructure();
 		// going UPwards
-		var	segment = { vFrom: { pt: { x: 10, y: 10 }}, vTo: { pt: { x: 17, y: 13 }}, upward: true };
+		var	segment = { vFrom: { x: 10, y: 10 }, vTo: { x: 17, y: 13 }, upward: true };
 		//	y equal
 		ok( qs.is_left_of(segment, { x: 0, y: 10 } ) > 0,  "is_left_of:  0, 10 (yes)" );
 		ok( qs.is_left_of(segment, { x: 0, y: 13 } ) > 0,  "is_left_of:  0, 13 (yes)" );
@@ -208,7 +208,7 @@ function test_QueryStructure() {
 		ok( qs.is_left_of(segment, { x: 21, y: 15 } ) > 0, "is_left_of: 21, 15 (yes)" );
 		//
 		// going DOWNwards
-		var	segment = { vFrom: { pt: { x: 17, y: 13 }}, vTo: { pt: { x: 10, y: 10 }}, upward: false };
+		var	segment = { vFrom: { x: 17, y: 13 }, vTo: { x: 10, y: 10 }, upward: false };
 		//	y equal
 		ok( qs.is_left_of(segment, { x: 0, y: 10 } ) > 0,  "is_left_of:  0, 10 (yes)" );
 		ok( qs.is_left_of(segment, { x: 0, y: 13 } ) > 0,  "is_left_of:  0, 13 (yes)" );
@@ -257,12 +257,12 @@ function test_QueryStructure() {
 	 */
 	function test_init_query_structure_up() {
 		// going UPwards
-		var	base_segment = { vFrom: { pt: { x: 1, y: 1 }},
-							  vTo: { pt: { x: 3, y: 4 }},
+		var	base_segment = { vFrom: { x: 1, y: 1 },
+							  vTo: { x: 3, y: 4 },
 							  upward: true
 							  }
 		// segment chain
-		var thirdVertex = { pt: { x: 2, y: 4 } };
+		var thirdVertex = { x: 2, y: 4 };
 		base_segment.snext = { vFrom: base_segment.vTo, vTo: thirdVertex, upward: false };
 		base_segment.sprev = { vFrom: thirdVertex, vTo: base_segment.vFrom, upward: false };
 		base_segment.snext.sprev = base_segment.sprev.snext = base_segment;
@@ -275,7 +275,7 @@ function test_QueryStructure() {
 		ok( base_segment.is_inserted, "init_query_structure_up: Segment inserted" );
 		// segMax(vTo): root-Node
 		equal( myQsRoot.nodetype, PNLTRI.T_Y, "init_query_structure_up: root: Y-Node" );
-		equal( myQsRoot.yval, base_segment.vTo.pt, "init_query_structure_up: root: yval = vTo.pt" );
+		equal( myQsRoot.yval, base_segment.vTo, "init_query_structure_up: root: yval = vTo" );
 		// top(tr4): above root
 		var qs2 = myQsRoot.right;
 		equal( qs2.nodetype, PNLTRI.T_SINK, "init_query_structure_up: root.above: SINK (top: tr4)" );
@@ -283,11 +283,11 @@ function test_QueryStructure() {
 		var tr4 = qs2.trap;
 		equal( tr4.sink, qs2, "init_query_structure_up: root.above->tr.sink: this qs" );
 		equal( tr4.hiPt.y, Number.POSITIVE_INFINITY, "init_query_structure_up: root.above->tr.hiPt.y: +INFINITY" );
-		equal( tr4.loPt, base_segment.vTo.pt, "init_query_structure_up: root.above->tr.loPt: vTo.pt" );
+		equal( tr4.loPt, base_segment.vTo, "init_query_structure_up: root.above->tr.loPt: vTo" );
 		// segMin(vFrom): below root
 		var qs3 = myQsRoot.left;
 		equal( qs3.nodetype, PNLTRI.T_Y, "init_query_structure_up: root.below: Y-Node" );
-		equal( qs3.yval, base_segment.vFrom.pt, "init_query_structure_up: root.below: yval = vFrom.pt" );
+		equal( qs3.yval, base_segment.vFrom, "init_query_structure_up: root.below: yval = vFrom" );
 		//
 		// bottom(tr3): below segMin(qs3)
 		var qs4 = qs3.left;
@@ -296,7 +296,7 @@ function test_QueryStructure() {
 		var tr3 = qs4.trap;
 		equal( tr3.sink, qs4, "init_query_structure_up: segMin.below->tr.sink: this qs" );
 		equal( tr3.loPt.y, Number.NEGATIVE_INFINITY, "init_query_structure_up: segMin.below->tr.loPt.y: -INFINITY" );
-		equal( tr3.hiPt, base_segment.vFrom.pt, "init_query_structure_up: segMin.below->tr.hiPt: vFrom.pt" );
+		equal( tr3.hiPt, base_segment.vFrom, "init_query_structure_up: segMin.below->tr.hiPt: vFrom" );
 		//
 		// Segment - below segMax, above segMin
 		var qs5 = qs3.right;
@@ -310,8 +310,8 @@ function test_QueryStructure() {
 		var tr1 = qs6.trap;
 		equal( tr1.sink, qs6, "init_query_structure_up: segment.left->tr.sink: this qs" );
 		equal( tr1.rseg, base_segment, "init_query_structure_up: segment.left->tr.rseg: inSegment" );
-		equal( tr1.hiPt, base_segment.vTo.pt, "init_query_structure_up: segment.left->tr.hiPt: vTo.pt" );
-		equal( tr1.loPt, base_segment.vFrom.pt, "init_query_structure_up: segment.left->tr.loPt: vFrom.pt" );
+		equal( tr1.hiPt, base_segment.vTo, "init_query_structure_up: segment.left->tr.hiPt: vTo" );
+		equal( tr1.loPt, base_segment.vFrom, "init_query_structure_up: segment.left->tr.loPt: vFrom" );
 		//
 		// right(tr2): segment.right(qs5)
 		var qs7 = qs5.right;
@@ -320,10 +320,10 @@ function test_QueryStructure() {
 		var tr2 = qs7.trap;
 		equal( tr2.sink, qs7, "init_query_structure_up: segment.right->tr.sink: this qs" );
 		equal( tr2.lseg, base_segment, "init_query_structure_up: segment.right->tr.lseg: inSegment" );
-		equal( tr2.hiPt, base_segment.vTo.pt, "init_query_structure_up: segment.right->tr.hiPt: vTo.pt" );
-		equal( tr2.loPt, base_segment.vFrom.pt, "init_query_structure_up: segment.right->tr.loPt: vFrom.pt" );
+		equal( tr2.hiPt, base_segment.vTo, "init_query_structure_up: segment.right->tr.hiPt: vTo" );
+		equal( tr2.loPt, base_segment.vFrom, "init_query_structure_up: segment.right->tr.loPt: vFrom" );
 		//
-		//	Trapezoid-Nachbarschaft
+		//	Trapezoid-Neighborhood
 		equal( tr1.u0, tr4, "init_query_structure_up: left.up: top(tr4)" );
 		equal( tr1.d0, tr3, "init_query_structure_up: left.down: bottom(tr3)" );
 		equal( tr2.u0, tr4, "init_query_structure_up: right.up: top(tr4)" );
@@ -349,12 +349,12 @@ function test_QueryStructure() {
 	 */
 	function test_init_query_structure_down() {
 		// going DOWNwards
-		var	base_segment = { vFrom: { pt: { x: 1, y: 4 }},
-							  vTo: { pt: { x: 3, y: 1 }},
+		var	base_segment = { vFrom: { x: 1, y: 4 },
+							  vTo: { x: 3, y: 1 },
 							  upward: false
 							  }
 		// segment chain
-		var thirdVertex = { pt: { x: 3, y: 3 }};
+		var thirdVertex = { x: 3, y: 3 };
 		base_segment.snext = { vFrom: base_segment.vTo, vTo: thirdVertex, upward: true };
 		base_segment.sprev = { vFrom: thirdVertex, vTo: base_segment.vFrom, upward: true };
 		base_segment.snext.sprev = base_segment.sprev.snext = base_segment;
@@ -365,30 +365,30 @@ function test_QueryStructure() {
 		var myQsRoot = qs.setup_segments( base_segment );
 		ok( base_segment.is_inserted, "init_query_structure_down: Segment inserted" );
 		// segMax(vFrom): root-Node
-		equal( myQsRoot.yval, base_segment.vFrom.pt, "init_query_structure_down: root: yval = vFrom.pt" );
+		equal( myQsRoot.yval, base_segment.vFrom, "init_query_structure_down: root: yval = vFrom" );
 		// top(tr4): above root
 		var tr4 = myQsRoot.right.trap;
-		equal( tr4.loPt, base_segment.vFrom.pt, "init_query_structure_down: root.above->tr.loPt: vFrom.pt" );
+		equal( tr4.loPt, base_segment.vFrom, "init_query_structure_down: root.above->tr.loPt: vFrom" );
 		// segMin(vTo): below root
 		var qs3 = myQsRoot.left;
-		equal( qs3.yval, base_segment.vTo.pt, "init_query_structure_down: root.below: yval = vTo.pt" );
+		equal( qs3.yval, base_segment.vTo, "init_query_structure_down: root.below: yval = vTo" );
 		//
 		// bottom(tr3): below segMin(qs3)
 		var tr3 = qs3.left.trap;
-		equal( tr3.hiPt, base_segment.vTo.pt, "init_query_structure_down: segMin.below->tr.hiPt: vTo.pt" );
+		equal( tr3.hiPt, base_segment.vTo, "init_query_structure_down: segMin.below->tr.hiPt: vTo" );
 		//
 		// Segment - below segMax, above segMin
 		var qs5 = qs3.right;
 		//
 		// left(tr1): segment.left(qs5)
 		var tr1 = qs5.left.trap;
-		equal( tr1.hiPt, base_segment.vFrom.pt, "init_query_structure_down: segment.left->tr.hiPt: vFrom.pt" );
-		equal( tr1.loPt, base_segment.vTo.pt, "init_query_structure_down: segment.left->tr.loPt: vTo.pt" );
+		equal( tr1.hiPt, base_segment.vFrom, "init_query_structure_down: segment.left->tr.hiPt: vFrom" );
+		equal( tr1.loPt, base_segment.vTo, "init_query_structure_down: segment.left->tr.loPt: vTo" );
 		//
 		// right(tr2): segment.right(qs5)
 		var tr2 = qs5.right.trap;
-		equal( tr2.hiPt, base_segment.vFrom.pt, "init_query_structure_down: segment.right->tr.hiPt: vFrom.pt" );
-		equal( tr2.loPt, base_segment.vTo.pt, "init_query_structure_down: segment.right->tr.loPt: vTo.pt" );
+		equal( tr2.hiPt, base_segment.vFrom, "init_query_structure_down: segment.right->tr.hiPt: vFrom" );
+		equal( tr2.loPt, base_segment.vTo, "init_query_structure_down: segment.right->tr.loPt: vTo" );
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -406,12 +406,12 @@ function test_QueryStructure() {
 	 */
 	function test_trap_setAbove() {
 		// going DOWNwards
-		var	base_segment = { vFrom: { pt: { x: 1, y: 4 }},
-							  vTo: { pt: { x: 3, y: 1 }},
+		var	base_segment = { vFrom: { x: 1, y: 4 },
+							  vTo: { x: 3, y: 1 },
 							  upward: false
 							  }
 		// segment chain
-		var thirdVertex = { pt: { x: 3, y: 3 }};
+		var thirdVertex = { x: 3, y: 3 };
 		base_segment.snext = { vFrom: base_segment.vTo, vTo: thirdVertex, upward: true };
 		base_segment.sprev = { vFrom: thirdVertex, vTo: base_segment.vFrom, upward: true };
 		base_segment.snext.sprev = base_segment.sprev.snext = base_segment;
@@ -449,12 +449,12 @@ function test_QueryStructure() {
 	 */
 	function test_trap_splitOffLower() {
 		// going DOWNwards
-		var	base_segment = { vFrom: { pt: { x: 1, y: 4 }},
-							  vTo: { pt: { x: 3, y: 1 }},
+		var	base_segment = { vFrom: { x: 1, y: 4 },
+							  vTo: { x: 3, y: 1 },
 							  upward: false
 							  }
 		// segment chain
-		var thirdVertex = { pt: { x: 3, y: 3 }};
+		var thirdVertex = { x: 3, y: 3 };
 		base_segment.snext = { vFrom: base_segment.vTo, vTo: thirdVertex, upward: true };
 		base_segment.sprev = { vFrom: thirdVertex, vTo: base_segment.vFrom, upward: true };
 		base_segment.snext.sprev = base_segment.sprev.snext = base_segment;
@@ -603,9 +603,9 @@ function test_QueryStructure() {
 
 	function test_splitNodeAtPoint1() {
 		// going UPwards
-		var	base_segment = { vFrom: { pt: { x: 20, y: 20 }}, vTo: { pt: { x: 30, y: 40 }}, upward: true }
+		var	base_segment = { vFrom: { x: 20, y: 20 }, vTo: { x: 30, y: 40 }, upward: true }
 		// going DOWNwards - with exchanged coordinates
-		var	downward_segment = { vFrom: { pt: { x: 15, y: 10 }}, vTo: { pt: { x: 10, y: 25 }}, upward: true }
+		var	downward_segment = { vFrom: { x: 15, y: 10 }, vTo: { x: 10, y: 25 }, upward: true }
 		// segment chain
 		base_segment.snext = downward_segment.sprev = { vFrom: base_segment.vTo, vTo: downward_segment.vFrom, upward: false,
 														sprev: base_segment, snext: downward_segment };
@@ -617,9 +617,9 @@ function test_QueryStructure() {
 		//
 		// precheck of correct Trapezoids
 		var tr1 = qs.getTrapByIdx(1), qs_tr1 = tr1.sink;		// TODO
-		ok( ( qs.ptNode( downward_segment.vTo.pt, downward_segment.vFrom.pt, myQsRoot ) == qs_tr1 ), "splitNodeAtPoint1: Seg.vTo.pt -> qs_tr1" );
+		ok( ( qs.ptNode( downward_segment.vTo, downward_segment.vFrom, myQsRoot ) == qs_tr1 ), "splitNodeAtPoint1: Seg.vTo -> qs_tr1" );
 		var tr3 = qs.getTrapByIdx(2), qs_tr3 = tr3.sink;
-		ok( ( qs.ptNode( downward_segment.vFrom.pt, downward_segment.vTo.pt, myQsRoot ) == qs_tr3 ), "splitNodeAtPoint1: Seg.vFrom.pt -> qs_tr3" );
+		ok( ( qs.ptNode( downward_segment.vFrom, downward_segment.vTo, myQsRoot ) == qs_tr3 ), "splitNodeAtPoint1: Seg.vFrom -> qs_tr3" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
@@ -627,7 +627,7 @@ function test_QueryStructure() {
 		// Main Test
 		//
 		//	insert higher point into QueryStructure
-		var qs_tr5 = qs.splitNodeAtPoint( qs_tr1, downward_segment.vTo.pt, false );
+		var qs_tr5 = qs.splitNodeAtPoint( qs_tr1, downward_segment.vTo, false );
 		//
 		equal( qs_tr1.nodetype, PNLTRI.T_Y, "splitNodeAtPoint1: nodetype(tr1) -> T_Y" );
 		equal( qs_tr1.yval.y, 25, "splitNodeAtPoint1: yval = 25" );
@@ -638,7 +638,7 @@ function test_QueryStructure() {
 		ok( ( qs_tr1.left.trap.d0 == tr3 ), "splitNodeAtPoint1: left -> NewTrap(tr5) [d0==tr3]" );
 		//
 		//	insert lower point into QueryStructure
-		var qs_trX = qs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom.pt, true );
+		var qs_trX = qs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom, true );
 		//
 		equal( qs_tr3.nodetype, PNLTRI.T_Y, "splitNodeAtPoint1: nodetype(tr3) -> T_Y" );
 		equal( qs_tr3.yval.y, 10, "splitNodeAtPoint1: yval = 10" );
@@ -654,9 +654,9 @@ function test_QueryStructure() {
 
 	function test_splitNodeAtPoint2() {
 		// going UPwards
-		var	base_segment = { vFrom: { pt: { x: 20, y: 20 }}, vTo: { pt: { x: 30, y: 40 }}, upward: true }
+		var	base_segment = { vFrom: { x: 20, y: 20 }, vTo: { x: 30, y: 40 }, upward: true }
 		// inside of tr3, connected !!
-		var	downward_segment = { vFrom: { pt: { x: 5, y: 15 }}, vTo: base_segment.vFrom, upward: true }
+		var	downward_segment = { vFrom: { x: 5, y: 15 }, vTo: base_segment.vFrom, upward: true }
 		// segment chain
 		var third_segment = { vFrom: base_segment.vTo, vTo: downward_segment.vFrom, upward: false,
 							  sprev: base_segment, snext: downward_segment };
@@ -669,8 +669,8 @@ function test_QueryStructure() {
 		//
 		// precheck of correct Trapezoids
 		var tr3 = qs.getTrapByIdx(2), qs_tr3 = tr3.sink;		// TODO
-		strictEqual( qs.ptNode( downward_segment.vTo.pt, downward_segment.vFrom.pt, myQsRoot ), qs_tr3, "SplitN#2: Seg.vTo.pt -> qs_tr3" );
-		strictEqual( qs.ptNode( downward_segment.vFrom.pt, downward_segment.vTo.pt, myQsRoot ), qs_tr3, "SplitN#2: Seg.vFrom.pt -> qs_tr3" );
+		strictEqual( qs.ptNode( downward_segment.vTo, downward_segment.vFrom, myQsRoot ), qs_tr3, "SplitN#2: Seg.vTo -> qs_tr3" );
+		strictEqual( qs.ptNode( downward_segment.vFrom, downward_segment.vTo, myQsRoot ), qs_tr3, "SplitN#2: Seg.vFrom -> qs_tr3" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
@@ -678,7 +678,7 @@ function test_QueryStructure() {
 		// Main Test
 		//
 		//	insert higher point into QueryStructure
-		var qs_tr5 = qs.splitNodeAtPoint( qs_tr3, downward_segment.vTo.pt, false );
+		var qs_tr5 = qs.splitNodeAtPoint( qs_tr3, downward_segment.vTo, false );
 		//		TODO: Tests
 /*		equal( qs_tr1.nodetype, PNLTRI.T_Y, "SplitN#2: nodetype(tr1) -> T_Y" );
 		equal( qs_tr1.yval.y, 25, "SplitN#2: yval = 25" );
@@ -689,7 +689,7 @@ function test_QueryStructure() {
 		strictEqual( qs_tr1.left.trap.d0, tr3, "SplitN#2: left -> NewTrap(tr5) [d0==tr3]" );		*/
 		//
 		//	insert lower point into QueryStructure
-		var qs_trX = qs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom.pt, true );
+		var qs_trX = qs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom, true );
 		//		TODO: Tests
 /*		equal( qs_tr3.nodetype, PNLTRI.T_Y, "SplitN#2: nodetype(tr3) -> T_Y" );
 		equal( qs_tr3.yval.y, 10, "SplitN#2: yval = 10" );
@@ -710,12 +710,12 @@ function test_QueryStructure() {
 		var	secondPoint = { x: 3, y: 4 };
 		var	thirdPoint = { x: 2, y: 4 };
 		// going UPwards
-		var	base_segment = { vFrom: { pt: firstPoint },
-							  vTo: { pt: secondPoint },
+		var	base_segment = { vFrom: firstPoint,
+							  vTo: secondPoint,
 							  upward: true,
 							  }
 		// segment chain
-		var thirdVertex = { pt: thirdPoint };
+		var thirdVertex = thirdPoint;
 		base_segment.snext = { vFrom: base_segment.vTo, vTo: thirdVertex, upward: false };
 		base_segment.sprev = { vFrom: thirdVertex, vTo: base_segment.vFrom, upward: false };
 		base_segment.snext.sprev = base_segment.sprev.snext = base_segment;
@@ -761,11 +761,11 @@ function test_QueryStructure() {
 		secondPoint = { x: 3, y: 1 };
 		thirdPoint = { x: 3, y: 3 };
 		// DOWNward segment
-		base_segment = { vFrom: { pt: firstPoint },
-						  vTo: { pt: secondPoint },
+		base_segment = { vFrom: firstPoint,
+						  vTo: secondPoint,
 						  }
 		// segment chain
-		thirdVertex = { pt: thirdPoint };
+		thirdVertex = thirdPoint;
 		base_segment.snext = { vFrom: base_segment.vTo, vTo: thirdVertex };
 		base_segment.sprev = { vFrom: thirdVertex, vTo: base_segment.vFrom };
 		base_segment.snext.sprev = base_segment.sprev.snext = base_segment;
@@ -958,9 +958,9 @@ function test_QueryStructure() {
 	 */
 	function test_add_segment_1() {
 		// going UPwards
-		var	base_segment = { vFrom: { pt: { x: 20, y: 20 }}, vTo: { pt: { x: 30, y: 40 }}, upward: true }
+		var	base_segment = { vFrom: { x: 20, y: 20 }, vTo: { x: 30, y: 40 }, upward: true }
 		// going DOWNwards - with exchanged coordinates
-		var	downward_segment = { vFrom: { pt: { x: 15, y: 10 }}, vTo: { pt: { x: 10, y: 25 }}, upward: true }
+		var	downward_segment = { vFrom: { x: 15, y: 10 }, vTo: { x: 10, y: 25 }, upward: true }
 		// segment chain
 		base_segment.snext = downward_segment.sprev = { vFrom: base_segment.vTo, vTo: downward_segment.vFrom, upward: false,
 														sprev: base_segment, snext: downward_segment };
@@ -974,8 +974,8 @@ function test_QueryStructure() {
 		// precheck of correct Trapezoids
 		var tr1 = qs.getTrapByIdx(1), qs_tr1 = tr1.sink;			// TODO
 		var tr3 = qs.getTrapByIdx(2), qs_tr3 = tr3.sink;
-		ok( ( qs.ptNode( downward_segment.vFrom.pt, downward_segment.vTo.pt, myQsRoot ) == qs_tr3 ), "Add#1: Seg.vFrom.pt -> qs_tr3" );
-		ok( ( qs.ptNode( downward_segment.vTo.pt, downward_segment.vFrom.pt, myQsRoot ) == qs_tr1 ), "Add#1: Seg.vTo.pt -> qs_tr1" );
+		ok( ( qs.ptNode( downward_segment.vFrom, downward_segment.vTo, myQsRoot ) == qs_tr3 ), "Add#1: Seg.vFrom -> qs_tr3" );
+		ok( ( qs.ptNode( downward_segment.vTo, downward_segment.vFrom, myQsRoot ) == qs_tr1 ), "Add#1: Seg.vTo -> qs_tr1" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
@@ -1014,9 +1014,9 @@ function test_QueryStructure() {
 
 	function test_add_segment_2() {
 		// going UPwards
-		var	base_segment = { vFrom: { pt: { x: 20, y: 20 }}, vTo: { pt: { x: 30, y: 40 }}, upward: true }
+		var	base_segment = { vFrom: { x: 20, y: 20 }, vTo: { x: 30, y: 40 }, upward: true }
 		// start in tr4
-		var	downward_segment = { vFrom: { pt: { x: 15, y: 10 }}, vTo: { pt: { x: 10, y: 45 }}, upward: true }
+		var	downward_segment = { vFrom: { x: 15, y: 10 }, vTo: { x: 10, y: 45 }, upward: true }
 		// segment chain
 		base_segment.snext = downward_segment.sprev = { vFrom: base_segment.vTo, vTo: downward_segment.vFrom, upward: false,
 														sprev: base_segment, snext: downward_segment };
@@ -1030,8 +1030,8 @@ function test_QueryStructure() {
 		// precheck of correct Trapezoids
 		var tr3 = qs.getTrapByIdx(2), qs_tr3 = tr3.sink;		// TODO
 		var tr4 = qs.getTrapByIdx(0), qs_tr4 = tr4.sink;
-		ok( ( qs.ptNode( downward_segment.vFrom.pt, downward_segment.vTo.pt, myQsRoot ) == qs_tr3 ), "Add#2: Seg.vFrom.pt -> qs_tr3" );
-		ok( ( qs.ptNode( downward_segment.vTo.pt, downward_segment.vFrom.pt, myQsRoot ) == qs_tr4 ), "Add#2: Seg.vTo.pt -> qs_tr4" );
+		ok( ( qs.ptNode( downward_segment.vFrom, downward_segment.vTo, myQsRoot ) == qs_tr3 ), "Add#2: Seg.vFrom -> qs_tr3" );
+		ok( ( qs.ptNode( downward_segment.vTo, downward_segment.vFrom, myQsRoot ) == qs_tr4 ), "Add#2: Seg.vTo -> qs_tr4" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
@@ -1049,9 +1049,9 @@ function test_QueryStructure() {
 
 	function test_add_segment_3() {
 		// going UPwards
-		var	base_segment = { vFrom: { pt: { x: 20, y: 20 }}, vTo: { pt: { x: 30, y: 40 }}, upward: true }
+		var	base_segment = { vFrom: { x: 20, y: 20 }, vTo: { x: 30, y: 40 }, upward: true }
 		// inside of tr2
-		var	downward_segment = { vFrom: { pt: { x: 35, y: 35 }}, vTo: { pt: { x: 25, y: 25 }}, upward: false }
+		var	downward_segment = { vFrom: { x: 35, y: 35 }, vTo: { x: 25, y: 25 }, upward: false }
 		// segment chain
 		base_segment.snext = downward_segment.sprev = { vFrom: base_segment.vTo, vTo: downward_segment.vFrom, upward: false,
 														sprev: base_segment, snext: downward_segment };
@@ -1064,8 +1064,8 @@ function test_QueryStructure() {
 		equal( qs.nbTrapezoids(), 4, "Add#3: Number of Trapezoids in Array (4)" );
 		// precheck of correct Trapezoids
 		var tr2 = qs.getTrapByIdx(3), qs_tr2 = tr2.sink;			// TODO
-		ok( ( qs.ptNode( downward_segment.vFrom.pt, downward_segment.vTo.pt, myQsRoot ) == qs_tr2 ), "Add#3: Seg.vFrom.pt -> qs_tr2" );
-		ok( ( qs.ptNode( downward_segment.vTo.pt, downward_segment.vFrom.pt, myQsRoot ) == qs_tr2 ), "Add#3: Seg.vTo.pt -> qs_tr2" );
+		ok( ( qs.ptNode( downward_segment.vFrom, downward_segment.vTo, myQsRoot ) == qs_tr2 ), "Add#3: Seg.vFrom -> qs_tr2" );
+		ok( ( qs.ptNode( downward_segment.vTo, downward_segment.vFrom, myQsRoot ) == qs_tr2 ), "Add#3: Seg.vTo -> qs_tr2" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
@@ -1083,9 +1083,9 @@ function test_QueryStructure() {
 
 	function test_add_segment_4() {
 		// going UPwards
-		var	base_segment = { vFrom: { pt: { x: 20, y: 20 }}, vTo: { pt: { x: 30, y: 40 }}, upward: true }
+		var	base_segment = { vFrom: { x: 20, y: 20 }, vTo: { x: 30, y: 40 }, upward: true }
 		// inside of tr3
-		var	downward_segment = { vFrom: { pt: { x: 5, y: 15 }}, vTo: { pt: { x: 35, y: 5 }}, upward: false }
+		var	downward_segment = { vFrom: { x: 5, y: 15 }, vTo: { x: 35, y: 5 }, upward: false }
 		// segment chain
 		base_segment.snext = downward_segment.sprev = { vFrom: base_segment.vTo, vTo: downward_segment.vFrom, upward: false,
 														sprev: base_segment, snext: downward_segment };
@@ -1098,8 +1098,8 @@ function test_QueryStructure() {
 		equal( qs.nbTrapezoids(), 4, "Add#4: Number of Trapezoids in Array (4)" );
 		// precheck of correct Trapezoids
 		var tr3 = qs.getTrapByIdx(2), qs_tr3 = tr3.sink;			// TODO
-		strictEqual( qs.ptNode( downward_segment.vFrom.pt, downward_segment.vTo.pt, myQsRoot ), qs_tr3, "Add#4: Seg.vFrom.pt -> qs_tr3" );
-		strictEqual( qs.ptNode( downward_segment.vTo.pt, downward_segment.vFrom.pt, myQsRoot ), qs_tr3, "Add#4: Seg.vTo.pt -> qs_tr3" );
+		strictEqual( qs.ptNode( downward_segment.vFrom, downward_segment.vTo, myQsRoot ), qs_tr3, "Add#4: Seg.vFrom -> qs_tr3" );
+		strictEqual( qs.ptNode( downward_segment.vTo, downward_segment.vFrom, myQsRoot ), qs_tr3, "Add#4: Seg.vTo -> qs_tr3" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
@@ -1270,9 +1270,9 @@ function test_QueryStructure() {
 	
 	function test_add_segment_5ccw() {
 		// CCW-Ordering (Shapes)
-		var	segment_top = { vFrom: { pt: { x: 30, y: 40 }}, vTo: { pt: { x: 20, y: 20 }}, upward: false }
-		var	segment_left = { vFrom: segment_top.vTo, vTo: { pt: { x: 10, y: 15 }}, upward: false }
-		var	segment_right = { vFrom: { pt: { x: 60, y: 22 }}, vTo: segment_top.vFrom, upward: true }
+		var	segment_top = { vFrom: { x: 30, y: 40 }, vTo: { x: 20, y: 20 }, upward: false }
+		var	segment_left = { vFrom: segment_top.vTo, vTo: { x: 10, y: 15 }, upward: false }
+		var	segment_right = { vFrom: { x: 60, y: 22 }, vTo: segment_top.vFrom, upward: true }
 		var	segment_bottom = { vFrom: segment_left.vTo, vTo: segment_right.vFrom, upward: true }
 		//
 		segment_top.snext = segment_left; segment_top.sprev = segment_right;
@@ -1286,11 +1286,11 @@ function test_QueryStructure() {
 		equal( qs.nbTrapezoids(), 4, "Add#5ccw: Number of Trapezoids in Array (4)" );
 		// precheck of correct Trapezoids
 		var tr3 = qs.getTrapByIdx(2), qs_tr3 = tr3.sink;			// TODO
-		ok( ( qs.ptNode( segment_left.vFrom.pt, segment_left.vTo.pt, myQsRoot ) == qs_tr3 ), "Add#5ccw: Seg.vFrom.pt -> qs_tr3" );
-		ok( ( qs.ptNode( segment_left.vTo.pt, segment_left.vFrom.pt, myQsRoot ) == qs_tr3 ), "Add#5ccw: Seg.vTo.pt -> qs_tr3" );
+		ok( ( qs.ptNode( segment_left.vFrom, segment_left.vTo, myQsRoot ) == qs_tr3 ), "Add#5ccw: Seg.vFrom -> qs_tr3" );
+		ok( ( qs.ptNode( segment_left.vTo, segment_left.vFrom, myQsRoot ) == qs_tr3 ), "Add#5ccw: Seg.vTo -> qs_tr3" );
 		var tr2 = qs.getTrapByIdx(3), qs_tr2 = tr2.sink;
-		ok( ( qs.ptNode( segment_right.vFrom.pt, segment_right.vTo.pt, myQsRoot ) == qs_tr2 ), "Add#5ccw: Seg.vFrom.pt -> qs_tr2" );
-		ok( ( qs.ptNode( segment_right.vTo.pt, segment_right.vFrom.pt, myQsRoot ) == qs_tr2 ), "Add#5ccw: Seg.vTo.pt -> qs_tr2" );
+		ok( ( qs.ptNode( segment_right.vFrom, segment_right.vTo, myQsRoot ) == qs_tr2 ), "Add#5ccw: Seg.vFrom -> qs_tr2" );
+		ok( ( qs.ptNode( segment_right.vTo, segment_right.vFrom, myQsRoot ) == qs_tr2 ), "Add#5ccw: Seg.vTo -> qs_tr2" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
@@ -1314,9 +1314,9 @@ function test_QueryStructure() {
 
 	function test_add_segment_5cw() {
 		// CW-Ordering (Holes)
-		var	segment_top = { vFrom: { pt: { x: 20, y: 20 }}, vTo: { pt: { x: 30, y: 40 }}, upward: true }
-		var	segment_left = { vFrom: { pt: { x: 10, y: 15 }}, vTo: segment_top.vFrom, upward: true }
-		var	segment_right = { vFrom: segment_top.vTo, vTo: { pt: { x: 60, y: 22 }}, upward: false }
+		var	segment_top = { vFrom: { x: 20, y: 20 }, vTo: { x: 30, y: 40 }, upward: true }
+		var	segment_left = { vFrom: { x: 10, y: 15 }, vTo: segment_top.vFrom, upward: true }
+		var	segment_right = { vFrom: segment_top.vTo, vTo: { x: 60, y: 22 }, upward: false }
 		var	segment_bottom = { vFrom: segment_right.vTo, vTo: segment_left.vFrom, upward: false }
 		//
 		segment_top.sprev = segment_left; segment_top.snext = segment_right;
@@ -1348,13 +1348,13 @@ function test_QueryStructure() {
 
 	function test_add_segment_6nonmono() {
 		// CCW-Ordering (Shapes)
-		var	segment_nosetop = { vFrom: { pt: { x: 30, y: 45 }}, vTo: { pt: { x: 15, y: 30 }}, upward: false }
-		var	segment_nosebot = { vFrom: segment_nosetop.vTo, vTo: { pt: { x: 28, y: 33 }}, upward: true }
-		var	segment_lefttop = { vFrom: segment_nosebot.vTo, vTo: { pt: { x: 20, y: 20 }}, upward: false }
-		var	segment_leftbot = { vFrom: segment_lefttop.vTo, vTo: { pt: { x: 10, y: 10 }}, upward: false }
-		var	segment_indetop = { vFrom: { pt: { x: 26, y: 36 }}, vTo: segment_nosetop.vFrom, upward: true }
-		var	segment_indebot = { vFrom: { pt: { x: 35, y: 40 }}, vTo: segment_indetop.vFrom, upward: false }
-		var	segment_right = { vFrom: { pt: { x: 60, y: 22 }}, vTo: segment_indebot.vFrom, upward: true }
+		var	segment_nosetop = { vFrom: { x: 30, y: 45 }, vTo: { x: 15, y: 30 }, upward: false }
+		var	segment_nosebot = { vFrom: segment_nosetop.vTo, vTo: { x: 28, y: 33 }, upward: true }
+		var	segment_lefttop = { vFrom: segment_nosebot.vTo, vTo: { x: 20, y: 20 }, upward: false }
+		var	segment_leftbot = { vFrom: segment_lefttop.vTo, vTo: { x: 10, y: 10 }, upward: false }
+		var	segment_indetop = { vFrom: { x: 26, y: 36 }, vTo: segment_nosetop.vFrom, upward: true }
+		var	segment_indebot = { vFrom: { x: 35, y: 40 }, vTo: segment_indetop.vFrom, upward: false }
+		var	segment_right = { vFrom: { x: 60, y: 22 }, vTo: segment_indebot.vFrom, upward: true }
 		var	segment_bottom = { vFrom: segment_leftbot.vTo, vTo: segment_right.vFrom, upward: true }
 		//
 		segment_nosetop.snext = segment_nosebot; segment_nosetop.sprev = segment_indetop;

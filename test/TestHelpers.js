@@ -179,9 +179,9 @@ function showDataStructure( inObject, inTempKeys ) {
 	
 
 	function	xCoord_of_segment_at_Y( inSegment, inCrossYPt ) {
-		if ( inSegment.vTo.pt.y == inSegment.vFrom.pt.y )		return inCrossYPt.x;
-		return	inSegment.vFrom.pt.x + (inSegment.vTo.pt.x - inSegment.vFrom.pt.x) *
-					( inCrossYPt.y - inSegment.vFrom.pt.y ) / ( inSegment.vTo.pt.y - inSegment.vFrom.pt.y );
+		if ( inSegment.vTo.y == inSegment.vFrom.y )		return inCrossYPt.x;
+		return	inSegment.vFrom.x + (inSegment.vTo.x - inSegment.vFrom.x) *
+					( inCrossYPt.y - inSegment.vFrom.y ) / ( inSegment.vTo.y - inSegment.vFrom.y );
 	}
 	
 	var addLines = [];
@@ -195,8 +195,8 @@ function showDataStructure( inObject, inTempKeys ) {
 		
 		for (var i=0; i<addLines.length; i++) {
 			context.beginPath();
-			myMoveTo( addLines[i].vFrom.pt.x, addLines[i].vFrom.pt.y );
-			myLineTo( addLines[i].vTo.pt.x, addLines[i].vTo.pt.y );
+			myMoveTo( addLines[i].vFrom.x, addLines[i].vFrom.y );
+			myLineTo( addLines[i].vTo.x, addLines[i].vTo.y );
 			context.stroke();
 		}
 	}
@@ -219,8 +219,8 @@ function showDataStructure( inObject, inTempKeys ) {
 		// lseg
 		if ( inTrapezoid.lseg ) {
 			context.beginPath();
-			myMoveTo( inTrapezoid.lseg.vFrom.pt.x, inTrapezoid.lseg.vFrom.pt.y );
-			myLineTo( inTrapezoid.lseg.vTo.pt.x, inTrapezoid.lseg.vTo.pt.y );
+			myMoveTo( inTrapezoid.lseg.vFrom.x, inTrapezoid.lseg.vFrom.y );
+			myLineTo( inTrapezoid.lseg.vTo.x, inTrapezoid.lseg.vTo.y );
 			context.lineWidth = 3;
 			context.stroke();
 			highLineLeft.x = xCoord_of_segment_at_Y( inTrapezoid.lseg, inTrapezoid.hiPt );
@@ -229,8 +229,8 @@ function showDataStructure( inObject, inTempKeys ) {
 		// rseg
 		if ( inTrapezoid.rseg ) {
 			context.beginPath();
-			myMoveTo( inTrapezoid.rseg.vFrom.pt.x, inTrapezoid.rseg.vFrom.pt.y );
-			myLineTo( inTrapezoid.rseg.vTo.pt.x, inTrapezoid.rseg.vTo.pt.y );
+			myMoveTo( inTrapezoid.rseg.vFrom.x, inTrapezoid.rseg.vFrom.y );
+			myLineTo( inTrapezoid.rseg.vTo.x, inTrapezoid.rseg.vTo.y );
 			context.lineWidth = 3;
 			context.stroke();
 			highLineRight.x = xCoord_of_segment_at_Y( inTrapezoid.rseg, inTrapezoid.hiPt );
@@ -261,10 +261,10 @@ function showDataStructure( inObject, inTempKeys ) {
 		
 		if ( inTrapezoid.u0 && inTrapezoid.u1 ) {
 			// two upper neighbors
-			addLines.push( { vFrom: { pt: inTrapezoid.hiPt }, vTo: { pt: inTrapezoid.loPt } } );
+			addLines.push( { vFrom: inTrapezoid.hiPt, vTo: inTrapezoid.loPt } );
 		} else if ( inTrapezoid.d0 && inTrapezoid.d1 ) {
 			// two lower neighbors
-			addLines.push( { vFrom: { pt: inTrapezoid.hiPt }, vTo: { pt: inTrapezoid.loPt } } );
+			addLines.push( { vFrom: inTrapezoid.hiPt, vTo: inTrapezoid.loPt } );
 		}
 	}
 

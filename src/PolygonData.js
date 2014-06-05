@@ -6,7 +6,7 @@
 PNLTRI.PolygonData = function ( inPolygonChainList ) {
 
 	// list of polygon vertices
-	//	.pt: coordinates
+	//	.x, .y: coordinates
 	//	.outSegs: Array of outgoing segments from this point
 	//		{ vertTo: next vertex, segOut: outgoing segments-Entry }
 	// outSegs[0] is the original polygon segment, the others are added
@@ -94,7 +94,8 @@ PNLTRI.PolygonData.prototype = {
 	
 	appendVertexEntry: function ( inVertex ) {			// private
 		var vertex = inVertex ? inVertex : {
-			pt: null,		// coordinates: { x:, y: }
+			x: null,		// coordinates
+			y: null,
 			outSegs: [],	// outbound segments (up to 4)
 			};
 		vertex.id = this.vertices.length;
@@ -109,7 +110,7 @@ PNLTRI.PolygonData.prototype = {
 			vFrom: inVertexFrom,	// -> start point entry in vertices
 			vTo: inVertexTo,		// -> end point entry in vertices
 			// upward segment? (i.e. vTo > vFrom)
-			upward: ( this.compare_pts_yx(inVertexTo.pt, inVertexFrom.pt) == 1 ),
+			upward: ( this.compare_pts_yx(inVertexTo, inVertexFrom) == 1 ),
 			// double linked list of original polygon chains (not the monoChains !)
 			sprev: null,			// previous segment
 			snext: null,			// next segment
@@ -128,8 +129,8 @@ PNLTRI.PolygonData.prototype = {
 	addVertexChain: function ( inRawPointList, inIsHole ) {			// private
 		
 		function verts_equal( inVert1, inVert2 ) {
-			return ( ( Math.abs(inVert1.pt.x - inVert2.pt.x) < PNLTRI.Math.EPSILON_P ) &&
-					 ( Math.abs(inVert1.pt.y - inVert2.pt.y) < PNLTRI.Math.EPSILON_P ) );
+			return ( ( Math.abs(inVert1.x - inVert2.x) < PNLTRI.Math.EPSILON_P ) &&
+					 ( Math.abs(inVert1.y - inVert2.y) < PNLTRI.Math.EPSILON_P ) );
 		}
 		
 		var reverse = false;
@@ -141,8 +142,8 @@ PNLTRI.PolygonData.prototype = {
 		var newVertices = [];
 		var newVertex, acceptVertex, prevIdx;
 		for ( var i=0; i < inRawPointList.length; i++ ) {
-			newVertex = this.appendVertexEntry( { pt: { x: inRawPointList[i].x,
-														y: inRawPointList[i].y } } );
+			newVertex = this.appendVertexEntry( { x: inRawPointList[i].x,
+												  y: inRawPointList[i].y } );
 			// suppresses zero-length segments
 			acceptVertex = true;
 			prevIdx = newVertices.length-1;
@@ -158,7 +159,7 @@ PNLTRI.PolygonData.prototype = {
 			newVertices.pop();
 		}
 		if ( reverse ) {
-			// console.log( "Polygon chain reversed! " + newVertices[0].pt.x + "/" + newVertices[0].pt.y );
+			// console.log( "Polygon chain reversed! " + newVertices[0].x + "/" + newVertices[0].y );
 			newVertices = newVertices.reverse();		// vertex-index preserving reversal !!!
 		}
 		
@@ -286,7 +287,7 @@ PNLTRI.PolygonData.prototype = {
 			var minAngle = 4.0;			// <=> 360 degrees
 			for (var i = 0; i < vert0.outSegs.length; i++) {
 				tmpSeg = vert0.outSegs[i]
-				if ( ( tmpAngle = mapAngle( vert0.pt, tmpSeg.vertTo.pt, vert1.pt ) ) < minAngle ) {
+				if ( ( tmpAngle = mapAngle( vert0, tmpSeg.vertTo, vert1 ) ) < minAngle ) {
 					minAngle = tmpAngle;
 					segRight = tmpSeg;
 				}
@@ -305,7 +306,7 @@ PNLTRI.PolygonData.prototype = {
 		var segOutFromVert1 = vert1outSeg.segOut;
 		
 		// modify linked lists
-		var upward = ( this.compare_pts_yx(vert0.pt, vert1.pt) == 1 );
+		var upward = ( this.compare_pts_yx(vert0, vert1) == 1 );
 		var newSegPolyOrg = this.appendSegmentEntry( { vFrom: vert0, vTo: vert1, upward: !upward,
 							mprev: segOutFromVert0.mprev, mnext: segOutFromVert1 } );
 		var newSegPolyNew = this.appendSegmentEntry( { vFrom: vert1, vTo: vert0, upward: upward,
@@ -341,13 +342,13 @@ PNLTRI.PolygonData.prototype = {
 		for ( i=0; i<this.monoSubPolyChains.length; i++ ) {
 			// loop through uni-monotone chains
 			frontMono = monoPosmax = this.monoSubPolyChains[i];
-			firstPt = ymaxPt = frontMono.vFrom.pt;
+			firstPt = ymaxPt = frontMono.vFrom;
 
 			frontMono.marked = true;
 			frontMono = frontMono.mnext;
 			
 			var processed = false;
-			while ( (frontPt = frontMono.vFrom.pt) != firstPt ) {
+			while ( (frontPt = frontMono.vFrom) != firstPt ) {
 				if (frontMono.marked) {
 					processed = true;
 					break;		// break from while

@@ -69,7 +69,7 @@ PNLTRI.Math = {
 PNLTRI.PolygonData = function ( inPolygonChainList ) {
 
 	// list of polygon vertices
-	//	.pt: coordinates
+	//	.x, .y: coordinates
 	//	.outSegs: Array of outgoing segments from this point
 	//		{ vertTo: next vertex, segOut: outgoing segments-Entry }
 	// outSegs[0] is the original polygon segment, the others are added
@@ -157,7 +157,8 @@ PNLTRI.PolygonData.prototype = {
 	
 	appendVertexEntry: function ( inVertex ) {			// private
 		var vertex = inVertex ? inVertex : {
-			pt: null,		// coordinates: { x:, y: }
+			x: null,		// coordinates
+			y: null,
 			outSegs: [],	// outbound segments (up to 4)
 			};
 		vertex.id = this.vertices.length;
@@ -172,7 +173,7 @@ PNLTRI.PolygonData.prototype = {
 			vFrom: inVertexFrom,	// -> start point entry in vertices
 			vTo: inVertexTo,		// -> end point entry in vertices
 			// upward segment? (i.e. vTo > vFrom)
-			upward: ( this.compare_pts_yx(inVertexTo.pt, inVertexFrom.pt) == 1 ),
+			upward: ( this.compare_pts_yx(inVertexTo, inVertexFrom) == 1 ),
 			// double linked list of original polygon chains (not the monoChains !)
 			sprev: null,			// previous segment
 			snext: null,			// next segment
@@ -191,8 +192,8 @@ PNLTRI.PolygonData.prototype = {
 	addVertexChain: function ( inRawPointList, inIsHole ) {			// private
 		
 		function verts_equal( inVert1, inVert2 ) {
-			return ( ( Math.abs(inVert1.pt.x - inVert2.pt.x) < PNLTRI.Math.EPSILON_P ) &&
-					 ( Math.abs(inVert1.pt.y - inVert2.pt.y) < PNLTRI.Math.EPSILON_P ) );
+			return ( ( Math.abs(inVert1.x - inVert2.x) < PNLTRI.Math.EPSILON_P ) &&
+					 ( Math.abs(inVert1.y - inVert2.y) < PNLTRI.Math.EPSILON_P ) );
 		}
 		
 		var reverse = false;
@@ -204,8 +205,8 @@ PNLTRI.PolygonData.prototype = {
 		var newVertices = [];
 		var newVertex, acceptVertex, prevIdx;
 		for ( var i=0; i < inRawPointList.length; i++ ) {
-			newVertex = this.appendVertexEntry( { pt: { x: inRawPointList[i].x,
-														y: inRawPointList[i].y } } );
+			newVertex = this.appendVertexEntry( { x: inRawPointList[i].x,
+												  y: inRawPointList[i].y } );
 			// suppresses zero-length segments
 			acceptVertex = true;
 			prevIdx = newVertices.length-1;
@@ -221,7 +222,7 @@ PNLTRI.PolygonData.prototype = {
 			newVertices.pop();
 		}
 		if ( reverse ) {
-			// console.log( "Polygon chain reversed! " + newVertices[0].pt.x + "/" + newVertices[0].pt.y );
+			// console.log( "Polygon chain reversed! " + newVertices[0].x + "/" + newVertices[0].y );
 			newVertices = newVertices.reverse();		// vertex-index preserving reversal !!!
 		}
 		
@@ -349,7 +350,7 @@ PNLTRI.PolygonData.prototype = {
 			var minAngle = 4.0;			// <=> 360 degrees
 			for (var i = 0; i < vert0.outSegs.length; i++) {
 				tmpSeg = vert0.outSegs[i]
-				if ( ( tmpAngle = mapAngle( vert0.pt, tmpSeg.vertTo.pt, vert1.pt ) ) < minAngle ) {
+				if ( ( tmpAngle = mapAngle( vert0, tmpSeg.vertTo, vert1 ) ) < minAngle ) {
 					minAngle = tmpAngle;
 					segRight = tmpSeg;
 				}
@@ -368,7 +369,7 @@ PNLTRI.PolygonData.prototype = {
 		var segOutFromVert1 = vert1outSeg.segOut;
 		
 		// modify linked lists
-		var upward = ( this.compare_pts_yx(vert0.pt, vert1.pt) == 1 );
+		var upward = ( this.compare_pts_yx(vert0, vert1) == 1 );
 		var newSegPolyOrg = this.appendSegmentEntry( { vFrom: vert0, vTo: vert1, upward: !upward,
 							mprev: segOutFromVert0.mprev, mnext: segOutFromVert1 } );
 		var newSegPolyNew = this.appendSegmentEntry( { vFrom: vert1, vTo: vert0, upward: upward,
@@ -404,13 +405,13 @@ PNLTRI.PolygonData.prototype = {
 		for ( i=0; i<this.monoSubPolyChains.length; i++ ) {
 			// loop through uni-monotone chains
 			frontMono = monoPosmax = this.monoSubPolyChains[i];
-			firstPt = ymaxPt = frontMono.vFrom.pt;
+			firstPt = ymaxPt = frontMono.vFrom;
 
 			frontMono.marked = true;
 			frontMono = frontMono.mnext;
 			
 			var processed = false;
-			while ( (frontPt = frontMono.vFrom.pt) != firstPt ) {
+			while ( (frontPt = frontMono.vFrom) != firstPt ) {
 				if (frontMono.marked) {
 					processed = true;
 					break;		// break from while
@@ -716,20 +717,20 @@ PNLTRI.QueryStructure.prototype = {
 	 
 	is_left_of: function ( inSeg, inPt, inBetweenY ) {
 		var	retVal, retVal2;
-		var dXfrom = inSeg.vFrom.pt.x - inPt.x;
-		var dXto = inSeg.vTo.pt.x - inPt.x;
-		if ( Math.abs( inSeg.vTo.pt.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
+		var dXfrom = inSeg.vFrom.x - inPt.x;
+		var dXto = inSeg.vTo.x - inPt.x;
+		if ( Math.abs( inSeg.vTo.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
 			retVal = dXto; retVal2 = dXfrom;
-		} else if ( Math.abs( inSeg.vFrom.pt.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
+		} else if ( Math.abs( inSeg.vFrom.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
 			retVal = dXfrom; retVal2 = dXto;
 //		} else if ( inBetweenY && ( dXfrom * dXto > 0 ) ) {
 			// both x-coordinates of inSeg are on the same side of inPt
 //			retVal = dXto; retVal2 = dXfrom;
 		} else {
 			if ( inSeg.upward ) {
-				return	PNLTRI.Math.ptsCrossProd( inSeg.vFrom.pt, inSeg.vTo.pt, inPt );
+				return	PNLTRI.Math.ptsCrossProd( inSeg.vFrom, inSeg.vTo, inPt );
 			} else {
-				return	PNLTRI.Math.ptsCrossProd( inSeg.vTo.pt, inSeg.vFrom.pt, inPt );
+				return	PNLTRI.Math.ptsCrossProd( inSeg.vTo, inSeg.vFrom, inPt );
 			}
 		}
 		if ( Math.abs( retVal ) < PNLTRI.Math.EPSILON_P ) {
@@ -765,8 +766,8 @@ PNLTRI.QueryStructure.prototype = {
 				}		*/
 				break;
 			case PNLTRI.T_X:
-				if ( ( inPt == inQsNode.seg.vFrom.pt ) ||						// the point is already inserted.
-					 ( inPt == inQsNode.seg.vTo.pt ) ) {
+				if ( ( inPt == inQsNode.seg.vFrom ) ||						// the point is already inserted.
+					 ( inPt == inQsNode.seg.vTo ) ) {
 					if ( this.fpEqual( inPt.y, inPtOther.y ) ) {
 						// horizontal segment
 						if ( inPtOther.x < inPt.x )		sideRightAbove = false;		// left
@@ -782,7 +783,7 @@ PNLTRI.QueryStructure.prototype = {
 							// now as we have two consecutive co-linear segments we have to avoid a cross-over
 							//	for this we need the far point on the "next" segment to the shorter of our two
 							//	segments to avoid that "next" segment to cross the longer of our two segments
-							if ( inPt == inQsNode.seg.vFrom.pt ) {
+							if ( inPt == inQsNode.seg.vFrom ) {
 								// connected at inQsNode.seg.vFrom
 //								console.log("ptNode: co-linear, going back on previous segment, connected at inQsNode.seg.vFrom", inPt, inPtOther, inQsNode );
 								sideRightAbove = true;				// ??? TODO: for test_add_segment_spezial_4B !!
@@ -795,8 +796,8 @@ PNLTRI.QueryStructure.prototype = {
 					}
 					break;
 				} else { 
-/*					if ( ( this.compare_pts_yx( compPt, inQsNode.seg.vFrom.pt ) *			// TODO: Testcase
-					 	    this.compare_pts_yx( compPt, inQsNode.seg.vTo.pt )
+/*					if ( ( this.compare_pts_yx( compPt, inQsNode.seg.vFrom ) *			// TODO: Testcase
+					 	    this.compare_pts_yx( compPt, inQsNode.seg.vTo )
 					 	   ) == 0 ) {
 						console.log("ptNode: Pts too close together#2: ", compPt, inQsNode.seg );
 					}		*/
@@ -1022,22 +1023,22 @@ PNLTRI.QueryStructure.prototype = {
 		var segHighPt, segHighRoot, segHighAdjSeg;		// y-max vertex
 		var segLowPt , segLowRoot , segLowAdjSeg;		// y-min vertex
 		
-/*		if ( ( inSegment.sprev.vTo.pt != inSegment.vFrom.pt ) || ( inSegment.vTo.pt != inSegment.snext.vFrom.pt ) ) {
+/*		if ( ( inSegment.sprev.vTo != inSegment.vFrom ) || ( inSegment.vTo != inSegment.snext.vFrom ) ) {
 			console.log( "add_segment: inconsistent point order of adjacent segments: ",
-						 inSegment.sprev.vTo.pt, inSegment.vFrom.pt, inSegment.vTo.pt, inSegment.snext.vFrom.pt );
+						 inSegment.sprev.vTo, inSegment.vFrom, inSegment.vTo, inSegment.snext.vFrom );
 			return;
 		}		*/
 		
 		if ( inSegment.upward ) {
-			segLowPt	= inSegment.vFrom.pt;
-			segHighPt	= inSegment.vTo.pt;
+			segLowPt	= inSegment.vFrom;
+			segHighPt	= inSegment.vTo;
 			segLowRoot		= inSegment.rootFrom;
 			segHighRoot		= inSegment.rootTo;
 			segLowAdjSeg	= inSegment.sprev;
 			segHighAdjSeg	= inSegment.snext;
 		} else {
-			segLowPt	= inSegment.vTo.pt;
-			segHighPt	= inSegment.vFrom.pt;
+			segLowPt	= inSegment.vTo;
+			segHighPt	= inSegment.vFrom;
 			segLowRoot		= inSegment.rootTo;
 			segHighRoot		= inSegment.rootFrom;
 			segLowAdjSeg	= inSegment.snext;
@@ -1193,7 +1194,7 @@ PNLTRI.QueryStructure.prototype = {
 				// TM
 				thisTrap.hiVert = thisTrap.u0.rseg.vFrom;		// == thisTrap.u1.lseg.vTo
 				thisTrap.topLoc = PNLTRI.TRAP_MIDDLE;
-			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vFrom.pt ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vFrom ) ) {
 				// TL
 				thisTrap.hiVert = thisTrap.lseg.vFrom;
 				thisTrap.topLoc = ( !thisTrap.u0 && !thisTrap.u1 ) ?
@@ -1203,7 +1204,7 @@ PNLTRI.QueryStructure.prototype = {
 				// TR
 				thisTrap.hiVert = thisTrap.rseg.vTo;
 				thisTrap.topLoc = PNLTRI.TRAP_RIGHT;
-			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vTo.pt ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vTo ) ) {
 				// TL, for outside polygons: wrong segment direction
 				thisTrap.hiVert = thisTrap.lseg.vTo;
 				thisTrap.topLoc = PNLTRI.TRAP_LEFT;
@@ -1213,7 +1214,7 @@ PNLTRI.QueryStructure.prototype = {
 				// BM
 				thisTrap.loVert = thisTrap.d1.lseg.vFrom;		// == thisTrap.d0.rseg.vTo
 				thisTrap.botLoc = PNLTRI.TRAP_MIDDLE;
-			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vTo.pt ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vTo ) ) {
 				// BL
 				thisTrap.loVert = thisTrap.lseg.vTo;
 				thisTrap.botLoc = ( !thisTrap.d0 && !thisTrap.d1 ) ?
@@ -1223,7 +1224,7 @@ PNLTRI.QueryStructure.prototype = {
 				// BR
 				thisTrap.loVert = thisTrap.rseg.vFrom;
 				thisTrap.botLoc = PNLTRI.TRAP_RIGHT;
-			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vFrom.pt ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vFrom ) ) {
 				// BL, for outside polygons: wrong segment direction
 				thisTrap.loVert = thisTrap.lseg.vFrom;
 				thisTrap.botLoc = PNLTRI.TRAP_LEFT;
@@ -1288,8 +1289,8 @@ PNLTRI.Trapezoider.prototype = {
 	
 	find_new_roots: function ( inSegment ) {					// <<<< private
 		if ( !inSegment.is_inserted ) {
-			inSegment.rootFrom = this.queryStructure.ptNode( inSegment.vFrom.pt, inSegment.vTo.pt, inSegment.rootFrom );
-			inSegment.rootTo = this.queryStructure.ptNode( inSegment.vTo.pt, inSegment.vFrom.pt, inSegment.rootTo );
+			inSegment.rootFrom = this.queryStructure.ptNode( inSegment.vFrom, inSegment.vTo, inSegment.rootFrom );
+			inSegment.rootTo = this.queryStructure.ptNode( inSegment.vTo, inSegment.vFrom, inSegment.rootTo );
 		}
 	},
 
@@ -1491,11 +1492,11 @@ PNLTRI.MonoSplitter.prototype = {
 					} else {
 						// 2 trapezoids on one side (extern cusp) & 1 on the other side
 						if ( dblOnUp ) {
-							// 2 trapezoids above, 1 below, loPt to the left/right
+							// 2 trapezoids above, 1 below, sglLeft: loVert to the left?
 							sglSide = thisTrap.d0 ? thisTrap.d0 : thisTrap.d1;
 							sglLeft = ( thisTrap.botLoc == PNLTRI.TRAP_LEFT );
 						} else {
-							// 1 trapezoid above, 2 below, hiPt to the left/right
+							// 1 trapezoid above, 2 below, sglLeft: hiVert to the left?
 							sglSide = thisTrap.u0 ? thisTrap.u0 : thisTrap.u1;
 							sglLeft = ( thisTrap.topLoc == PNLTRI.TRAP_LEFT );
 						}
@@ -1534,11 +1535,11 @@ PNLTRI.MonoSplitter.prototype = {
 						} else {
 							if ( thisTrap.topLoc == PNLTRI.TRAP_LEFT ) {		// && botLoc == RIGHT
 								// TL_BR, !fromLeft !!
-								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "hiPt.left->loPt.right (in from above)" : "loPt.right->hiPt.left (in from below)" ) );
+								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "hiVert(left)->loVert(right) (in from above)" : "loVert(right)->hiVert(left) (in from below)" ) );
 								curChain = this.doSplit( curChain, vLow, vHigh, !fromUp );
 							} else {				// topLoc == RIGHT && botLoc == LEFT
 								// TR_BL, fromLeft !!
-								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "loPt.left->hiPt.right (in from above)" : "hiPt.right->loPt.left (in from below)" ) );
+								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "loVert(left)->hiVert(right) (in from above)" : "hiVert(right)->loVert(left) (in from below)" ) );
 								curChain = this.doSplit( curChain, vLow, vHigh, fromUp );
 							}
 						}
@@ -1645,7 +1646,7 @@ PNLTRI.MonoTriangulator.prototype = {
 		while ( (frontVert != endVert) || (vertBackLogIdx > 1) ) {
 			if (vertBackLogIdx > 0) {
 				// vertBackLog is not empty
-				if ( PNLTRI.Math.ptsCrossProd( frontVert.pt, vertBackLog[vertBackLogIdx-1].pt, vertBackLog[vertBackLogIdx].pt ) > 0 ) {		// TODO !!
+				if ( PNLTRI.Math.ptsCrossProd( frontVert, vertBackLog[vertBackLogIdx-1], vertBackLog[vertBackLogIdx] ) > 0 ) {		// TODO !!
 					// convex corner: cut if off
 					this.polyData.addTriangle( vertBackLog[vertBackLogIdx-1], vertBackLog[vertBackLogIdx], frontVert );
 					vertBackLogIdx--;

@@ -80,7 +80,7 @@ PNLTRI.MonoTriangulator.prototype = {
 		while ( (frontVert != endVert) || (vertBackLogIdx > 1) ) {
 			if (vertBackLogIdx > 0) {
 				// vertBackLog is not empty
-				if ( PNLTRI.Math.ptsCrossProd( frontVert.pt, vertBackLog[vertBackLogIdx-1].pt, vertBackLog[vertBackLogIdx].pt ) > 0 ) {		// TODO !!
+				if ( PNLTRI.Math.ptsCrossProd( frontVert, vertBackLog[vertBackLogIdx-1], vertBackLog[vertBackLogIdx] ) > 0 ) {		// TODO !!
 					// convex corner: cut if off
 					this.polyData.addTriangle( vertBackLog[vertBackLogIdx-1], vertBackLog[vertBackLogIdx], frontVert );
 					vertBackLogIdx--;

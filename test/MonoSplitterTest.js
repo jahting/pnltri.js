@@ -431,28 +431,28 @@ function test_MonoSplitter() {
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (10,30)->(25,10)
 								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from UP0, diag: hiPt.left->loPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from UP0, diag: hiPt(left)->loPt(right)");
 		ok( mock_check_calls(), "TL_BR: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP0" !!
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from UP1, diag: hiPt.left->loPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from UP1, diag: hiPt(left)->loPt(right)");
 		ok( mock_check_calls(), "TL_BR: from UP1, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], true ],		// (25,10)->(10,30)
 								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from DN0, diag: loPt.right->hiPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from DN0, diag: loPt(right)->hiPt(left)");
 		ok( mock_check_calls(), "TL_BR: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from DN0" !!
 		myMono.alyTrap_check( myTrap, false, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from DN1, diag: loPt.right->hiPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from DN1, diag: loPt(right)->hiPt(left)");
 		ok( mock_check_calls(), "TL_BR: from DN1, all calls received" );
 	}
 	
@@ -492,28 +492,28 @@ function test_MonoSplitter() {
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], true ],		// (15,10)->(35,30)
 								[ myTrap.d0, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from UP0, diag: loPt.left->hiPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from UP0, diag: loPt(left)->hiPt(right)");
 		ok( mock_check_calls(), "TR_BL: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP0" !!
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from UP1, diag: loPt.left->hiPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from UP1, diag: loPt(left)->hiPt(right)");
 		ok( mock_check_calls(), "TR_BL: from UP1, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], false ],		// (35,30)->(15,10)
 								[ myTrap.u1, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from DN0, diag: hiPt.right->loPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from DN0, diag: hiPt(right)->loPt(left)");
 		ok( mock_check_calls(), "TR_BL: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from DN0" !!
 		myMono.alyTrap_check( myTrap, false, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from DN1, diag: hiPt.right->loPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from DN1, diag: hiPt(right)->loPt(left)");
 		ok( mock_check_calls(), "TR_BL: from DN1, all calls received" );
 	}
 	
@@ -558,7 +558,7 @@ function test_MonoSplitter() {
 								[ myTrap.u0, false, false, 0 ],
 								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from UP0, diag: hiPt.left->loPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from UP0, diag: hiPt(left)->loPt(middle)");
 		ok( mock_check_calls(), "TL_BM: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
@@ -568,13 +568,13 @@ function test_MonoSplitter() {
 								[ myTrap.u1, false, false, 0 ],
 								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from UP1, diag: hiPt.left->loPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from UP1, diag: hiPt(left)->loPt(middle)");
 		ok( mock_check_calls(), "TL_BM: from UP1, all calls received" );
 			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP1" !!
 		myMono.alyTrap_check( myTrap, false, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from DN-right, diag: hiPt.left->loPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from DN-right, diag: hiPt(left)->loPt(middle)");
 		ok( mock_check_calls(), "TL_BM: from DN-right, all calls received" );
 			// from DN-left
 		myTrap.monoDiag = null;			// => not yet visited
@@ -582,7 +582,7 @@ function test_MonoSplitter() {
 								[ myTrap.d1, true, false, 7 ],
 								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from DN-left, diag: loPt.middle->hiPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from DN-left, diag: loPt(middle)->hiPt(left)");
 		ok( mock_check_calls(), "TL_BM: from DN-left, all calls received" );
 	}
 	
@@ -627,7 +627,7 @@ function test_MonoSplitter() {
 								[ myTrap.u0, false, true, 0 ],
 								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from UP0, diag: loPt.middle->hiPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from UP0, diag: loPt(middle)->hiPt(right)");
 		ok( mock_check_calls(), "TR_BM: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
@@ -637,13 +637,13 @@ function test_MonoSplitter() {
 								[ myTrap.u1, false, true, 0 ],
 								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from UP1, diag: loPt.middle->hiPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from UP1, diag: loPt(middle)->hiPt(right)");
 		ok( mock_check_calls(), "TR_BM: from UP1, all calls received" );
 			// from DN-left
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP" !!
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from DN-left, diag: loPt.middle->hiPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from DN-left, diag: loPt(middle)->hiPt(right)");
 		ok( mock_check_calls(), "TR_BM: from DN-left, all calls received" );
 			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
@@ -651,7 +651,7 @@ function test_MonoSplitter() {
 								[ myTrap.d0, true, true, 7 ],
 								[ myTrap.u1, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from DN-right, diag: hiPt.right->loPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from DN-right, diag: hiPt(right)->loPt(middle)");
 		ok( mock_check_calls(), "TR_BM: from DN-right, all calls received" );
 	}
 	
@@ -695,7 +695,7 @@ function test_MonoSplitter() {
 								[ myTrap.u1, false, false, 7 ],
 								[ myTrap.d0, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from UP-left, diag: loPt.left->hiPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from UP-left, diag: loPt(left)->hiPt(middle)");
 		ok( mock_check_calls(), "TM_BL: from UP-left, all calls received" );
 			// from UP-right
 		myTrap.monoDiag = null;			// => not yet visited
@@ -704,13 +704,13 @@ function test_MonoSplitter() {
 								[ myTrap.d0, true, false, 0 ],
 								[ myTrap.u0, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from UP-right, diag: hiPt.middle->loPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from UP-right, diag: hiPt(middle)->loPt(left)");
 		ok( mock_check_calls(), "TM_BL: from UP-right, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP-right" !!
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from DN0, diag: hiPt.middle->loPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from DN0, diag: hiPt(middle)->loPt(left)");
 		ok( mock_check_calls(), "TM_BL: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
@@ -720,7 +720,7 @@ function test_MonoSplitter() {
 								[ myTrap.d1, true, false, 0 ],
 								[ myTrap.u0, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from DN1, diag: hiPt.middle->loPt.left");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from DN1, diag: hiPt(middle)->loPt(left)");
 		ok( mock_check_calls(), "TM_BL: from DN1, all calls received" );
 	}
 	
@@ -764,7 +764,7 @@ function test_MonoSplitter() {
 								[ myTrap.u0, false, true, 7 ],
 								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from UP-right, diag: hiPt.middle->loPt.right");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from UP-right, diag: hiPt(middle)->loPt(right)");
 		ok( mock_check_calls(), "TM_BR: from UP-right, all calls received" );
 			// from UP-left
 		myTrap.monoDiag = null;			// => not yet visited
@@ -773,13 +773,13 @@ function test_MonoSplitter() {
 								[ myTrap.d0, true, true, 0 ],
 								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from UP-left, diag: loPt.right->hiPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from UP-left, diag: loPt(right)->hiPt(middle)");
 		ok( mock_check_calls(), "TM_BR: from UP-left, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP-left" !!
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from DN0, diag: loPt.right->hiPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from DN0, diag: loPt(right)->hiPt(middle)");
 		ok( mock_check_calls(), "TM_BR: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
@@ -789,7 +789,7 @@ function test_MonoSplitter() {
 								[ myTrap.d1, true, true, 0 ],
 								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from DN1, diag: loPt.right->hiPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from DN1, diag: loPt(right)->hiPt(middle)");
 		ok( mock_check_calls(), "TM_BR: from DN1, all calls received" );
 	}
 	
@@ -838,13 +838,13 @@ function test_MonoSplitter() {
 								[ myTrap.u1, false, false, 7 ],
 								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from UP-left, diag: loPt.middle->hiPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from UP-left, diag: loPt(middle)->hiPt(middle)");
 		ok( mock_check_calls(), "TM_BM: from UP-left, all calls received" );
 			// from DN-left
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();			// same calls as for "from UP-left" !
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from DN-left, diag: loPt.middle->hiPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from DN-left, diag: loPt(middle)->hiPt(middle)");
 		ok( mock_check_calls(), "TM_BM: from DN-left, all calls received" );
 			// from UP-right
 		myTrap.monoDiag = null;			// => not yet visited
@@ -855,13 +855,13 @@ function test_MonoSplitter() {
 								[ myTrap.u1, false, false, 0 ],
 								[ myTrap.d1, true, false, 0 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from UP-right, diag: hiPt.middle->loPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from UP-right, diag: hiPt(middle)->loPt(middle)");
 		ok( mock_check_calls(), "TM_BM: from UP-right, all calls received" );
 			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();			// same calls as for "from UP-right" !
 		myMono.alyTrap_check( myTrap, false, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from DN-right, diag: hiPt.middle->loPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from DN-right, diag: hiPt(middle)->loPt(middle)");
 		ok( mock_check_calls(), "TM_BM: from DN-right, all calls received" );
 	}
 
@@ -905,7 +905,7 @@ function test_MonoSplitter() {
 								[ myTrap.d0, true, true, 0 ],
 								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from DN-left, diag: loPt.middle->hiPt");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from DN-left, diag: loPt(middle)->hiPt");
 		ok( mock_check_calls(), "TLR_BM: from DN-left, all calls received" );
 			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
@@ -913,7 +913,7 @@ function test_MonoSplitter() {
 								[ myTrap.d1, true, false, 0 ],
 								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from DN-right, diag: hiPt->loPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from DN-right, diag: hiPt->loPt(middle)");
 		ok( mock_check_calls(), "TLR_BM: from DN-right, all calls received" );
 	}
 	
@@ -957,7 +957,7 @@ function test_MonoSplitter() {
 								[ myTrap.u0, false, true, 0 ],
 								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TM_BLR: from UP-left, diag: loPt->hiPt.middle");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TM_BLR: from UP-left, diag: loPt->hiPt(middle)");
 		ok( mock_check_calls(), "TM_BLR: from UP-left, all calls received" );
 			// from UP-right
 		myTrap.monoDiag = null;			// => not yet visited
@@ -965,7 +965,7 @@ function test_MonoSplitter() {
 								[ myTrap.u1, false, false, 0 ],
 								[ myTrap.u0, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TM_BLR: from UP-right, diag: hiPt.middle->loPt");
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TM_BLR: from UP-right, diag: hiPt(middle)->loPt");
 		ok( mock_check_calls(), "TM_BLR: from UP-right, all calls received" );
 	}
 	
