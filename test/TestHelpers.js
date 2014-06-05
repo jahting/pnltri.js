@@ -210,11 +210,11 @@ function showDataStructure( inObject, inTempKeys ) {
 		context.fillStyle = "magenta"; 
 		context.font = 'bold 20px sans-serif'; 
 		
-		var highLineLeft	= { x: 0, y: inTrapezoid.hiPt.y };
-		var highLineRight	= { x: max_width, y: inTrapezoid.hiPt.y };
+		var highLineLeft	= { x: 0, y: inTrapezoid.vHigh.y };
+		var highLineRight	= { x: max_width, y: inTrapezoid.vHigh.y };
 		
-		var lowLineLeft		= { x: 0, y: inTrapezoid.loPt.y };
-		var lowLineRight	= { x: max_width, y: inTrapezoid.loPt.y };
+		var lowLineLeft		= { x: 0, y: inTrapezoid.vLow.y };
+		var lowLineRight	= { x: max_width, y: inTrapezoid.vLow.y };
 		
 		// lseg
 		if ( inTrapezoid.lseg ) {
@@ -223,8 +223,8 @@ function showDataStructure( inObject, inTempKeys ) {
 			myLineTo( inTrapezoid.lseg.vTo.x, inTrapezoid.lseg.vTo.y );
 			context.lineWidth = 3;
 			context.stroke();
-			highLineLeft.x = xCoord_of_segment_at_Y( inTrapezoid.lseg, inTrapezoid.hiPt );
-			lowLineLeft.x = xCoord_of_segment_at_Y( inTrapezoid.lseg, inTrapezoid.loPt );
+			highLineLeft.x = xCoord_of_segment_at_Y( inTrapezoid.lseg, inTrapezoid.vHigh );
+			lowLineLeft.x = xCoord_of_segment_at_Y( inTrapezoid.lseg, inTrapezoid.vLow );
 		}
 		// rseg
 		if ( inTrapezoid.rseg ) {
@@ -233,17 +233,17 @@ function showDataStructure( inObject, inTempKeys ) {
 			myLineTo( inTrapezoid.rseg.vTo.x, inTrapezoid.rseg.vTo.y );
 			context.lineWidth = 3;
 			context.stroke();
-			highLineRight.x = xCoord_of_segment_at_Y( inTrapezoid.rseg, inTrapezoid.hiPt );
-			lowLineRight.x = xCoord_of_segment_at_Y( inTrapezoid.rseg, inTrapezoid.loPt );
+			highLineRight.x = xCoord_of_segment_at_Y( inTrapezoid.rseg, inTrapezoid.vHigh );
+			lowLineRight.x = xCoord_of_segment_at_Y( inTrapezoid.rseg, inTrapezoid.vLow );
 		}
 		
-		// hiPt
+		// vHigh
 		context.beginPath();
 		myMoveTo( highLineLeft.x, highLineLeft.y );
 		myLineTo( highLineRight.x, highLineRight.y );
 		context.lineWidth = 1;
 		context.stroke();
-		// loPt
+		// vLow
 		context.beginPath();
 		myMoveTo( lowLineLeft.x, lowLineLeft.y );
 		myLineTo( lowLineRight.x, lowLineRight.y );
@@ -261,10 +261,10 @@ function showDataStructure( inObject, inTempKeys ) {
 		
 		if ( inTrapezoid.u0 && inTrapezoid.u1 ) {
 			// two upper neighbors
-			addLines.push( { vFrom: inTrapezoid.hiPt, vTo: inTrapezoid.loPt } );
+			addLines.push( { vFrom: inTrapezoid.vHigh, vTo: inTrapezoid.vLow } );
 		} else if ( inTrapezoid.d0 && inTrapezoid.d1 ) {
 			// two lower neighbors
-			addLines.push( { vFrom: inTrapezoid.hiPt, vTo: inTrapezoid.loPt } );
+			addLines.push( { vFrom: inTrapezoid.vHigh, vTo: inTrapezoid.vLow } );
 		}
 	}
 

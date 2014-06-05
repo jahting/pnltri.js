@@ -18,8 +18,8 @@ PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 	
 	this.trapID = PNLTRI.trapCounter++;			// for Debug
 
-	this.hiPt = inHigh ? inHigh : { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY };
-	this.loPt = inLow ? inLow : { x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY };
+	this.vHigh = inHigh ? inHigh : { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY };
+	this.vLow = inLow ? inLow : { x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY };
 	
 	this.lseg = inLeft;
 	this.rseg = inRight;
@@ -60,7 +60,7 @@ PNLTRI.Trapezoid.prototype = {
 	splitOffLower: function ( inSplitPt ) {
 		var trLower = this.clone();				// new lower trapezoid
 		
-		this.loPt = trLower.hiPt = inSplitPt;
+		this.vLow = trLower.vHigh = inSplitPt;
 		
 		this.d0 = trLower;
 		this.d1 = null;
@@ -75,7 +75,7 @@ PNLTRI.Trapezoid.prototype = {
 
 
 	clone: function () {
-		var newTrap = new PNLTRI.Trapezoid( this.hiPt, this.loPt, this.lseg, this.rseg );
+		var newTrap = new PNLTRI.Trapezoid( this.vHigh, this.vLow, this.lseg, this.rseg );
 		
 		
 		newTrap.u0 = this.u0;
@@ -211,8 +211,8 @@ PNLTRI.QueryStructure.prototype = {
 	splitNodeAtPoint: function ( inNode, inPoint, inReturnUpper ) {
 		// inNode: PNLTRI.T_SINK with trapezoid containing inPoint
 		var trUpper = inNode.trap;							// trUpper: trapezoid includes the point
-		if (trUpper.hiPt == inPoint)	return	inNode;				// (ERROR) inPoint is already inserted
-		if (trUpper.loPt == inPoint)	return	inNode;				// (ERROR) inPoint is already inserted
+		if (trUpper.vHigh == inPoint)	return	inNode;				// (ERROR) inPoint is already inserted
+		if (trUpper.vLow == inPoint)	return	inNode;				// (ERROR) inPoint is already inserted
 		var trLower = trUpper.splitOffLower( inPoint );		// trLower: new lower trapezoid
 		this.trapezoids.push( trLower );
 		
@@ -454,8 +454,8 @@ PNLTRI.QueryStructure.prototype = {
 		// make trNewLeft and trNewRight the upper neighbors of this sole lower trapezoid
 		
 		function	only_one_trap_below( inTrNext ) {
-			// console.log( "only_one_trap_below: (act.loPt.y, last.loPt.y)", trCurrent.loPt.y, trLast.loPt.y );
-			if ( ( trCurrent.loPt == trLast.loPt ) && meetsLowAdjSeg ) {
+			// console.log( "only_one_trap_below: (act.vLow.y, last.vLow.y)", trCurrent.vLow.y, trLast.vLow.y );
+			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {
 				// console.log( "only_one_trap_below: (bottom forms a triangle)" );
 				
 				// ATTENTION: the decision whether trNewLeft or trNewRight is the
@@ -509,7 +509,7 @@ PNLTRI.QueryStructure.prototype = {
 		function two_trap_below() {
 
 			var trNext;
-			if ( ( trCurrent.loPt == trLast.loPt ) && meetsLowAdjSeg ) {
+			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {
 				// the Low-End of this segment meets
 				//  the High-End of an already inserted segment
 				// => trNewLeft  is continued in trCurrent.d0,
@@ -527,8 +527,8 @@ PNLTRI.QueryStructure.prototype = {
 				trNext = null;	      	// segment finished
 			} else {
 				// passes left or right of an already inserted NOT connected segment
-				var compRes = scope.is_left_of( inSegment, trCurrent.loPt, true );
-				if ( compRes > 0 ) {				// trCurrent.loPt is left of inSegment
+				var compRes = scope.is_left_of( inSegment, trCurrent.vLow, true );
+				if ( compRes > 0 ) {				// trCurrent.vLow is left of inSegment
 					// console.log( "two_trap_below: (intersecting d1)" );
 					trNext = trCurrent.d1;
 					
@@ -538,7 +538,7 @@ PNLTRI.QueryStructure.prototype = {
 					// change FIRST trNewLeft then trNewRight !!
 					trNewLeft.setBelow( trCurrent.d0, trCurrent.d1 );
 					trNewRight.setBelow( trCurrent.d1, null );
-				} else if ( compRes < 0 ) {			// trCurrent.loPt is right of inSegment
+				} else if ( compRes < 0 ) {			// trCurrent.vLow is right of inSegment
 					// console.log( "two_trap_below: (intersecting d0)" );
 					trNext = trCurrent.d0;
 		
@@ -548,8 +548,8 @@ PNLTRI.QueryStructure.prototype = {
 					// change FIRST trNewRight then trNewLeft !!
 					trNewRight.setBelow( trCurrent.d0, trCurrent.d1 );
 					trNewLeft.setBelow( trCurrent.d0, null );
-				} else {							// trCurrent.loPt lies ON inSegment
-//					console.log( "two_trap_below: loPt ON new segment" );
+				} else {							// trCurrent.vLow lies ON inSegment
+//					console.log( "two_trap_below: vLow ON new segment" );
 					trNext = trCurrent.d0;				// TODO: for test_add_segment_spezial_4A -> like intersecting d0
 //					trNext = trCurrent.d1;				// TODO: for test_add_segment_spezial_9 -> like intersecting d1
 		
@@ -659,7 +659,7 @@ PNLTRI.QueryStructure.prototype = {
 				// console.log( "add_segment: extending right predecessor down!", trPrevRight );
 				trNewLeft = trCurrent;
 				trNewRight = trPrevRight;
-				trNewRight.loPt = trCurrent.loPt;
+				trNewRight.vLow = trCurrent.vLow;
 				// redirect parent PNLTRI.T_X-Node to extended sink
 				qs_trCurrent.right = trPrevRight.sink;
 				trNewLeft.sink  = qs_trCurrent.newLeft( PNLTRI.T_SINK, trNewLeft );		// left trapezoid sink (use existing one)
@@ -668,7 +668,7 @@ PNLTRI.QueryStructure.prototype = {
 				// console.log( "add_segment: extending left predecessor down!", trPrevLeft );
 				trNewRight = trCurrent;
 				trNewLeft = trPrevLeft;
-				trNewLeft.loPt = trCurrent.loPt;
+				trNewLeft.vLow = trCurrent.vLow;
 				// redirect parent PNLTRI.T_X-Node to extended sink
 				qs_trCurrent.left = trPrevLeft.sink;
 				trNewRight.sink = qs_trCurrent.newRight( PNLTRI.T_SINK, trNewRight );		// right trapezoid sink (use existing one)
@@ -703,7 +703,7 @@ PNLTRI.QueryStructure.prototype = {
 			trNewLeft.rseg = trNewRight.lseg  = inSegment;
 
 			// further loop-step down ?
-			if ( trCurrent.loPt != trLast.loPt ) {
+			if ( trCurrent.vLow != trLast.vLow ) {
 				trPrevLeft = trNewLeft;
 				trPrevRight = trNewRight;
 				
@@ -732,7 +732,7 @@ PNLTRI.QueryStructure.prototype = {
 	
 	// Precomputes additional fields for splitting of trapezoids
 	//	TODO: temporary, since all can be filled during trapezoid construction
-	//	hiVert, loVert,  topLoc, botLoc
+	// topLoc, botLoc
 
 	update_trapezoids: function () {
 		var thisTrap;
@@ -741,41 +741,40 @@ PNLTRI.QueryStructure.prototype = {
 			// Top
 			if ( thisTrap.u0 && thisTrap.u1 ) {
 				// TM
-				thisTrap.hiVert = thisTrap.u0.rseg.vFrom;		// == thisTrap.u1.lseg.vTo
+//				thisTrap.vHigh = thisTrap.u0.rseg.vFrom;		// == thisTrap.u1.lseg.vTo
 				thisTrap.topLoc = PNLTRI.TRAP_MIDDLE;
-			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vFrom ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.vHigh == thisTrap.lseg.vFrom ) ) {
 				// TL
-				thisTrap.hiVert = thisTrap.lseg.vFrom;
 				thisTrap.topLoc = ( !thisTrap.u0 && !thisTrap.u1 ) ?
 					PNLTRI.TRAP_CUSP :	// TLR, highVert == thisTrap.rseg.vTo
 					PNLTRI.TRAP_LEFT;	// TL
 			} else if ( thisTrap.rseg ) {		// exclude infinite borders
 				// TR
-				thisTrap.hiVert = thisTrap.rseg.vTo;
+//				thisTrap.vHigh = thisTrap.rseg.vTo;
 				thisTrap.topLoc = PNLTRI.TRAP_RIGHT;
-			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vTo ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.vHigh == thisTrap.lseg.vTo ) ) {
 				// TL, for outside polygons: wrong segment direction
-				thisTrap.hiVert = thisTrap.lseg.vTo;
+//				thisTrap.vHigh = thisTrap.lseg.vTo;
 				thisTrap.topLoc = PNLTRI.TRAP_LEFT;
 			}
 			// Bottom
 			if ( thisTrap.d0 && thisTrap.d1 ) {
 				// BM
-				thisTrap.loVert = thisTrap.d1.lseg.vFrom;		// == thisTrap.d0.rseg.vTo
+//				thisTrap.vLow = thisTrap.d1.lseg.vFrom;		// == thisTrap.d0.rseg.vTo
 				thisTrap.botLoc = PNLTRI.TRAP_MIDDLE;
-			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vTo ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.vLow == thisTrap.lseg.vTo ) ) {
 				// BL
-				thisTrap.loVert = thisTrap.lseg.vTo;
+//				thisTrap.vLow = thisTrap.lseg.vTo;
 				thisTrap.botLoc = ( !thisTrap.d0 && !thisTrap.d1 ) ?
 					PNLTRI.TRAP_CUSP :	// BLR, highVert == thisTrap.rseg.vFrom
 					PNLTRI.TRAP_LEFT;	// BL
 			} else if ( thisTrap.rseg ) {		// exclude infinite borders
 				// BR
-				thisTrap.loVert = thisTrap.rseg.vFrom;
+//				thisTrap.vLow = thisTrap.rseg.vFrom;
 				thisTrap.botLoc = PNLTRI.TRAP_RIGHT;
-			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vFrom ) ) {
+			} else if ( thisTrap.lseg && ( thisTrap.vLow == thisTrap.lseg.vFrom ) ) {
 				// BL, for outside polygons: wrong segment direction
-				thisTrap.loVert = thisTrap.lseg.vFrom;
+//				thisTrap.vLow = thisTrap.lseg.vFrom;
 				thisTrap.botLoc = PNLTRI.TRAP_LEFT;
 			}
 		}

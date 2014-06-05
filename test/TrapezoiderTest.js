@@ -282,8 +282,8 @@ function test_QueryStructure() {
 			// tr4
 		var tr4 = qs2.trap;
 		equal( tr4.sink, qs2, "init_query_structure_up: root.above->tr.sink: this qs" );
-		equal( tr4.hiPt.y, Number.POSITIVE_INFINITY, "init_query_structure_up: root.above->tr.hiPt.y: +INFINITY" );
-		equal( tr4.loPt, base_segment.vTo, "init_query_structure_up: root.above->tr.loPt: vTo" );
+		equal( tr4.vHigh.y, Number.POSITIVE_INFINITY, "init_query_structure_up: root.above->tr.vHigh.y: +INFINITY" );
+		equal( tr4.vLow, base_segment.vTo, "init_query_structure_up: root.above->tr.vLow: vTo" );
 		// segMin(vFrom): below root
 		var qs3 = myQsRoot.left;
 		equal( qs3.nodetype, PNLTRI.T_Y, "init_query_structure_up: root.below: Y-Node" );
@@ -295,8 +295,8 @@ function test_QueryStructure() {
 			// tr3
 		var tr3 = qs4.trap;
 		equal( tr3.sink, qs4, "init_query_structure_up: segMin.below->tr.sink: this qs" );
-		equal( tr3.loPt.y, Number.NEGATIVE_INFINITY, "init_query_structure_up: segMin.below->tr.loPt.y: -INFINITY" );
-		equal( tr3.hiPt, base_segment.vFrom, "init_query_structure_up: segMin.below->tr.hiPt: vFrom" );
+		equal( tr3.vLow.y, Number.NEGATIVE_INFINITY, "init_query_structure_up: segMin.below->tr.vLow.y: -INFINITY" );
+		equal( tr3.vHigh, base_segment.vFrom, "init_query_structure_up: segMin.below->tr.vHigh: vFrom" );
 		//
 		// Segment - below segMax, above segMin
 		var qs5 = qs3.right;
@@ -310,8 +310,8 @@ function test_QueryStructure() {
 		var tr1 = qs6.trap;
 		equal( tr1.sink, qs6, "init_query_structure_up: segment.left->tr.sink: this qs" );
 		equal( tr1.rseg, base_segment, "init_query_structure_up: segment.left->tr.rseg: inSegment" );
-		equal( tr1.hiPt, base_segment.vTo, "init_query_structure_up: segment.left->tr.hiPt: vTo" );
-		equal( tr1.loPt, base_segment.vFrom, "init_query_structure_up: segment.left->tr.loPt: vFrom" );
+		equal( tr1.vHigh, base_segment.vTo, "init_query_structure_up: segment.left->tr.vHigh: vTo" );
+		equal( tr1.vLow, base_segment.vFrom, "init_query_structure_up: segment.left->tr.vLow: vFrom" );
 		//
 		// right(tr2): segment.right(qs5)
 		var qs7 = qs5.right;
@@ -320,8 +320,8 @@ function test_QueryStructure() {
 		var tr2 = qs7.trap;
 		equal( tr2.sink, qs7, "init_query_structure_up: segment.right->tr.sink: this qs" );
 		equal( tr2.lseg, base_segment, "init_query_structure_up: segment.right->tr.lseg: inSegment" );
-		equal( tr2.hiPt, base_segment.vTo, "init_query_structure_up: segment.right->tr.hiPt: vTo" );
-		equal( tr2.loPt, base_segment.vFrom, "init_query_structure_up: segment.right->tr.loPt: vFrom" );
+		equal( tr2.vHigh, base_segment.vTo, "init_query_structure_up: segment.right->tr.vHigh: vTo" );
+		equal( tr2.vLow, base_segment.vFrom, "init_query_structure_up: segment.right->tr.vLow: vFrom" );
 		//
 		//	Trapezoid-Neighborhood
 		equal( tr1.u0, tr4, "init_query_structure_up: left.up: top(tr4)" );
@@ -368,27 +368,27 @@ function test_QueryStructure() {
 		equal( myQsRoot.yval, base_segment.vFrom, "init_query_structure_down: root: yval = vFrom" );
 		// top(tr4): above root
 		var tr4 = myQsRoot.right.trap;
-		equal( tr4.loPt, base_segment.vFrom, "init_query_structure_down: root.above->tr.loPt: vFrom" );
+		equal( tr4.vLow, base_segment.vFrom, "init_query_structure_down: root.above->tr.vLow: vFrom" );
 		// segMin(vTo): below root
 		var qs3 = myQsRoot.left;
 		equal( qs3.yval, base_segment.vTo, "init_query_structure_down: root.below: yval = vTo" );
 		//
 		// bottom(tr3): below segMin(qs3)
 		var tr3 = qs3.left.trap;
-		equal( tr3.hiPt, base_segment.vTo, "init_query_structure_down: segMin.below->tr.hiPt: vTo" );
+		equal( tr3.vHigh, base_segment.vTo, "init_query_structure_down: segMin.below->tr.vHigh: vTo" );
 		//
 		// Segment - below segMax, above segMin
 		var qs5 = qs3.right;
 		//
 		// left(tr1): segment.left(qs5)
 		var tr1 = qs5.left.trap;
-		equal( tr1.hiPt, base_segment.vFrom, "init_query_structure_down: segment.left->tr.hiPt: vFrom" );
-		equal( tr1.loPt, base_segment.vTo, "init_query_structure_down: segment.left->tr.loPt: vTo" );
+		equal( tr1.vHigh, base_segment.vFrom, "init_query_structure_down: segment.left->tr.vHigh: vFrom" );
+		equal( tr1.vLow, base_segment.vTo, "init_query_structure_down: segment.left->tr.vLow: vTo" );
 		//
 		// right(tr2): segment.right(qs5)
 		var tr2 = qs5.right.trap;
-		equal( tr2.hiPt, base_segment.vFrom, "init_query_structure_down: segment.right->tr.hiPt: vFrom" );
-		equal( tr2.loPt, base_segment.vTo, "init_query_structure_down: segment.right->tr.loPt: vTo" );
+		equal( tr2.vHigh, base_segment.vFrom, "init_query_structure_down: segment.right->tr.vHigh: vFrom" );
+		equal( tr2.vLow, base_segment.vTo, "init_query_structure_down: segment.right->tr.vLow: vTo" );
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -472,18 +472,18 @@ function test_QueryStructure() {
 		//
 		//	Test: split tr1
 		var tr1u0 = tr1.u0;
-		var tr1hi = tr1.hiPt;
-		var tr1lo = tr1.loPt;
+		var tr1hi = tr1.vHigh;
+		var tr1lo = tr1.vLow;
 		var tr1d0 = tr1.d0;
 		ok( ( tr1d0 == tr3 ), "trap_splitOffLower: tr1.d0 == tr3" );
 		var splitPt1 = { x: 2 , y: 2 };
 		var tr1b = tr1.splitOffLower( splitPt1 );
 		strictEqual( tr1.lseg, tr1b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr1.rseg, tr1b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr1.hiPt, tr1hi, "trap_splitOffLower: tr1.hiPt unchanged" );
-		strictEqual( tr1.loPt, splitPt1, "trap_splitOffLower: tr1.loPt == splitPt1" );
-		strictEqual( tr1b.hiPt, splitPt1, "trap_splitOffLower: tr1b.hiPt == splitPt1" );
-		strictEqual( tr1b.loPt, tr1lo, "trap_splitOffLower: tr1b.loPt unchanged" );
+		strictEqual( tr1.vHigh, tr1hi, "trap_splitOffLower: tr1.vHigh unchanged" );
+		strictEqual( tr1.vLow, splitPt1, "trap_splitOffLower: tr1.vLow == splitPt1" );
+		strictEqual( tr1b.vHigh, splitPt1, "trap_splitOffLower: tr1b.vHigh == splitPt1" );
+		strictEqual( tr1b.vLow, tr1lo, "trap_splitOffLower: tr1b.vLow unchanged" );
 		//
 		strictEqual( tr1.sink, tr1b.sink, "trap_splitOffLower: sink equal" );
 		strictEqual( tr1.usave, tr1b.usave, "trap_splitOffLower: usave equal" );
@@ -507,18 +507,18 @@ function test_QueryStructure() {
 		//
 		//	Test: split tr2
 		var tr2u0 = tr2.u0;
-		var tr2hi = tr2.hiPt;
-		var tr2lo = tr2.loPt;
+		var tr2hi = tr2.vHigh;
+		var tr2lo = tr2.vLow;
 		var tr2d0 = tr2.d0;
 		strictEqual( tr2d0, tr3, "trap_splitOffLower: tr2.d0 == tr3" );
 		var splitPt2 = { x: 2 , y: 3 };
 		var tr2b = tr2.splitOffLower( splitPt2 );
 		strictEqual( tr2.lseg, tr2b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr2.rseg, tr2b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr2.hiPt, tr2hi, "trap_splitOffLower: tr2.hiPt unchanged" );
-		strictEqual( tr2.loPt, splitPt2, "trap_splitOffLower: tr2.loPt == splitPt2" );
-		strictEqual( tr2b.hiPt, splitPt2, "trap_splitOffLower: tr2b.hiPt == splitPt2" );
-		strictEqual( tr2b.loPt, tr2lo, "trap_splitOffLower: tr2b.loPt unchanged" );
+		strictEqual( tr2.vHigh, tr2hi, "trap_splitOffLower: tr2.vHigh unchanged" );
+		strictEqual( tr2.vLow, splitPt2, "trap_splitOffLower: tr2.vLow == splitPt2" );
+		strictEqual( tr2b.vHigh, splitPt2, "trap_splitOffLower: tr2b.vHigh == splitPt2" );
+		strictEqual( tr2b.vLow, tr2lo, "trap_splitOffLower: tr2b.vLow unchanged" );
 		//
 		strictEqual( tr2.sink, tr2b.sink, "trap_splitOffLower: sink equal" );
 		strictEqual( tr2.usave, tr2b.usave, "trap_splitOffLower: usave equal" );
@@ -540,18 +540,18 @@ function test_QueryStructure() {
 		//	Test: split tr3
 		var tr3u0 = tr3.u0;
 		var tr3u1 = tr3.u1;
-		var tr3hi = tr3.hiPt;
-		var tr3lo = tr3.loPt;
+		var tr3hi = tr3.vHigh;
+		var tr3lo = tr3.vLow;
 		ok( !tr3.d0, "trap_splitOffLower: tr3.d0 undefined" );
 		ok( !tr3.d1, "trap_splitOffLower: tr3.d1 undefined" );
 		var splitPt3 = { x: 0 , y: 0 };
 		var tr3b = tr3.splitOffLower( splitPt3 );
 		strictEqual( tr3.lseg, tr3b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr3.rseg, tr3b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr3.hiPt, tr3hi, "trap_splitOffLower: tr3.hiPt unchanged" );
-		strictEqual( tr3.loPt, splitPt3, "trap_splitOffLower: tr3.loPt == splitPt3" );
-		strictEqual( tr3b.hiPt, splitPt3, "trap_splitOffLower: tr3b.hiPt == splitPt3" );
-		strictEqual( tr3b.loPt, tr3lo, "trap_splitOffLower: tr3b.loPt unchanged" );
+		strictEqual( tr3.vHigh, tr3hi, "trap_splitOffLower: tr3.vHigh unchanged" );
+		strictEqual( tr3.vLow, splitPt3, "trap_splitOffLower: tr3.vLow == splitPt3" );
+		strictEqual( tr3b.vHigh, splitPt3, "trap_splitOffLower: tr3b.vHigh == splitPt3" );
+		strictEqual( tr3b.vLow, tr3lo, "trap_splitOffLower: tr3b.vLow unchanged" );
 		//
 		strictEqual( tr3.sink, tr3b.sink, "trap_splitOffLower: sink equal" );
 		strictEqual( tr3.usave, tr3b.usave, "trap_splitOffLower: usave equal" );
@@ -568,8 +568,8 @@ function test_QueryStructure() {
 		ok( !tr3b.d1, "trap_splitOffLower: tr3b.d1 null" );
 		//
 		//	Test: split tr4
-		var tr4hi = tr4.hiPt;
-		var tr4lo = tr4.loPt;
+		var tr4hi = tr4.vHigh;
+		var tr4lo = tr4.vLow;
 		var tr4d0 = tr4.d0;
 		var tr4d1 = tr4.d1;
 		ok( !tr4.u0, "trap_splitOffLower: tr4.u0 undefined" );
@@ -578,10 +578,10 @@ function test_QueryStructure() {
 		var tr4b = tr4.splitOffLower( splitPt4 );
 		strictEqual( tr4.lseg, tr4b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr4.rseg, tr4b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr4.hiPt, tr4hi, "trap_splitOffLower: tr4.hiPt unchanged" );
-		strictEqual( tr4.loPt, splitPt4, "trap_splitOffLower: tr4.loPt == splitPt4" );
-		strictEqual( tr4b.hiPt, splitPt4, "trap_splitOffLower: tr4b.hiPt == splitPt4" );
-		strictEqual( tr4b.loPt, tr4lo, "trap_splitOffLower: tr4b.loPt unchanged" );
+		strictEqual( tr4.vHigh, tr4hi, "trap_splitOffLower: tr4.vHigh unchanged" );
+		strictEqual( tr4.vLow, splitPt4, "trap_splitOffLower: tr4.vLow == splitPt4" );
+		strictEqual( tr4b.vHigh, splitPt4, "trap_splitOffLower: tr4b.vHigh == splitPt4" );
+		strictEqual( tr4b.vLow, tr4lo, "trap_splitOffLower: tr4b.vLow unchanged" );
 		//
 		strictEqual( tr4.sink, tr4b.sink, "trap_splitOffLower: sink equal" );
 		strictEqual( tr4.usave, tr4b.usave, "trap_splitOffLower: usave equal" );

@@ -112,8 +112,8 @@ PNLTRI.MonoSplitter.prototype = {
 				var curChain = trapQItem[3], newChain;
 				
 				
-				var vHigh = thisTrap.hiVert;
-				var vLow = thisTrap.loVert;
+				var vHigh = thisTrap.vHigh;
+				var vLow = thisTrap.vLow;
 
 				var dblOnUp = null;
 				var dblSideL, dblSideR;
@@ -160,11 +160,11 @@ PNLTRI.MonoSplitter.prototype = {
 					} else {
 						// 2 trapezoids on one side (extern cusp) & 1 on the other side
 						if ( dblOnUp ) {
-							// 2 trapezoids above, 1 below, sglLeft: loVert to the left?
+							// 2 trapezoids above, 1 below, sglLeft: vLow to the left?
 							sglSide = thisTrap.d0 ? thisTrap.d0 : thisTrap.d1;
 							sglLeft = ( thisTrap.botLoc == PNLTRI.TRAP_LEFT );
 						} else {
-							// 1 trapezoid above, 2 below, sglLeft: hiVert to the left?
+							// 1 trapezoid above, 2 below, sglLeft: vHigh to the left?
 							sglSide = thisTrap.u0 ? thisTrap.u0 : thisTrap.u1;
 							sglLeft = ( thisTrap.topLoc == PNLTRI.TRAP_LEFT );
 						}
@@ -203,11 +203,11 @@ PNLTRI.MonoSplitter.prototype = {
 						} else {
 							if ( thisTrap.topLoc == PNLTRI.TRAP_LEFT ) {		// && botLoc == RIGHT
 								// TL_BR, !fromLeft !!
-								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "hiVert(left)->loVert(right) (in from above)" : "loVert(right)->hiVert(left) (in from below)" ) );
+								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "vHigh(left)->vLow(right) (in from above)" : "vLow(right)->vHigh(left) (in from below)" ) );
 								curChain = this.doSplit( curChain, vLow, vHigh, !fromUp );
 							} else {				// topLoc == RIGHT && botLoc == LEFT
 								// TR_BL, fromLeft !!
-								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "loVert(left)->hiVert(right) (in from above)" : "hiVert(right)->loVert(left) (in from below)" ) );
+								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "vLow(left)->vHigh(right) (in from above)" : "vHigh(right)->vLow(left) (in from below)" ) );
 								curChain = this.doSplit( curChain, vLow, vHigh, fromUp );
 							}
 						}
