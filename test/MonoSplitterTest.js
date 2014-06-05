@@ -3,35 +3,49 @@
  */
 
 /*	Base class extensions - for testing only */
-	
+
 PNLTRI.MonoSplitter.prototype.getQsRoot = function () {
 		return	this.trapezoider.getQsRoot();
 };
+PNLTRI.MonoSplitter.prototype.alyTrap_check = function ( inTrap, inFromUp, inFromLeft ) {
+	var inChain = 0;
+	var trapQueue = this.alyTrap( inChain, inTrap, inFromUp, inFromLeft, true );
+	if ( mockDoChecks ) {
+		var paras;
+		while ( paras = trapQueue.shift() ) { mock_check( paras ) }
+	}
+};
 PNLTRI.MonoSplitter.prototype.mockSetup = function () {
 	
-	function mock_alyTrap_check( mcur, thisTrap, fromTrap, dir ) {
-		if ( mockDoChecks )		mock_check( [ mcur, thisTrap, fromTrap, dir ] );
-		return	null;
-	}
-	function mock_doSplit_check( mcur, v0, v1 ) {
-		if ( mockDoChecks )		return	mock_check( [ mcur, v0, v1 ] );
+	function mock_doSplit_check( inChain, vLow, vHigh, low2high ) {
+		if ( mockDoChecks )		return	mock_check( [ inChain, vLow, vHigh, low2high ] );
 		return	null;
 	}
 
 //		Dependency Injection of Mock-Checks
-	this.alyTrap_ORG = this.alyTrap;
 //	this.doSplit_ORG = this.doSplit;
 	//
-	this.alyTrap = mock_alyTrap_check;
 	this.doSplit = mock_doSplit_check;
 	mock_check_off();
 };
-
-
+	
+	// for splitting trapezoids
+	//  on which segment lie the points defining the top and bottom y-line?
+	PNLTRI.TRAP_TM_BM = 1 + 4*PNLTRI.TRAP_MIDDLE + PNLTRI.TRAP_MIDDLE;		// top-middle, bottom-middle
+	PNLTRI.TRAP_TM_BL = 1 + 4*PNLTRI.TRAP_MIDDLE + PNLTRI.TRAP_LEFT;		// top-middle, bottom-left
+	PNLTRI.TRAP_TM_BR = 1 + 4*PNLTRI.TRAP_MIDDLE + PNLTRI.TRAP_RIGHT;		// top-middle, bottom-right
+	PNLTRI.TRAP_TM_BLR =1 + 4*PNLTRI.TRAP_MIDDLE + PNLTRI.TRAP_CUSP;		// top-middle, bottom-cusp
+	PNLTRI.TRAP_TL_BM = 1 + 4*PNLTRI.TRAP_LEFT	 + PNLTRI.TRAP_MIDDLE;		// top-left, bottom-middle
+	PNLTRI.TRAP_TL_BR = 1 + 4*PNLTRI.TRAP_LEFT	 + PNLTRI.TRAP_RIGHT;		// top-left, bottom-right
+	PNLTRI.TRAP_TR_BM = 1 + 4*PNLTRI.TRAP_RIGHT  + PNLTRI.TRAP_MIDDLE;		// top-right, bottom-middle
+	PNLTRI.TRAP_TR_BL = 1 + 4*PNLTRI.TRAP_RIGHT	 + PNLTRI.TRAP_LEFT;		// top-right, bottom-left
+	PNLTRI.TRAP_TLR_BM =1 + 4*PNLTRI.TRAP_CUSP   + PNLTRI.TRAP_MIDDLE;		// top-cusp, bottom-middle
+	
 function test_MonoSplitter() {
 	
 	// TODO: tests for cases: d0=null,d1=set; u0=null,u1=set !!!
 	//   Start-Triangle: coming in from a non-existing direction !!!
+
 
 	/* 4 Cases for "high points", mirror them for "low points"
 	
@@ -99,6 +113,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TL_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BL_2" );
 		equal( myQs.nbTrapezoids(), 7, "TL_BL: nb. of trapezoids == 7");
+		myQs.update_trapezoids();
 //		var myQsRoot = myQs.getRoot();
 //		drawTrapezoids( myQsRoot, false, 1 );
 		//
@@ -110,37 +125,33 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [ [ myTrap.d0, true, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BL: from UP0, no diag");
 		ok( mock_check_calls(), "TL_BL: from UP0, all calls received" );
 			//	already visited !!
 		mock_set_expected();
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BL: 2.from UP0, no diag");
 		ok( mock_check_calls(), "TL_BL: 2.from UP0, no calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, null, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [ [ myTrap.u0, false, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BL: from DN0, no diag");
 		ok( mock_check_calls(), "TL_BL: from DN0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [ [ myTrap.d1, true, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BL: from UP1, no diag");
 		ok( mock_check_calls(), "TL_BL: from UP1, all calls received" );
 			// from DN1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		mock_set_expected( [ [ myTrap.u1, false, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BL: from DN1, no diag");
 		ok( mock_check_calls(), "TL_BL: from DN1, all calls received" );
 	}
@@ -166,6 +177,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TR_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BR_2" );
 		equal( myQs.nbTrapezoids(), 7, "TR_BR: nb. of trapezoids == 7");
+		myQs.update_trapezoids();
 //		var myQsRoot = myQs.getRoot();
 //		drawTrapezoids( myQsRoot, false, 1 );
 		//
@@ -177,32 +189,28 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(4);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [ [ myTrap.d0, true, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BR: from UP0, no diag");
 		ok( mock_check_calls(), "TR_BR: from UP0, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, null, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [ [ myTrap.u0, false, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BR: from DN0, no diag");
 		ok( mock_check_calls(), "TR_BR: from DN0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [ [ myTrap.d1, true, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BR: from UP1, no diag");
 		ok( mock_check_calls(), "TR_BR: from UP1, all calls received" );
 			// from DN1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		mock_set_expected( [ [ myTrap.u1, false, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BR: from DN1, no diag");
 		ok( mock_check_calls(), "TR_BR: from DN1, all calls received" );
 	}
@@ -228,6 +236,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TL_BLR_1" );
 		myQs.add_segment_consistently( segListArray[1], "TL_BLR_2" );
 		equal( myQs.nbTrapezoids(), 6, "TL_BLR: nb. of trapezoids == 6");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -238,34 +247,17 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, null, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ myTrap.u0, false, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BLR: from UP0, no diag");
 		ok( mock_check_calls(), "TL_BLR: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;					// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [	[ myTrap.u1, false, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BLR: from UP1, no diag");
 		ok( mock_check_calls(), "TL_BLR: from UP1, all calls received" );
-		//
-		// Robustness Test for Start Triangle
-		//
-			// from DN
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from UP1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRDN );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BLR: from DN, no diag");
-		ok( mock_check_calls(), "TL_BLR: from DN, all calls received" );
-			// from UP - wrong side
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from UP1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRUP );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BLR: from UP-wrong, no diag");
-		ok( mock_check_calls(), "TL_BLR: from UP-wrong, all calls received" );
 	}
 
 	/*    
@@ -289,6 +281,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TR_BLR_1" );
 		myQs.add_segment_consistently( segListArray[1], "TR_BLR_2" );
 		equal( myQs.nbTrapezoids(), 6, "TR_BLR: nb. of trapezoids == 6");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -299,34 +292,17 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(4);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, null, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ myTrap.u0, false, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BLR: from UP0, no diag");
 		ok( mock_check_calls(), "TR_BLR: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;					// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [	[ myTrap.u1, false, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BLR: from UP1, no diag");
 		ok( mock_check_calls(), "TR_BLR: from UP1, all calls received" );
-		//
-		// Robustness Test for Start Triangle
-		//
-			// from DN
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from UP1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRDN );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BLR: from DN, no diag");
-		ok( mock_check_calls(), "TR_BLR: from DN, all calls received" );
-			// from UP - wrong side
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from UP1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRUP );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TR_BLR: from UP-wrong, no diag");
-		ok( mock_check_calls(), "TR_BLR: from UP-wrong, all calls received" );
 	}
 	
 	/*    
@@ -350,6 +326,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TLR_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TLR_BL_2" );
 		equal( myQs.nbTrapezoids(), 6, "TLR_BL: nb. of trapezoids == 6");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -360,34 +337,17 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from DN0
-		mock_set_expected( [	[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [	[ myTrap.d0, true, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BL: from DN0, no diag");
 		ok( mock_check_calls(), "TLR_BL: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;					// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		mock_set_expected( [	[ myTrap.d1, true, false, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BL: from DN1, no diag");
 		ok( mock_check_calls(), "TLR_BL: from DN1, all calls received" );
-		//
-		// Robustness Test for Start Triangle
-		//
-			// from UP
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from DN1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRUP );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BL: from UP, no diag");
-		ok( mock_check_calls(), "TLR_BL: from UP, all calls received" );
-			// from DN - wrong side
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from DN1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRDN );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BL: from DN-wrong, no diag");
-		ok( mock_check_calls(), "TLR_BL: from DN-wrong, all calls received" );
 	}
 	
 	/*    
@@ -411,6 +371,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TLR_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TLR_BR_2" );
 		equal( myQs.nbTrapezoids(), 6, "TLR_BR: nb. of trapezoids == 6");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -421,34 +382,17 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from DN0
-		mock_set_expected( [	[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [	[ myTrap.d0, true, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BR: from DN0, no diag");
 		ok( mock_check_calls(), "TLR_BR: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;					// => not yet visited
-		mock_set_expected( [	[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ] ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		mock_set_expected( [	[ myTrap.d1, true, true, 0 ] ] );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BR: from DN1, no diag");
 		ok( mock_check_calls(), "TLR_BR: from DN1, all calls received" );
-		//
-		// Robustness Test for Start Triangle
-		//
-			// from UP
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from DN1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRUP );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BR: from UP, no diag");
-		ok( mock_check_calls(), "TLR_BR: from UP, all calls received" );
-			// from DN - wrong side
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from DN1" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRDN );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BR: from DN-wrong, no diag");
-		ok( mock_check_calls(), "TLR_BR: from DN-wrong, all calls received" );
 	}
 	
 	/*    
@@ -473,6 +417,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TL_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BR_2" );
 		equal( myQs.nbTrapezoids(), 7, "TL_BR: nb. of trapezoids == 7");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -483,32 +428,30 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myVertices[0], myVertices[2] ],		// (10,30)->(25,10)
-								[ 7, null, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (10,30)->(25,10)
+								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from UP0, diag: hiPt.left->loPt.right");
 		ok( mock_check_calls(), "TL_BR: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP0" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from UP1, diag: hiPt.left->loPt.right");
 		ok( mock_check_calls(), "TL_BR: from UP1, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[0] ],		// (25,10)->(10,30)
-								[ 7, null, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], true ],		// (25,10)->(10,30)
+								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from DN0, diag: loPt.right->hiPt.left");
 		ok( mock_check_calls(), "TL_BR: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from DN0" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BR, "TL_BR: from DN1, diag: loPt.right->hiPt.left");
 		ok( mock_check_calls(), "TL_BR: from DN1, all calls received" );
 	}
@@ -535,6 +478,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TR_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BL_2" );
 		equal( myQs.nbTrapezoids(), 7, "TR_BL: nb. of trapezoids == 7");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -545,32 +489,30 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(4);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myVertices[1], myVertices[3] ],		// (15,10)->(35,30)
-								[ 7, null, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], true ],		// (15,10)->(35,30)
+								[ myTrap.d0, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from UP0, diag: loPt.left->hiPt.right");
 		ok( mock_check_calls(), "TR_BL: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP0" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from UP1, diag: loPt.left->hiPt.right");
 		ok( mock_check_calls(), "TR_BL: from UP1, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[3], myVertices[1] ],		// (35,30)->(15,10)
-								[ 7, null, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], false ],		// (35,30)->(15,10)
+								[ myTrap.u1, false, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from DN0, diag: hiPt.right->loPt.left");
 		ok( mock_check_calls(), "TR_BL: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from DN0" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BL, "TR_BL: from DN1, diag: hiPt.right->loPt.left");
 		ok( mock_check_calls(), "TR_BL: from DN1, all calls received" );
 	}
@@ -600,6 +542,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[1], "TL_BM_3" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BM_4" );
 		equal( myQs.nbTrapezoids(), 10, "TL_BM: nb. of trapezoids == 10");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -610,38 +553,35 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myVertices[0], myVertices[2] ],		// (10,30)->(20,15)
-								[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (10,30)->(20,15)
+								[ myTrap.d1, true, false, 0 ],
+								[ myTrap.u0, false, false, 0 ],
+								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from UP0, diag: hiPt.left->loPt.middle");
 		ok( mock_check_calls(), "TL_BM: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[0], myVertices[2] ],		// (10,30)->(20,15)
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (10,30)->(20,15)
+								[ myTrap.d1, true, false, 0 ],
+								[ myTrap.u1, false, false, 0 ],
+								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from UP1, diag: hiPt.left->loPt.middle");
 		ok( mock_check_calls(), "TL_BM: from UP1, all calls received" );
 			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP1" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from DN-right, diag: hiPt.left->loPt.middle");
 		ok( mock_check_calls(), "TL_BM: from DN-right, all calls received" );
 			// from DN-left
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[0] ],		// (20,15)->(10,30)
-								[ 7, null, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d1, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], true ],		// (20,15)->(10,30)
+								[ myTrap.d1, true, false, 7 ],
+								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TL_BM, "TL_BM: from DN-left, diag: loPt.middle->hiPt.left");
 		ok( mock_check_calls(), "TL_BM: from DN-left, all calls received" );
 	}
@@ -671,6 +611,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[1], "TR_BM_3" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BM_4" );
 		equal( myQs.nbTrapezoids(), 10, "TR_BM: nb. of trapezoids == 10");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -681,38 +622,35 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(4);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[4] ],		// (20,15)->(35,30)
-								[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d1, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], true ],		// (20,15)->(35,30)
+								[ myTrap.d0, true, true, 0 ],
+								[ myTrap.u0, false, true, 0 ],
+								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from UP0, diag: loPt.middle->hiPt.right");
 		ok( mock_check_calls(), "TR_BM: from UP0, all calls received" );
 			// from UP1
 		myTrap.setAbove( null, myTrap.u0 );		// exchange u0, u1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[4] ],		// (20,15)->(35,30)
-								[ 0, null, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d1, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], true ],		// (20,15)->(35,30)
+								[ myTrap.d0, true, true, 0 ],
+								[ myTrap.u1, false, true, 0 ],
+								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from UP1, diag: loPt.middle->hiPt.right");
 		ok( mock_check_calls(), "TR_BM: from UP1, all calls received" );
 			// from DN-left
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from DN-left, diag: loPt.middle->hiPt.right");
 		ok( mock_check_calls(), "TR_BM: from DN-left, all calls received" );
 			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[4], myVertices[2] ],		// (35,30)->(20,15)
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 7, null, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], false ],		// (35,30)->(20,15)
+								[ myTrap.d0, true, true, 7 ],
+								[ myTrap.u1, false, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TR_BM, "TR_BM: from DN-right, diag: hiPt.right->loPt.middle");
 		ok( mock_check_calls(), "TR_BM: from DN-right, all calls received" );
 	}
@@ -742,6 +680,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TM_BL_3" );
 		myQs.add_segment_consistently( segListArray[2], "TM_BL_4" );
 		equal( myQs.nbTrapezoids(), 10, "TM_BL: nb. of trapezoids == 10");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -752,38 +691,35 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(2);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP-left
-		mock_set_expected( [	[ 0, myVertices[1], myVertices[4] ],		// (15,10)->(20,25)
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 7, null, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[1], myVertices[4], true ],		// (15,10)->(20,25)
+								[ myTrap.u1, false, false, 7 ],
+								[ myTrap.d0, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from UP-left, diag: loPt.left->hiPt.middle");
 		ok( mock_check_calls(), "TM_BL: from UP-left, all calls received" );
 			// from UP-right
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[4], myVertices[1] ],		// (20,25)->(15,10)
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u0, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[1], myVertices[4], false ],		// (20,25)->(15,10)
+								[ myTrap.u1, false, false, 0 ],
+								[ myTrap.d0, true, false, 0 ],
+								[ myTrap.u0, false, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from UP-right, diag: hiPt.middle->loPt.left");
 		ok( mock_check_calls(), "TM_BL: from UP-right, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP-right" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from DN0, diag: hiPt.middle->loPt.left");
 		ok( mock_check_calls(), "TM_BL: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[4], myVertices[1] ],		// (20,25)->(15,10)
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u0, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[1], myVertices[4], false ],		// (20,25)->(15,10)
+								[ myTrap.u1, false, false, 0 ],
+								[ myTrap.d1, true, false, 0 ],
+								[ myTrap.u0, false, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BL, "TM_BL: from DN1, diag: hiPt.middle->loPt.left");
 		ok( mock_check_calls(), "TM_BL: from DN1, all calls received" );
 	}
@@ -813,6 +749,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TM_BR_3" );
 		myQs.add_segment_consistently( segListArray[2], "TM_BR_4" );
 		equal( myQs.nbTrapezoids(), 10, "TM_BR: nb. of trapezoids == 10");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -823,38 +760,35 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(2);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP-right
-		mock_set_expected( [	[ 0, myVertices[4], myVertices[2] ],		// (20,25)->(25,10)
-								[ 7, null, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u0, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], false ],		// (20,25)->(25,10)
+								[ myTrap.u0, false, true, 7 ],
+								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from UP-right, diag: hiPt.middle->loPt.right");
 		ok( mock_check_calls(), "TM_BR: from UP-right, all calls received" );
 			// from UP-left
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[4] ],		// (25,10)->(20,25)
-								[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], true ],		// (25,10)->(20,25)
+								[ myTrap.u0, false, true, 0 ],
+								[ myTrap.d0, true, true, 0 ],
+								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from UP-left, diag: loPt.right->hiPt.middle");
 		ok( mock_check_calls(), "TM_BR: from UP-left, all calls received" );
 			// from DN0
 		myTrap.monoDiag = null;			// => not yet visited
 		mock_rewind();				// same data as "from UP-left" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from DN0, diag: loPt.right->hiPt.middle");
 		ok( mock_check_calls(), "TM_BR: from DN0, all calls received" );
 			// from DN1
 		myTrap.setBelow( null, myTrap.d0 );		// exchange d0, d1
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[4] ],		// (25,10)->(20,25)
-								[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, null, myTrap, PNLTRI.FRUP ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], true ],		// (25,10)->(20,25)
+								[ myTrap.u0, false, true, 0 ],
+								[ myTrap.d1, true, true, 0 ],
+								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BR, "TM_BR: from DN1, diag: loPt.right->hiPt.middle");
 		ok( mock_check_calls(), "TM_BR: from DN1, all calls received" );
 	}
@@ -887,6 +821,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[5], "TM_BM_5" );
 		myQs.add_segment_consistently( segListArray[1], "TM_BM_6" );
 		equal( myQs.nbTrapezoids(), 13, "TM_BM: nb. of trapezoids == 13");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -897,35 +832,35 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(2);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP-left
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[5] ],		// (22,15)->(20,25)
-								[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d1, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[5], true ],		// (22,15)->(20,25)
+								[ myTrap.u0, false, true, 0 ],
+								[ myTrap.d0, true, true, 0 ],
+								[ myTrap.u1, false, false, 7 ],
+								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from UP-left, diag: loPt.middle->hiPt.middle");
 		ok( mock_check_calls(), "TM_BM: from UP-left, all calls received" );
 			// from DN-left
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();				// same data as "from UP-left" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_rewind();			// same calls as for "from UP-left" !
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from DN-left, diag: loPt.middle->hiPt.middle");
 		ok( mock_check_calls(), "TM_BM: from DN-left, all calls received" );
 			// from UP-right
 		myTrap.monoDiag = null;			// => not yet visited
 //		mock_check_off();
-		mock_set_expected( [	[ 0, myVertices[5], myVertices[2] ],		// (20,25)->(22,15)
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[5], false ],		// (20,25)->(22,15)
+								[ myTrap.u0, false, true, 7 ],
+								[ myTrap.d0, true, true, 7 ],
+								[ myTrap.u1, false, false, 0 ],
+								[ myTrap.d1, true, false, 0 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from UP-right, diag: hiPt.middle->loPt.middle");
 		ok( mock_check_calls(), "TM_BM: from UP-right, all calls received" );
 			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();				// same data as "from UP-right" !!
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
+		mock_rewind();			// same calls as for "from UP-right" !
+		myMono.alyTrap_check( myTrap, false, false );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BM, "TM_BM: from DN-right, diag: hiPt.middle->loPt.middle");
 		ok( mock_check_calls(), "TM_BM: from DN-right, all calls received" );
 	}
@@ -955,6 +890,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[2], "TLR_BM_3" );
 		myQs.add_segment_consistently( segListArray[1], "TLR_BM_4" );
 		equal( myQs.nbTrapezoids(), 9, "TLR_BM: nb. of trapezoids == 9");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -964,30 +900,21 @@ function test_MonoSplitter() {
 		//
 		var myTrap = myQs.getTrapByIdx(5);
 //		drawTrapezoids( myTrap.sink, false, 1 );
-			// from DN-right
-		mock_set_expected( [	[ 0, myVertices[0], myVertices[2] ],		// (20,25)->(22,15)
-								[ 0, myTrap.d1, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.d0, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d1, PNLTRI.FRDN );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from DN-right, diag: hiPt->loPt.middle");
-		ok( mock_check_calls(), "TLR_BM: from DN-right, all calls received" );
 			// from DN-left
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[2], myVertices[0] ],		// (22,15)->(20,25)
-								[ 0, myTrap.d0, myTrap, PNLTRI.FRUP ],
-								[ 7, myTrap.d1, myTrap, PNLTRI.FRUP ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.d0, PNLTRI.FRDN );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], true ],		// (22,15)->(20,25)
+								[ myTrap.d0, true, true, 0 ],
+								[ myTrap.d1, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from DN-left, diag: loPt.middle->hiPt");
 		ok( mock_check_calls(), "TLR_BM: from DN-left, all calls received" );
-		//
-		// Robustness Test for Start Triangle
-		//
-			// from UP
+			// from DN-right
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from DN-left" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRUP );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from UP, diag: loPt.middle->hiPt");
-		ok( mock_check_calls(), "TLR_BM: from UP, all calls received" );
+		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (20,25)->(22,15)
+								[ myTrap.d1, true, false, 0 ],
+								[ myTrap.d0, true, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, false );
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TLR_BM, "TLR_BM: from DN-right, diag: hiPt->loPt.middle");
+		ok( mock_check_calls(), "TLR_BM: from DN-right, all calls received" );
 	}
 	
 	/*    
@@ -1015,6 +942,7 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[2], "TM_BLR_3" );
 		myQs.add_segment_consistently( segListArray[1], "TM_BLR_4" );
 		equal( myQs.nbTrapezoids(), 9, "TM_BLR: nb. of trapezoids == 9");
+		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -1024,30 +952,21 @@ function test_MonoSplitter() {
 		//
 		var myTrap = myQs.getTrapByIdx(2);
 //		drawTrapezoids( myTrap.sink, false, 1 );
-			// from UP-right
-		mock_set_expected( [	[ 0, myVertices[3], myVertices[1] ],		// (20,25)->(22,15)
-								[ 0, myTrap.u1, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.u0, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u1, PNLTRI.FRUP );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TM_BLR: from UP-right, diag: hiPt.middle->loPt");
-		ok( mock_check_calls(), "TM_BLR: from UP-right, all calls received" );
 			// from UP-left
-		myTrap.monoDiag = null;			// => not yet visited
-		mock_set_expected( [	[ 0, myVertices[1], myVertices[3] ],		// (22,15)->(20,25)
-								[ 0, myTrap.u0, myTrap, PNLTRI.FRDN ],
-								[ 7, myTrap.u1, myTrap, PNLTRI.FRDN ] ], [	7 ] );
-		myMono.alyTrap_ORG( 0, myTrap, myTrap.u0, PNLTRI.FRUP );
+		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], true ],		// (22,15)->(20,25)
+								[ myTrap.u0, false, true, 0 ],
+								[ myTrap.u1, false, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TM_BLR: from UP-left, diag: loPt->hiPt.middle");
 		ok( mock_check_calls(), "TM_BLR: from UP-left, all calls received" );
-		//
-		// Robustness Test for Start Triangle
-		//
-			// from DN
+			// from UP-right
 		myTrap.monoDiag = null;			// => not yet visited
-		mock_rewind();			// same calls as for "from UP-left" !
-		myMono.alyTrap_ORG( 0, myTrap, null, PNLTRI.FRDN );
-		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TR_BLR: from DN, diag: loPt->hiPt.middle");
-		ok( mock_check_calls(), "TR_BLR: from DN, all calls received" );
+		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], false ],		// (20,25)->(22,15)
+								[ myTrap.u1, false, false, 0 ],
+								[ myTrap.u0, false, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, false );
+		equal( myTrap.monoDiag, PNLTRI.TRAP_TM_BLR, "TM_BLR: from UP-right, diag: hiPt.middle->loPt");
+		ok( mock_check_calls(), "TM_BLR: from UP-right, all calls received" );
 	}
 	
 	/**************************************************************************/
@@ -1067,12 +986,13 @@ function test_MonoSplitter() {
 		// Main Test
 		//
 		var nbMonoChains = myMono.monotonate_trapezoids();			// implicitly creates trapezoids
-		equal( nbMonoChains, inExpectedMonoChains, "monotonate_trapezoids ("+inDataName+"): Anzahl der MonoChainIndizes" );
+		equal( nbMonoChains, inExpectedMonoChains, "monotonate_trapezoids ("+inDataName+"): Number of MonoChainIndices" );
 		if ( inDebug > 0 ) {
 //			showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //			showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 //			showDataStructure( myPolygonData.getMonoSubPolys(), [ 'sprev', 'snext', 'mprev', 'vertTo', 'segOut' ] );
 			//
+//			showDataStructure( myPolygonData.monotone_chains_2_polygons() );
 			drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
 			//
 			var myQsRoot = myMono.getQsRoot();
@@ -1102,6 +1022,7 @@ function test_MonoSplitter() {
 		test_TM_BLR();		// top-middle, bottom-cusp
 		//
 		test_monotonate_trapezoids( "article_poly", 12, 0 );			// 1.5; from article Sei91
+		test_monotonate_trapezoids( "trap_2up_2down", 2, 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors
 		test_monotonate_trapezoids( "hole_short_path", 4, 0 );			// 0.8; shortest path to hole is outside polygon
 		test_monotonate_trapezoids( "three_error#1", 18, 0 );			// 1; 1.Error, integrating into Three.js
 		test_monotonate_trapezoids( "three_error#2", 12, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")

@@ -1,7 +1,16 @@
 /**
  * @author jahting / http://www.ameco.tv/
  */
- 
+
+// for splitting trapezoids
+//  on which segment lies the point defining the top or bottom y-line?
+//	all combinations are possible, except two cusps
+PNLTRI.TRAP_MIDDLE	= 0;		// middle: 2 neighbors, separated by a cusp
+PNLTRI.TRAP_LEFT	= 1;		// left: point lies on the left segment
+PNLTRI.TRAP_RIGHT	= 2;		// right: point lies on the right segment
+PNLTRI.TRAP_CUSP	= 1+2;		// cusp: point is the tip of a cusp of a triangular trapezoid
+								//	lying on the left and right segment
+
 PNLTRI.trapCounter = 0;
 
 /** @constructor */
@@ -719,6 +728,59 @@ PNLTRI.QueryStructure.prototype = {
 		}
 		return	null;
 	},
+
+	
+	// Precomputes additional fields for splitting of trapezoids
+	//	TODO: temporary, since all can be filled during trapezoid construction
+	//	hiVert, loVert,  topLoc, botLoc
+
+	update_trapezoids: function () {
+		var thisTrap;
+		for ( var i=0, j=this.trapezoids.length; i<j; i++ ) {
+			thisTrap = this.trapezoids[i];
+			// Top
+			if ( thisTrap.u0 && thisTrap.u1 ) {
+				// TM
+				thisTrap.hiVert = thisTrap.u0.rseg.vFrom;		// == thisTrap.u1.lseg.vTo
+				thisTrap.topLoc = PNLTRI.TRAP_MIDDLE;
+			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vFrom.pt ) ) {
+				// TL
+				thisTrap.hiVert = thisTrap.lseg.vFrom;
+				thisTrap.topLoc = ( !thisTrap.u0 && !thisTrap.u1 ) ?
+					PNLTRI.TRAP_CUSP :	// TLR, highVert == thisTrap.rseg.vTo
+					PNLTRI.TRAP_LEFT;	// TL
+			} else if ( thisTrap.rseg ) {		// exclude infinite borders
+				// TR
+				thisTrap.hiVert = thisTrap.rseg.vTo;
+				thisTrap.topLoc = PNLTRI.TRAP_RIGHT;
+			} else if ( thisTrap.lseg && ( thisTrap.hiPt == thisTrap.lseg.vTo.pt ) ) {
+				// TL, for outside polygons: wrong segment direction
+				thisTrap.hiVert = thisTrap.lseg.vTo;
+				thisTrap.topLoc = PNLTRI.TRAP_LEFT;
+			}
+			// Bottom
+			if ( thisTrap.d0 && thisTrap.d1 ) {
+				// BM
+				thisTrap.loVert = thisTrap.d1.lseg.vFrom;		// == thisTrap.d0.rseg.vTo
+				thisTrap.botLoc = PNLTRI.TRAP_MIDDLE;
+			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vTo.pt ) ) {
+				// BL
+				thisTrap.loVert = thisTrap.lseg.vTo;
+				thisTrap.botLoc = ( !thisTrap.d0 && !thisTrap.d1 ) ?
+					PNLTRI.TRAP_CUSP :	// BLR, highVert == thisTrap.rseg.vFrom
+					PNLTRI.TRAP_LEFT;	// BL
+			} else if ( thisTrap.rseg ) {		// exclude infinite borders
+				// BR
+				thisTrap.loVert = thisTrap.rseg.vFrom;
+				thisTrap.botLoc = PNLTRI.TRAP_RIGHT;
+			} else if ( thisTrap.lseg && ( thisTrap.loPt == thisTrap.lseg.vFrom.pt ) ) {
+				// BL, for outside polygons: wrong segment direction
+				thisTrap.loVert = thisTrap.lseg.vFrom;
+				thisTrap.botLoc = PNLTRI.TRAP_LEFT;
+			}
+		}
+	},
+
 };
 
 
@@ -739,6 +801,11 @@ PNLTRI.Trapezoider.prototype = {
 	constructor: PNLTRI.Trapezoider,
 
 
+	update_trapezoids: function () {
+		this.queryStructure.update_trapezoids();
+	},
+
+		
 	/*
 	 * Mathematics & Geometry helper methods
 	 */
