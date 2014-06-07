@@ -37,8 +37,6 @@ PNLTRI.MonoSplitter.prototype = {
 		this.trapezoider = new PNLTRI.Trapezoider( this.polyData );
 		//	=> one triangular trapezoid which lies inside the polygon
 		this.startTrap = this.trapezoider.trapezoide_polygon();
-		//	precompute additional fields (temporary)
-		this.trapezoider.update_trapezoids();
 				
 		// Generate the uni-y-monotone sub-polygons from
 		//	the trapezoidation of the polygon.

@@ -451,6 +451,9 @@ PNLTRI.PolygonData.prototype = {
 
 /**
  * @author jahting / http://www.ameco.tv/
+ *
+ *	Algorithm to create the trapezoidation of a polygon with holes
+ *	 according to Seidel's algorithm [Sei91]
  */
 
 // for splitting trapezoids
@@ -474,6 +477,11 @@ PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 	
 	this.lseg = inLeft;
 	this.rseg = inRight;
+		
+//	this.sink = null;			// link to corresponding node (T_SINK) in QueryStructure
+		
+//	this.usave = null;			// temp: u0/u1, preserved for next step
+//	this.uside = null;			// temp: PNLTRI.S_LEFT(u0), PNLTRI.S_RIGHT(u1)
 	
 	this.depth = -1;			// no depth assigned yet
 	
@@ -484,14 +492,31 @@ PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 PNLTRI.Trapezoid.prototype = {
 
 	constructor: PNLTRI.Trapezoid,
+
+	clone: function () {
+		var newTrap = new PNLTRI.Trapezoid( this.vHigh, this.vLow, this.lseg, this.rseg );
+		
+		newTrap.u0 = this.u0;
+		newTrap.u1 = this.u1;
+		newTrap.topLoc = this.topLoc;
+		
+		newTrap.d0 = this.d0;
+		newTrap.d1 = this.d1;
+		newTrap.botLoc = this.botLoc;
+		
+		newTrap.sink = this.sink;
+
+		return	newTrap;
+	},
+
 	
 	setAbove: function ( inTrap1, inTrap2 ) {
-		this.u0 = inTrap1;
-		this.u1 = inTrap2;
+		if ( inTrap1 != '' )	this.u0 = inTrap1;
+		if ( inTrap2 != '' )	this.u1 = inTrap2;
 	},
 	setBelow: function ( inTrap1, inTrap2 ) {
-		this.d0 = inTrap1;
-		this.d1 = inTrap2;
+		if ( inTrap1 != '' )	this.d0 = inTrap1;
+		if ( inTrap2 != '' )	this.d1 = inTrap2;
 	},
 
 	setSink: function ( inQsSink ) {
@@ -512,35 +537,15 @@ PNLTRI.Trapezoid.prototype = {
 		var trLower = this.clone();				// new lower trapezoid
 		
 		this.vLow = trLower.vHigh = inSplitPt;
+		this.botLoc = trLower.topLoc = PNLTRI.TRAP_MIDDLE;
 		
-		this.d0 = trLower;
-		this.d1 = null;
-		trLower.u0 = this;
-		trLower.u1 = null;
+		this.setBelow( trLower, null);
+		trLower.setAbove( this, null );
 		
 		if ( trLower.d0 )	trLower.d0.replaceAbove( this, trLower );
 		if ( trLower.d1 )	trLower.d1.replaceAbove( this, trLower );
 		
 		return	trLower;
-	},
-
-
-	clone: function () {
-		var newTrap = new PNLTRI.Trapezoid( this.vHigh, this.vLow, this.lseg, this.rseg );
-		
-		
-		newTrap.u0 = this.u0;
-		newTrap.u1 = this.u1;
-		
-		newTrap.d0 = this.d0;
-		newTrap.d1 = this.d1;
-		
-		newTrap.sink = this.sink;
-		
-//		newTrap.usave = this.usave;			// temp: u0/u1, preserved for next step
-//		newTrap.uside = this.uside;			// temp: PNLTRI.S_LEFT(u0), PNLTRI.S_RIGHT(u1)
-
-		return	newTrap;
 	},
 
 };
@@ -819,132 +824,244 @@ PNLTRI.QueryStructure.prototype = {
 	},
 
 
- 	//	Add in the new segment into the trapezoidation and update Q and T
-	//	structures. First locate the two endpoints of the segment in the
-	//	Q-structure. Then start from the topmost trapezoid and go down to
-	//	the  lower trapezoid dividing all the trapezoids in between .
+ 	// Add a new segment into the trapezoidation and update QueryStructure and Trapezoids
+	// 1) locates the two endpoints of the segment in the QueryStructure and inserts them
+	// 2) goes from the high-end trapezoid down to the low-end trapezoid
+	//		changing all the trapezoids in between.
+	// Except for the high-end and low-end no new trapezoids are created.
+	// For all in between either:
+	// - the existing trapezoid is restricted to the left of the new segment
+	//		and on the right side the trapezoid from above is extended downwards
+	// - or the other way round:
+	//	 the existing trapezoid is restricted to the right of the new segment
+	//		and on the left side the trapezoid from above is extended downwards
 	
 	add_segment: function ( inSegment ) {
 		var scope = this;
 		
-		function	continue_chain_from_above() {
-			if ( trCurrent.usave ) {
-				// console.log( "continue_chain_from_above: (three upper neighbors)" );
-				if ( trCurrent.uside == PNLTRI.S_LEFT ) {
-					// intersects in the left
-					// => left gets one, right gets two of the upper neighbors
-					if ( changeRightUp ) {
-						trNewRight.setAbove( trCurrent.u1, trCurrent.usave );
-						trNewRight.u0.d0 = trNewRight;
-						trNewRight.u1.d0 = trNewRight;
-					}
-					if ( changeLeftUp ) {
-						trNewLeft.u1 = null;
-						trNewLeft.u0.d0 = trNewLeft;
-					}
-				} else {
-					// intersects in the right
-					// => left gets two, right gets one of the upper neighbors
-					if ( changeRightUp ) {
-						trNewRight.setAbove( trCurrent.u1, null );
-						trNewRight.u0.d0 = trNewRight;		 
-					}
-					if ( changeLeftUp ) {
-						trNewLeft.setAbove( trCurrent.usave, trCurrent.u0 );
-						trNewLeft.u0.d0 = trNewLeft;
-						trNewLeft.u1.d0 = trNewLeft;
-					}
-				}
-				trNewLeft.usave = trNewRight.usave = null;
-			} else {
-				// console.log( "continue_chain_from_above: (No usave -> simple case)" );
-				if ( changeRightUp ) {
-					trNewRight.setAbove( trCurrent.u1, null );
-					trNewRight.u0.d0 = trNewRight;
-				}
-				if ( changeLeftUp ) {
-					trNewLeft.u1 = null;
-				}
-			}
- 		}
+		// functions handling the relationship to the upper neighbors (u0, u1)
+		//	of trNewLeft and trNewRight
 		
 		function	fresh_seg_or_upward_cusp() {
 			// trCurrent has at most 1 upper neighbor
-			//	and should have at least 1, since the high-point trapezoid
+			//	and should also have at least 1, since the high-point trapezoid
 			//	has been split off another one, which is now above
 
 			if ( trCurrent.u0.d0 && trCurrent.u0.d1 ) {
-				// console.log( "fresh_seg_or_upward_cusp: upward cusp!" );
+				// upward cusp: top forms a triangle
 
 				// ATTENTION: the decision whether trNewLeft or trNewRight is the
 				//	triangle trapezoid formed by the two segments has already been taken
 				//	when selecting trCurrent as the left or right lower neighbor to trCurrent.u0 !!
 				
 				if ( trCurrent == trCurrent.u0.d1 ) {
-					// cusp going rightwards => trNewLeft is triangular
-					if ( changeRightUp ) {
-						trNewRight.u0.d1 = trNewRight;
-						trNewRight.u1 = null;
-					}
-					if ( changeLeftUp )		trNewLeft.setAbove( null, null );
+					//	*** Case: FUC_UC_RIGHT; prev: ----
+					// console.log( "fresh_seg_or_upward_cusp: upward cusp, new seg from the right!" );
+					// !! trNewLeft and trNewRight cannot have been extended from above !!
+					//		  C.u0
+					//   -------*-------
+					//		   / +
+					//		  /   +	 NR
+					//		 /	NL +
+					//		/		+
+					trNewLeft.setAbove( null, null );
+					trNewLeft.topLoc = PNLTRI.TRAP_CUSP;
+					trNewRight.topLoc = PNLTRI.TRAP_LEFT;
+					trNewRight.setAbove( '', null );
+					// first parameter is NEVER null (trCurrent.u0.d0)
+					trNewRight.u0.setBelow( '', trNewRight );
 				} else {
-					// cusp going leftwards => trNewRight is triangular
-					if ( changeRightUp )	trNewRight.setAbove( null, null );
-					if ( changeLeftUp ) {
-						trNewLeft.u0.d0 = trNewLeft;
-						trNewLeft.u1 = null;
-					}
+					//	*** Case: FUC_UC_LEFT; prev: ----
+					// console.log( "fresh_seg_or_upward_cusp: upward cusp, new seg to the left!" );
+					// !! trNewLeft and trNewRight cannot have been extended from above !!
+					//		  C.u0
+					//   -------*-------
+					//		   + \
+					//	  NL  +   \
+					//		 +	NR \
+					//		+		\
+					trNewRight.setAbove( null, null );
+					trNewRight.topLoc = PNLTRI.TRAP_CUSP;
+					trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
+					trNewLeft.setAbove( '', null );
+					// second parameter is NEVER null (trCurrent.u0.d1)
+					trNewLeft.u0.setBelow( trNewLeft, '' );
 				}
 			} else {
-				// console.log( "fresh_seg_or_upward_cusp: fresh segment!" );
-				if ( changeLeftUp )	trNewLeft.u0.setBelow( trNewLeft, trNewRight );
+				//	*** Case: FUC_FS; prev: ----
+				// console.log( "fresh_seg_or_upward_cusp: fresh segment, high adjacent segment still missing" );
+				// !! trNewLeft and trNewRight cannot have been extended from above !!
+				//		  C.u0
+				//   -------*-------
+				//		   +
+				//	  NL  +
+				//		 +	NR
+				//		+
+				trNewLeft.u0.setBelow( trNewLeft, trNewRight );
+				trNewLeft.u0.botLoc = PNLTRI.TRAP_MIDDLE;
+				trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
+				trNewRight.topLoc = PNLTRI.TRAP_LEFT;
 			}
  		}
 		
-		// only one trapezoid below.
-		// make trNewLeft and trNewRight the upper neighbors of this sole lower trapezoid
+		function	continue_chain_from_above() {
+			// trCurrent has at least 2 upper neighbors
+			if ( trCurrent.usave ) {
+				// 3 upper neighbors (part II)
+				if ( trCurrent.uside == PNLTRI.S_LEFT ) {
+					//	*** Case: CC_3UN_LEFT; prev: 1B_3UN_LEFT
+					// console.log( "continue_chain_from_above: 3 upper neighbors (part II): u0a, u0b, u1(usave)" );
+					// => left gets one, right gets two of the upper neighbors
+					// !! trNewRight cannot have been extended from above
+					//		and trNewLeft must have been !!
+					//		   +		/
+					//	  C.u0  + C.u1 / C.usave
+					//   --------+----*----------
+					//		NL	  +		NR
+					trNewRight.setAbove( trCurrent.u1, trCurrent.usave );
+					trNewRight.u0.setBelow( trNewRight, null );
+					trNewRight.u1.setBelow( trNewRight, null );
+					trNewRight.topLoc = PNLTRI.TRAP_MIDDLE;
+				} else {
+					//	*** Case: CC_3UN_RIGHT; prev: 1B_3UN_RIGHT
+					// console.log( "continue_chain_from_above: 3 upper neighbors (part II): u0(usave), u1a, u1b" );
+					// => left gets two, right gets one of the upper neighbors
+					// !! trNewLeft cannot have been extended from above
+					//		and trNewRight must have been !!
+					//			\		 +
+					//	 C.usave \ C.u0 + C.u1
+					//   ---------*----+-------
+					//			NL    +   NR
+					trNewLeft.setAbove( trCurrent.usave, trCurrent.u0 );
+					trNewLeft.u0.setBelow( trNewLeft, null );
+					trNewLeft.u1.setBelow( trNewLeft, null );
+					trNewLeft.topLoc = PNLTRI.TRAP_MIDDLE;
+				}
+				trNewLeft.usave = trNewRight.usave = null;
+			} else {
+				//	*** Case: CC_2UN; prev: 1B_1UN_CONT, 2B_NCON_LEFT, 2B_NCON_RIGHT, 2B_NCON_TOUCH
+				// console.log( "continue_chain_from_above: simple case, 2 neighbors above (no usave)" );
+				//	  C.u0	 +  C.u1
+				//   -------+---------
+				//	   NL  +	NR
+				
+				//
+				//	Alternativ: Continuation of other segment ?			TODO
+				//
+				
+				if ( changeRightUp ) {
+					trNewRight.setAbove( trCurrent.u1, null );
+					// second parameter is NOT always null (prev: 2B_NCON_LEFT, 2B_NCON_TOUCH)
+					trNewRight.u0.setBelow( trNewRight, '' );
+					if ( trCurrent.vHigh == trFirst.vHigh ) {		// && meetsHighAdjSeg ??? TODO
+						trNewRight.topLoc = PNLTRI.TRAP_LEFT;
+					}
+				}
+				if ( changeLeftUp ) {
+					trNewLeft.setAbove( trCurrent.u0, null );
+					if ( trCurrent.vHigh == trFirst.vHigh ) {
+						trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
+					}
+				}
+			}
+ 		}
+		
+		// functions handling the relationship to the lower neighbors (d0, d1)
+		//	of trNewLeft and trNewRight
 		
 		function	only_one_trap_below( inTrNext ) {
 			// console.log( "only_one_trap_below: (act.vLow.y, last.vLow.y)", trCurrent.vLow.y, trLast.vLow.y );
+			// make trNewLeft and trNewRight the upper neighbors of the sole lower trapezoid inTrNext
 			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {
-				// console.log( "only_one_trap_below: (bottom forms a triangle)" );
+				// downward cusp: bottom forms a triangle
 				
 				// ATTENTION: the decision whether trNewLeft or trNewRight is the
 				//	triangle trapezoid formed by the two segments has already been taken
 				//	when selecting trLast to the right or left of segLowAdjSeg !!
 				
 				if ( trCurrent.rseg == segLowAdjSeg ) {
-					// L-R downward cusp
-					inTrNext.u0 = trNewLeft;
+					//	*** Case: 1B_DC_LEFT; next: ----
+					// console.log( "only_one_trap_below: downward cusp, new seg from the left!" );
+					//		+		/
+					//		 +  NR /
+					//	  NL  +	  /
+					//		   + /
+					//   -------*-------
+					//		  next
 					trNewLeft.setBelow( inTrNext, null );
+					trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
+					trNewRight.botLoc = PNLTRI.TRAP_CUSP;
 					trNewRight.setBelow( null, null );
+					// second parameter is NEVER null (inTrNext.u1)
+					inTrNext.setAbove( trNewLeft, '' );
 				} else {
-					// R-L downward cusp
-					inTrNext.u1 = trNewRight;
+					//	*** Case: 1B_DC_RIGHT; next: ----
+					// console.log( "only_one_trap_below: downward cusp, new seg to the right!" );
+					//		\		+
+					//		 \  NL +
+					//		  \	  +  NR
+					//		   \ +
+					//   -------*-------
+					//		  next
 					trNewRight.setBelow( inTrNext, null );
+					trNewRight.botLoc = PNLTRI.TRAP_LEFT;
+					trNewLeft.botLoc = PNLTRI.TRAP_CUSP;
 					trNewLeft.setBelow( null, null );
+					// first parameter is NEVER null (inTrNext.u0)
+					inTrNext.setAbove( '', trNewRight );
 				}
 			} else {
 				if ( inTrNext.u0 && inTrNext.u1 ) {
-					// console.log( "only_one_trap_below: (inTrNext has 3 upper neighbors)" );
-
 					// inTrNext has two upper neighbors
 					// => a segment ends on the upper Y-line of inTrNext
 					// => inTrNext has temporarily 3 upper neighbors
 					// => marks whether the new segment cuts through
 					//		u0 or u1 of inTrNext and saves the other in .usave
-					
 					if ( inTrNext.u0 == trCurrent ) {
-						// cuts thru u0
-						inTrNext.usave = inTrNext.u1;		// 3rd upper neighbor
+						//	*** Case: 1B_3UN_LEFT; next: CC_3UN_LEFT
+						// console.log( "only_one_trap_below: inTrNext has 3 upper neighbors (part I): u0a, u0b, u1(usave)" );
+						//		 +		  /
+						//	  NL  +	 NR	 /
+						//		   +	/
+						//   -------+--*----
+						//			 +
+						//		  next
+						inTrNext.usave = inTrNext.u1;
 						inTrNext.uside = PNLTRI.S_LEFT;
 					} else {
-						// cuts thru u1
+						//	*** Case: 1B_3UN_RIGHT; next: CC_3UN_RIGHT
+						// console.log( "only_one_trap_below: inTrNext has 3 upper neighbors (part I): u0(usave), u1a, u1b" );
+						//	 \		   +
+						//	  \	  NL  +  NR
+						//	   \	 +
+						//   ---*---+-------
+						//		   +
+						//		  next
 						inTrNext.usave = inTrNext.u0;
 						inTrNext.uside = PNLTRI.S_RIGHT;
 					}		    
 				} else {
-					// console.log( "only_one_trap_below: (simple case)" );
+					if ( trCurrent.vLow == trLast.vLow ) {
+						//	*** Case: 1B_1UN_END; next: ----
+						// console.log( "only_one_trap_below: simple case, new seg ends here, low adjacent seg still missing" );
+						//			  +
+						//		NL	 +  NR
+						//			+
+						//   ------*-------
+						//		  next
+						inTrNext.topLoc = PNLTRI.TRAP_MIDDLE;
+						trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
+						trNewRight.botLoc = PNLTRI.TRAP_LEFT;
+					// } else {
+						//	*** Case: 1B_1UN_CONT; next: CC_2UN
+						// console.log( "only_one_trap_below: simple case, new seg continues down" );
+						//			  +
+						//		NL	 +  NR
+						//			+
+						//   ------+-------
+						//	 	  +
+						//		next
+					}
 				}
 				inTrNext.setAbove( trNewLeft, trNewRight );
 				
@@ -953,34 +1070,43 @@ PNLTRI.QueryStructure.prototype = {
 			}
 		}
 	
-		// two trapezoids below.
-		// Find out which one (d0,d1) is intersected by this segment and
-		//	continue down that one
-
 		function two_trap_below() {
-
+			// Find out which one (d0,d1) is intersected by this segment and
+			//	continue down that one
 			var trNext;
 			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {
-				// the Low-End of this segment meets
-				//  the High-End of an already inserted segment
-				// => trNewLeft  is continued in trCurrent.d0,
-				//	  trNewRight is continued in trCurrent.d1
-				
-				// console.log( "two_trap_below: (finished: close with next segment)" );
-				
+				//	*** Case: 2B_CON_END; next: ----
+				// console.log( "two_trap_below: finished, meets low adjacent segment" );
+				//			  +
+				//		NL	 +  NR
+				//			+
+				//   ------*-------
+				//	 		\  C.d1
+				//	  C.d0	 \
 				trCurrent.d0.setAbove( trNewLeft, null );
 				trCurrent.d1.setAbove( trNewRight, null );
 				
 				trNext = trCurrent.d1;		// temporary store, in case: trCurrent == trNewLeft
 				trNewLeft.setBelow( trCurrent.d0, null );
 				trNewRight.setBelow( trNext, null );
+
+				trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
+				trNewRight.botLoc = PNLTRI.TRAP_LEFT;
 				
 				trNext = null;	      	// segment finished
 			} else {
 				// passes left or right of an already inserted NOT connected segment
+				//	trCurrent.vLow: high-end of existing segment
 				var compRes = scope.is_left_of( inSegment, trCurrent.vLow, true );
 				if ( compRes > 0 ) {				// trCurrent.vLow is left of inSegment
+					//	*** Case: 2B_NCON_RIGHT; next: CC_2UN
 					// console.log( "two_trap_below: (intersecting d1)" );
+					//		 +
+					//	  NL  +  NR
+					//		   +
+					//   ---*---+-------
+					//		 \	 +
+					//	 C.d0 \	C.d1
 					trNext = trCurrent.d1;
 					
 					trCurrent.d0.setAbove( trNewLeft, null );
@@ -990,7 +1116,14 @@ PNLTRI.QueryStructure.prototype = {
 					trNewLeft.setBelow( trCurrent.d0, trCurrent.d1 );
 					trNewRight.setBelow( trCurrent.d1, null );
 				} else if ( compRes < 0 ) {			// trCurrent.vLow is right of inSegment
+					//	*** Case: 2B_NCON_LEFT; next: CC_2UN
 					// console.log( "two_trap_below: (intersecting d0)" );
+					//			  +
+					//		NL	 +  NR
+					//			+
+					//   ------+---*-------
+					//	 	  +		\  C.d1
+					//	 	 C.d0	 \
 					trNext = trCurrent.d0;
 		
 					trCurrent.d0.setAbove( trNewLeft, trNewRight );
@@ -1000,7 +1133,21 @@ PNLTRI.QueryStructure.prototype = {
 					trNewRight.setBelow( trCurrent.d0, trCurrent.d1 );
 					trNewLeft.setBelow( trCurrent.d0, null );
 				} else {							// trCurrent.vLow lies ON inSegment
-//					console.log( "two_trap_below: vLow ON new segment" );
+					//	*** Case: 2B_NCON_TOUCH; next: CC_2UN
+					// console.log( "two_trap_below: vLow ON new segment" );
+					//			  +
+					//		NL	 +  NR
+					//			+
+					//   ------*-------
+					//	 	  +	\  C.d1
+					//	  C.d0	 \
+					// OR:
+					//		 +
+					//	  NL  +  NR
+					//		   +
+					//   -------*-------
+					//		   / +
+					//	 C.d0 /	C.d1
 					trNext = trCurrent.d0;				// TODO: for test_add_segment_spezial_4A -> like intersecting d0
 //					trNext = trCurrent.d1;				// TODO: for test_add_segment_spezial_9 -> like intersecting d1
 		
@@ -1054,7 +1201,7 @@ PNLTRI.QueryStructure.prototype = {
 			// higher point not yet inserted => split trapezoid horizontally
 			qs_area = this.splitNodeAtPoint( qs_area, segHighPt, false );
 		}
-		var trCurrent = qs_area.trap;		// top-most trapezoid
+		var trFirst = qs_area.trap;		// top-most trapezoid
 
 		//	insert lower point into QueryStructure
 		//		Get the bottom-most intersecting trapezoid
@@ -1075,6 +1222,8 @@ PNLTRI.QueryStructure.prototype = {
 		// Traverse from top to bottom
 		//
 
+		var trCurrent = trFirst;
+		
 		var qs_trCurrent;
 		var trNewLeft, trNewRight, trPrevLeft, trPrevRight;
 		var changeLeftUp, changeRightUp;
@@ -1111,6 +1260,7 @@ PNLTRI.QueryStructure.prototype = {
 				trNewLeft = trCurrent;
 				trNewRight = trPrevRight;
 				trNewRight.vLow = trCurrent.vLow;
+				trNewRight.botLoc = trCurrent.botLoc;
 				// redirect parent PNLTRI.T_X-Node to extended sink
 				qs_trCurrent.right = trPrevRight.sink;
 				trNewLeft.sink  = qs_trCurrent.newLeft( PNLTRI.T_SINK, trNewLeft );		// left trapezoid sink (use existing one)
@@ -1120,13 +1270,14 @@ PNLTRI.QueryStructure.prototype = {
 				trNewRight = trCurrent;
 				trNewLeft = trPrevLeft;
 				trNewLeft.vLow = trCurrent.vLow;
+				trNewLeft.botLoc = trCurrent.botLoc;
 				// redirect parent PNLTRI.T_X-Node to extended sink
 				qs_trCurrent.left = trPrevLeft.sink;
-				trNewRight.sink = qs_trCurrent.newRight( PNLTRI.T_SINK, trNewRight );		// right trapezoid sink (use existing one)
+				trNewRight.sink = qs_trCurrent.newRight( PNLTRI.T_SINK, trNewRight );	// right trapezoid sink (use existing one)
 			} else {
 				trNewLeft = trCurrent;
-				trNewRight = this.cloneTrap(trCurrent); 							// split-right: (allocate new)
-				trNewRight.sink = qs_trCurrent.newRight( PNLTRI.T_SINK, trNewRight );		// right trapezoid sink
+				trNewRight = this.cloneTrap(trCurrent); 								// split-right: (allocate new)
+				trNewRight.sink = qs_trCurrent.newRight( PNLTRI.T_SINK, trNewRight );	// right trapezoid sink
 				trNewLeft.sink  = qs_trCurrent.newLeft( PNLTRI.T_SINK, trNewLeft );		// left trapezoid sink (use existing one)
 			}
 		
@@ -1181,49 +1332,6 @@ PNLTRI.QueryStructure.prototype = {
 	},
 
 	
-	// Precomputes additional fields for splitting of trapezoids
-	//	TODO: temporary, since all can be filled during trapezoid construction
-	// topLoc, botLoc
-
-	update_trapezoids: function () {
-		var thisTrap;
-		for ( var i=0, j=this.trapArray.length; i<j; i++ ) {
-			thisTrap = this.trapArray[i];
-			// Top
-			if ( thisTrap.u0 && thisTrap.u1 ) {
-				// TM
-				thisTrap.topLoc = PNLTRI.TRAP_MIDDLE;
-			} else if ( thisTrap.lseg && ( thisTrap.vHigh == thisTrap.lseg.vFrom ) ) {
-				// TL
-				thisTrap.topLoc = ( !thisTrap.u0 && !thisTrap.u1 ) ?
-					PNLTRI.TRAP_CUSP :	// TLR, highVert == thisTrap.rseg.vTo
-					PNLTRI.TRAP_LEFT;	// TL
-			} else if ( thisTrap.rseg ) {		// exclude infinite borders
-				// TR
-				thisTrap.topLoc = PNLTRI.TRAP_RIGHT;
-			} else if ( thisTrap.lseg && ( thisTrap.vHigh == thisTrap.lseg.vTo ) ) {
-				// TL, for outside polygons: wrong segment direction
-				thisTrap.topLoc = PNLTRI.TRAP_LEFT;
-			}
-			// Bottom
-			if ( thisTrap.d0 && thisTrap.d1 ) {
-				// BM
-				thisTrap.botLoc = PNLTRI.TRAP_MIDDLE;
-			} else if ( thisTrap.lseg && ( thisTrap.vLow == thisTrap.lseg.vTo ) ) {
-				// BL
-				thisTrap.botLoc = ( !thisTrap.d0 && !thisTrap.d1 ) ?
-					PNLTRI.TRAP_CUSP :	// BLR, highVert == thisTrap.rseg.vFrom
-					PNLTRI.TRAP_LEFT;	// BL
-			} else if ( thisTrap.rseg ) {		// exclude infinite borders
-				// BR
-				thisTrap.botLoc = PNLTRI.TRAP_RIGHT;
-			} else if ( thisTrap.lseg && ( thisTrap.vLow == thisTrap.lseg.vFrom ) ) {
-				// BL, for outside polygons: wrong segment direction
-				thisTrap.botLoc = PNLTRI.TRAP_LEFT;
-			}
-		}
-	},
-
 };
 
 
@@ -1244,11 +1352,6 @@ PNLTRI.Trapezoider.prototype = {
 	constructor: PNLTRI.Trapezoider,
 
 
-	update_trapezoids: function () {
-		this.queryStructure.update_trapezoids();
-	},
-
-		
 	/*
 	 * Mathematics & Geometry helper methods
 	 */
@@ -1361,8 +1464,6 @@ PNLTRI.MonoSplitter.prototype = {
 		this.trapezoider = new PNLTRI.Trapezoider( this.polyData );
 		//	=> one triangular trapezoid which lies inside the polygon
 		this.startTrap = this.trapezoider.trapezoide_polygon();
-		//	precompute additional fields (temporary)
-		this.trapezoider.update_trapezoids();
 				
 		// Generate the uni-y-monotone sub-polygons from
 		//	the trapezoidation of the polygon.

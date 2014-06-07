@@ -67,7 +67,7 @@ function test_MonoSplitter() {
 	 *		   \     Trap	  /
 	 */
 
-	/*    LR
+	/*    LR, Cusp
 	 *   -------*-------
 	 *		   / \
 	 *		  /   \
@@ -113,7 +113,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TL_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BL_2" );
 		equal( myQs.nbTrapezoids(), 7, "TL_BL: nb. of trapezoids == 7");
-		myQs.update_trapezoids();
 //		var myQsRoot = myQs.getRoot();
 //		drawTrapezoids( myQsRoot, false, 1 );
 		//
@@ -177,7 +176,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TR_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BR_2" );
 		equal( myQs.nbTrapezoids(), 7, "TR_BR: nb. of trapezoids == 7");
-		myQs.update_trapezoids();
 //		var myQsRoot = myQs.getRoot();
 //		drawTrapezoids( myQsRoot, false, 1 );
 		//
@@ -236,7 +234,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TL_BLR_1" );
 		myQs.add_segment_consistently( segListArray[1], "TL_BLR_2" );
 		equal( myQs.nbTrapezoids(), 6, "TL_BLR: nb. of trapezoids == 6");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -281,7 +278,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TR_BLR_1" );
 		myQs.add_segment_consistently( segListArray[1], "TR_BLR_2" );
 		equal( myQs.nbTrapezoids(), 6, "TR_BLR: nb. of trapezoids == 6");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -326,7 +322,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TLR_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TLR_BL_2" );
 		equal( myQs.nbTrapezoids(), 6, "TLR_BL: nb. of trapezoids == 6");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -371,7 +366,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TLR_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TLR_BR_2" );
 		equal( myQs.nbTrapezoids(), 6, "TLR_BR: nb. of trapezoids == 6");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -417,7 +411,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TL_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BR_2" );
 		equal( myQs.nbTrapezoids(), 7, "TL_BR: nb. of trapezoids == 7");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -478,7 +471,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TR_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BL_2" );
 		equal( myQs.nbTrapezoids(), 7, "TR_BL: nb. of trapezoids == 7");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -542,7 +534,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[1], "TL_BM_3" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BM_4" );
 		equal( myQs.nbTrapezoids(), 10, "TL_BM: nb. of trapezoids == 10");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -611,7 +602,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[1], "TR_BM_3" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BM_4" );
 		equal( myQs.nbTrapezoids(), 10, "TR_BM: nb. of trapezoids == 10");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -680,7 +670,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TM_BL_3" );
 		myQs.add_segment_consistently( segListArray[2], "TM_BL_4" );
 		equal( myQs.nbTrapezoids(), 10, "TM_BL: nb. of trapezoids == 10");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -749,7 +738,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[0], "TM_BR_3" );
 		myQs.add_segment_consistently( segListArray[2], "TM_BR_4" );
 		equal( myQs.nbTrapezoids(), 10, "TM_BR: nb. of trapezoids == 10");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -821,7 +809,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[5], "TM_BM_5" );
 		myQs.add_segment_consistently( segListArray[1], "TM_BM_6" );
 		equal( myQs.nbTrapezoids(), 13, "TM_BM: nb. of trapezoids == 13");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -890,7 +877,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[2], "TLR_BM_3" );
 		myQs.add_segment_consistently( segListArray[1], "TLR_BM_4" );
 		equal( myQs.nbTrapezoids(), 9, "TLR_BM: nb. of trapezoids == 9");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
@@ -942,7 +928,6 @@ function test_MonoSplitter() {
 		myQs.add_segment_consistently( segListArray[2], "TM_BLR_3" );
 		myQs.add_segment_consistently( segListArray[1], "TM_BLR_4" );
 		equal( myQs.nbTrapezoids(), 9, "TM_BLR: nb. of trapezoids == 9");
-		myQs.update_trapezoids();
 //		drawTrapezoids( myQs.getRoot(), false, 1 );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );

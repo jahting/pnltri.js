@@ -141,7 +141,71 @@ PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId,
 		ok( trapezoid, inTestName + ": trapezoid exists" );
 	}
 }
+// Computes topLoc, botLoc from u0/u1/vHigh, d0/d1/vLow
+//	might not work correctly for outside/hole trapezoids
+PNLTRI.QueryStructure.prototype.find_topLoc = function ( inTrap ) {
+	if ( inTrap.u0 && inTrap.u1 ) {
+		return	PNLTRI.TRAP_MIDDLE;		// TM
+	} else if ( inTrap.lseg && ( inTrap.vHigh == inTrap.lseg.vFrom ) ) {
+		return	( !inTrap.u0 && !inTrap.u1 ) ?
+			PNLTRI.TRAP_CUSP :		// TLR, highVert == inTrap.rseg.vTo
+			PNLTRI.TRAP_LEFT;		// TL
+	} else if ( inTrap.rseg ) {		// exclude infinite borders
+		return	PNLTRI.TRAP_RIGHT;		// TR
+	} else if ( inTrap.lseg && ( inTrap.vHigh == inTrap.lseg.vTo ) ) {
+		// TL, for outside/hole polygons: wrong segment direction
+		return	PNLTRI.TRAP_LEFT;
+	}
+}
+PNLTRI.QueryStructure.prototype.find_botLoc = function ( inTrap ) {
+	if ( inTrap.d0 && inTrap.d1 ) {
+		return	PNLTRI.TRAP_MIDDLE;		// BM
+	} else if ( inTrap.lseg && ( inTrap.vLow == inTrap.lseg.vTo ) ) {
+		return	( !inTrap.d0 && !inTrap.d1 ) ?
+			PNLTRI.TRAP_CUSP :		// BLR, highVert == inTrap.rseg.vFrom
+			PNLTRI.TRAP_LEFT;		// BL
+	} else if ( inTrap.rseg ) {		// exclude infinite borders
+		return	PNLTRI.TRAP_RIGHT;		// BR
+	} else if ( inTrap.lseg && ( inTrap.vLow == inTrap.lseg.vFrom ) ) {
+		// BL, for outside polygons: wrong segment direction
+		return	PNLTRI.TRAP_LEFT;
+	}
+}
 
+/*	update_trapezoids_OLD: function ( inStartTrap ) {
+		this.assignDepths( inStartTrap );
+		var thisTrap;
+		for ( var i=0, j=this.trapArray.length; i<j; i++ ) {
+			thisTrap = this.trapArray[i];
+			// Top
+			var topLoc = this.find_topLoc( thisTrap );
+			if ( thisTrap.topLoc != null ) {
+				if ( thisTrap.topLoc != topLoc ) {
+					if ( thisTrap.depth == 1 ) {
+						console.log("update_trapezoids MAIN: topLoc wrong, SOLL: "+topLoc+", IST: "+thisTrap.topLoc);
+						thisTrap.topLoc = topLoc;
+					}
+				}
+			} else if ( topLoc != null ) {
+				console.log("update_trapezoids MAIN: topLoc missing: " + thisTrap.depth, topLoc);
+				thisTrap.topLoc = topLoc;
+			}
+			// Bottom
+			var botLoc = this.find_botLoc( thisTrap );
+			if ( thisTrap.botLoc != null ) {
+				if ( thisTrap.botLoc != botLoc ) {
+					if ( thisTrap.depth == 1 ) {
+						console.log("update_trapezoids MAIN: botLoc wrong, SOLL: "+botLoc+", IST: "+thisTrap.botLoc);
+						thisTrap.botLoc = botLoc;
+					}
+				}
+			} else if ( botLoc != null ) {
+				console.log("update_trapezoids MAIN: botLoc missing: " + thisTrap.depth, botLoc);
+				thisTrap.botLoc = botLoc;
+			}
+		}
+	},
+*/
 
 
 // #############################################################################
@@ -844,7 +908,6 @@ function test_QueryStructure() {
 	}
 
 	
-	
 	/*    
 	 *						0
 	 *   --------------*------------	y=40
@@ -861,7 +924,7 @@ function test_QueryStructure() {
 	 *   -----------*----------------	y=10
 	 *						4
 	 */
-	function test_update_trapezoids() {
+	function test_topLoc_botLoc() {
 		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
 		//
 		var myPolygonData = new PNLTRI.PolygonData( [ [
@@ -871,49 +934,48 @@ function test_QueryStructure() {
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		var myTrapezoider = new PNLTRI.Trapezoider( myPolygonData );
 		var startTrap = myTrapezoider.trapezoide_polygon();
-		equal( startTrap.trapID, 3, "update_trapezoids: Start-Trap-ID" );
-		equal( myTrapezoider.nbTrapezoids(), 9, "update_trapezoids: Number of generated Trapezoids" );
+		equal( startTrap.trapID, 3, "topLoc_botLoc: Start-Trap-ID" );
+		equal( myTrapezoider.nbTrapezoids(), 9, "topLoc_botLoc: Number of generated Trapezoids" );
 		//
 		// Main Test
 		//
 		var myQs = myTrapezoider.queryStructure;			// TODO
-		myQs.update_trapezoids();
 		//
 		var trap = myQs.getTrapByIdx(0);
-		ok( !trap.topLoc, "update_trapezoids: Trap#0 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_MIDDLE, "update_trapezoids: Trap#0 botLoc" );
+		ok( !trap.topLoc, "topLoc_botLoc: Trap#0 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_MIDDLE, "topLoc_botLoc: Trap#0 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(1);
-		equal( trap.topLoc, PNLTRI.TRAP_RIGHT, "update_trapezoids: Trap#1 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_RIGHT, "update_trapezoids: Trap#1 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_RIGHT, "topLoc_botLoc: Trap#1 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_RIGHT, "topLoc_botLoc: Trap#1 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(2);
-		equal( trap.topLoc, PNLTRI.TRAP_RIGHT, "update_trapezoids: Trap#2 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_RIGHT, "update_trapezoids: Trap#2 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_RIGHT, "topLoc_botLoc: Trap#2 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_RIGHT, "topLoc_botLoc: Trap#2 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(3);
-		equal( trap.topLoc, PNLTRI.TRAP_CUSP, "update_trapezoids: Trap#3 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_RIGHT, "update_trapezoids: Trap#3 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_CUSP, "topLoc_botLoc: Trap#3 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_RIGHT, "topLoc_botLoc: Trap#3 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(4);
-		equal( trap.topLoc, PNLTRI.TRAP_MIDDLE, "update_trapezoids: Trap#4 topLoc" );
-		ok( !trap.botLoc, "update_trapezoids: Trap#4 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_MIDDLE, "topLoc_botLoc: Trap#4 topLoc" );
+		ok( !trap.botLoc, "topLoc_botLoc: Trap#4 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(5);
-		equal( trap.topLoc, PNLTRI.TRAP_LEFT, "update_trapezoids: Trap#5 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_CUSP, "update_trapezoids: Trap#5 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_LEFT, "topLoc_botLoc: Trap#5 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_CUSP, "topLoc_botLoc: Trap#5 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(6);
-		equal( trap.topLoc, PNLTRI.TRAP_RIGHT, "update_trapezoids: Trap#6 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_LEFT, "update_trapezoids: Trap#6 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_RIGHT, "topLoc_botLoc: Trap#6 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_LEFT, "topLoc_botLoc: Trap#6 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(7);
-		equal( trap.topLoc, PNLTRI.TRAP_LEFT, "update_trapezoids: Trap#7 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_LEFT, "update_trapezoids: Trap#7 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_LEFT, "topLoc_botLoc: Trap#7 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_LEFT, "topLoc_botLoc: Trap#7 botLoc" );
 		//
 		trap = myQs.getTrapByIdx(8);
-		equal( trap.topLoc, PNLTRI.TRAP_LEFT, "update_trapezoids: Trap#8 topLoc" );
-		equal( trap.botLoc, PNLTRI.TRAP_LEFT, "update_trapezoids: Trap#8 botLoc" );
+		equal( trap.topLoc, PNLTRI.TRAP_LEFT, "topLoc_botLoc: Trap#8 topLoc" );
+		equal( trap.botLoc, PNLTRI.TRAP_LEFT, "topLoc_botLoc: Trap#8 botLoc" );
 		//
 //		var myQsRoot = myTrapezoider.getQsRoot();
 //		showDataStructure( myQsRoot );
@@ -1444,7 +1506,7 @@ function test_QueryStructure() {
 		test_ptNode();
 		//
 		test_assign_depths();
-		test_update_trapezoids();
+		test_topLoc_botLoc();
 		//
 		// 2 unconnected segments
 		test_add_segment_1();
