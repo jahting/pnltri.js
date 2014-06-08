@@ -125,18 +125,18 @@ PNLTRI.QueryStructure.prototype.check_trapezoids_segment_orientation = function 
 	return	( bugList.length == 0 ) ? null : bugList;
 };
 // check if trapezoid has specific neighbors
-PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId, inSollU0, inSollU1, inSollD0, inSollD1, inTestName ) {
+PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId, inSollUL, inSollUR, inSollDL, inSollDR, inTestName ) {
 	var trapezoid = this.getTrapByIdx(inTrapId);
 	if ( trapezoid ) {
-		var u0ID = trapezoid.u0 ? trapezoid.u0.trapID : null;
-		var u1ID = trapezoid.u1 ? trapezoid.u1.trapID : null;
-		var d0ID = trapezoid.d0 ? trapezoid.d0.trapID : null;
-		var d1ID = trapezoid.d1 ? trapezoid.d1.trapID : null;
+		var uL_ID = trapezoid.uL ? trapezoid.uL.trapID : null;
+		var uR_ID = trapezoid.uR ? trapezoid.uR.trapID : null;
+		var dL_ID = trapezoid.dL ? trapezoid.dL.trapID : null;
+		var dR_ID = trapezoid.dR ? trapezoid.dR.trapID : null;
 		//
-		equal( u0ID, inSollU0, inTestName + ": u0 == " + inSollU0 );
-		equal( u1ID, inSollU1, inTestName + ": u1 == " + inSollU1 );
-		equal( d0ID, inSollD0, inTestName + ": d0 == " + inSollD0 );
-		equal( d1ID, inSollD1, inTestName + ": d1 == " + inSollD1 );
+		equal( uL_ID, inSollUL, inTestName + ": uL == " + inSollUL );
+		equal( uR_ID, inSollUR, inTestName + ": uR == " + inSollUR );
+		equal( dL_ID, inSollDL, inTestName + ": dL == " + inSollDL );
+		equal( dR_ID, inSollDR, inTestName + ": dR == " + inSollDR );
 	} else {
 		ok( trapezoid, inTestName + ": trapezoid exists" );
 	}
@@ -388,7 +388,7 @@ function test_QueryStructure() {
 		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "init_query_structure_up: top" );
 		myQs.check_trapezoid_neighbors(  1, 0, null, 2, null, "init_query_structure_up: left" );
 		myQs.check_trapezoid_neighbors(  2, 1, 3, null, null, "init_query_structure_up: bottom" );
-		myQs.check_trapezoid_neighbors(  3, 0, null, 2, null, "init_query_structure_up: right" );
+		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "init_query_structure_up: right" );
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -519,40 +519,40 @@ function test_QueryStructure() {
 		var tr3 = myQs.getTrapByIdx(3);
 		//
 		//	Test: split tr0
-		var tr0hi = tr0.vHigh;
-		var tr0lo = tr0.vLow;
-		var tr0d0 = tr0.d0;
-		var tr0d1 = tr0.d1;
-		ok( !tr0.u0, "trap_splitOffLower: tr0.u0 undefined" );
-		ok( !tr0.u1, "trap_splitOffLower: tr0.u1 undefined" );
+		var tr0org_hi = tr0.vHigh;		// save original values
+		var tr0org_lo = tr0.vLow;
+		var tr0org_dL = tr0.dL;
+		var tr0org_dR = tr0.dR;
+		ok( !tr0.uL, "trap_splitOffLower: tr0.uL undefined" );
+		ok( !tr0.uR, "trap_splitOffLower: tr0.uR undefined" );
 		var splitPt4 = { x: 2 , y: 5 };
 		var tr0b = tr0.splitOffLower( splitPt4 );
 		strictEqual( tr0.lseg, tr0b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr0.rseg, tr0b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr0.vHigh, tr0hi, "trap_splitOffLower: tr0.vHigh unchanged" );
+		strictEqual( tr0.vHigh, tr0org_hi, "trap_splitOffLower: tr0.vHigh unchanged" );
 		strictEqual( tr0.vLow, splitPt4, "trap_splitOffLower: tr0.vLow == splitPt4" );
 		strictEqual( tr0b.vHigh, splitPt4, "trap_splitOffLower: tr0b.vHigh == splitPt4" );
-		strictEqual( tr0b.vLow, tr0lo, "trap_splitOffLower: tr0b.vLow unchanged" );
+		strictEqual( tr0b.vLow, tr0org_lo, "trap_splitOffLower: tr0b.vLow unchanged" );
 		//
 		strictEqual( tr0.sink, tr0b.sink, "trap_splitOffLower: sink equal" );
 		strictEqual( tr0.usave, tr0b.usave, "trap_splitOffLower: usave equal" );
 		strictEqual( tr0.uside, tr0b.uside, "trap_splitOffLower: uside equal" );
 		//
-		ok( !tr0.u0, "trap_splitOffLower: tr0.u0 unchanged" );
-		ok( !tr0.u1, "trap_splitOffLower: tr0.u1 unchanged" );
-		strictEqual( tr0.d0, tr0b, "trap_splitOffLower: tr0.d0 == tr0b" );
-		ok( !tr0.d1, "trap_splitOffLower: tr0.d1 null" );
+		ok( !tr0.uL, "trap_splitOffLower: tr0.uL unchanged" );
+		ok( !tr0.uR, "trap_splitOffLower: tr0.uR unchanged" );
+		strictEqual( tr0.dL, tr0b, "trap_splitOffLower: tr0.dL == tr0b" );
+		ok( !tr0.dR, "trap_splitOffLower: tr0.dR null" );
 		//
-		strictEqual( tr0b.u0, tr0, "trap_splitOffLower: tr0b.u0 == tr0" );
-		ok( !tr0b.u1, "trap_splitOffLower: tr0.u1 null" );
-		strictEqual( tr0b.d0, tr0d0, "trap_splitOffLower: tr0b.d0 == tr0d0" );
-		strictEqual( tr0b.d1, tr0d1, "trap_splitOffLower: tr0b.d1 == tr0d1" );
+		strictEqual( tr0b.uL, tr0, "trap_splitOffLower: tr0b.uL == tr0" );
+		ok( !tr0b.uR, "trap_splitOffLower: tr0.uR null" );
+		strictEqual( tr0b.dL, tr0org_dL, "trap_splitOffLower: tr0b.dL == tr0org_dL" );
+		strictEqual( tr0b.dR, tr0org_dR, "trap_splitOffLower: tr0b.dR == tr0org_dR" );
 		//
-		ok( ( tr0d0.u0 == tr0b ), "trap_splitOffLower: tr0d0.u0 == tr0b" );
-		ok( ( tr0d1.u0 == tr0b ), "trap_splitOffLower: tr0d1.u1 == tr0b" );
+		ok( ( tr0org_dL.uL == tr0b ), "trap_splitOffLower: tr0org_dL.uL == tr0b" );
+		ok( ( tr0org_dR.uR == tr0b ), "trap_splitOffLower: tr0org_dR.uR == tr0b" );
 		//
 		//	Test: split tr1
-		var tr1u0 = tr1.u0;
+		var tr1u0 = tr1.uL;
 		var tr1hi = tr1.vHigh;
 		var tr1lo = tr1.vLow;
 		var tr1d0 = tr1.d0;
@@ -570,17 +570,17 @@ function test_QueryStructure() {
 		strictEqual( tr1.usave, tr1b.usave, "trap_splitOffLower: usave equal" );
 		strictEqual( tr1.uside, tr1b.uside, "trap_splitOffLower: uside equal" );
 		//
-		strictEqual( tr1.u0, tr1u0, "trap_splitOffLower: tr1.u0 unchanged" );
+		strictEqual( tr1.uL, tr1u0, "trap_splitOffLower: tr1.uL unchanged" );
 		ok( !tr1.u1, "trap_splitOffLower: tr1.u1 unchanged" );
 		strictEqual( tr1.d0, tr1b, "trap_splitOffLower: tr1.d0 == tr1b" );
 		ok( !tr1.d1, "trap_splitOffLower: tr1.d1 null" );
 		//
-		strictEqual( tr1b.u0, tr1, "trap_splitOffLower: tr1b.u0 == tr1" );
+		strictEqual( tr1b.uL, tr1, "trap_splitOffLower: tr1b.uL == tr1" );
 		ok( !tr1b.u1, "trap_splitOffLower: tr1.u1 null" );
 		strictEqual( tr1b.d0, tr1d0, "trap_splitOffLower: tr1b.d0 == tr1d0" );
 		ok( !tr1b.d1, "trap_splitOffLower: tr1b.d1 null" );
 		//
-		strictEqual( tr1d0.u0, tr1b, "trap_splitOffLower: tr1d0.u0 == tr1b" );
+		strictEqual( tr1d0.uL, tr1b, "trap_splitOffLower: tr1d0.uL == tr1b" );
 		ok( ( tr1d0.u1 == tr3 ), "trap_splitOffLower: tr1d0.u1 == tr3" );
 		//
 //		showDataStructure( myQsRoot );
@@ -617,11 +617,13 @@ function test_QueryStructure() {
 		ok( !tr2b.d1, "trap_splitOffLower: tr2b.d1 null" );
 		//
 		//	Test: split tr3
-		var tr3u0 = tr3.u0;
+//		var tr3u0 = tr3.u0;
+		var tr3u1 = tr3.u1;
 		var tr3hi = tr3.vHigh;
 		var tr3lo = tr3.vLow;
-		var tr3d0 = tr3.d0;
-		strictEqual( tr3d0, tr2, "trap_splitOffLower: tr3.d0 == tr2" );
+//		var tr3d0 = tr3.d0;
+		var tr3d0 = tr3.d1;														// d0/d1 -> dL/dR
+		ok( ( tr3d0 == tr2 ), "trap_splitOffLower: tr3.d0 == tr2" );
 		var splitPt3 = { x: 2 , y: 3 };
 		var tr3b = tr3.splitOffLower( splitPt3 );
 		strictEqual( tr3.lseg, tr3b.lseg, "trap_splitOffLower: lseg unchanged" );
@@ -635,15 +637,19 @@ function test_QueryStructure() {
 		strictEqual( tr3.usave, tr3b.usave, "trap_splitOffLower: usave equal" );
 		strictEqual( tr3.uside, tr3b.uside, "trap_splitOffLower: uside equal" );
 		//
-		strictEqual( tr3.u0, tr3u0, "trap_splitOffLower: tr3.u0 unchanged" );
-		ok( !tr3.u1, "trap_splitOffLower: tr3.u1 unchanged" );
+//		strictEqual( tr3.u0, tr3u0, "trap_splitOffLower: tr3.u0 unchanged" );
+//		ok( !tr3.u1, "trap_splitOffLower: tr3.u1 unchanged" );
+		ok( !tr3.u0, "trap_splitOffLower: tr3.u0 unchanged" );					// d0/d1 -> dL/dR
+		strictEqual( tr3.u1, tr3u1, "trap_splitOffLower: tr3.u1 unchanged" );
 		strictEqual( tr3.d0, tr3b, "trap_splitOffLower: tr3.d0 == tr3b" );
 		ok( !tr3.d1, "trap_splitOffLower: tr3.d1 null" );
 		//
 		strictEqual( tr3b.u0, tr3, "trap_splitOffLower: tr3b.u0 == tr3" );
 		ok( !tr3b.u1, "trap_splitOffLower: tr3.u1 null" );
-		strictEqual( tr3b.d0, tr3d0, "trap_splitOffLower: tr3b.d0 == tr3d0" );
-		ok( !tr3b.d1, "trap_splitOffLower: tr3b.d1 null" );
+//		ok( ( tr3b.d0 == tr3d0 ), "trap_splitOffLower: tr3b.d0 == tr3d0" );
+//		ok( !tr3b.d1, "trap_splitOffLower: tr3b.d1 null" );
+		ok( ( tr3b.d1 == tr3d0 ), "trap_splitOffLower: tr3b.d0 == tr3d0" );		// d0/d1 -> dL/dR
+		ok( !tr3b.d0, "trap_splitOffLower: tr3b.d1 null" );
 		//
 		ok( ( tr3d0.u0 == tr1b ), "trap_splitOffLower: tr3d0.u0 == tr1b" );
 		ok( ( tr3d0.u1 == tr3b ), "trap_splitOffLower: tr3d0.u1 == tr3b" );
@@ -1258,9 +1264,11 @@ function test_QueryStructure() {
 		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_4a #2, n#0" );
 		myQs.check_trapezoid_neighbors(  1, 0, null, 4, null, "Spec_4a #2, n#1" );
 		myQs.check_trapezoid_neighbors(  2, 4, 3, null, null, "Spec_4a #2, n#2" );
-		myQs.check_trapezoid_neighbors(  3, 0, null, 2, null, "Spec_4a #2, n#3" );
+//		myQs.check_trapezoid_neighbors(  3, 0, null, 2, null, "Spec_4a #2, n#3" );
+		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "Spec_4a #2, n#3" );		// d0/d1 -> dL/dR
 		myQs.check_trapezoid_neighbors(  4, 1, 5, 2, null, "Spec_4a #2, n#4" );
-		myQs.check_trapezoid_neighbors(  5, null, null, 4, null, "Spec_4a #2, n#5" );
+//		myQs.check_trapezoid_neighbors(  5, null, null, 4, null, "Spec_4a #2, n#5" );
+		myQs.check_trapezoid_neighbors(  5, null, null, null, 4, "Spec_4a #2, n#5" );		// d0/d1 -> dL/dR
 		// complex case: goes back on same x-line
 		myQs.add_segment_consistently( segListArray[2], 'Spec_4a Main' );
 		//
@@ -1278,9 +1286,11 @@ function test_QueryStructure() {
 		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_4b #2, n#0" );
 		myQs.check_trapezoid_neighbors(  1, 0, null, 2, null, "Spec_4b #2, n#1" );
 		myQs.check_trapezoid_neighbors(  2, 1, 5, null, null, "Spec_4b #2, n#2" );
-		myQs.check_trapezoid_neighbors(  3, 0, null, 4, 5, "Spec_4b #2, n#3" );
+//		myQs.check_trapezoid_neighbors(  3, 0, null, 4, 5, "Spec_4b #2, n#3" );
+		myQs.check_trapezoid_neighbors(  3, null, 0, 4, 5, "Spec_4b #2, n#3" );			// d0/d1 -> dL/dR
 		myQs.check_trapezoid_neighbors(  4, 3, null, null, null, "Spec_4b #2, n#4" );
-		myQs.check_trapezoid_neighbors(  5, 3, null, 2, null, "Spec_4b #2, n#5" );
+		myQs.check_trapezoid_neighbors(  5, null, 3, null, 2, "Spec_4b #2, n#5" );		// d0/d1 -> dL/dR
+//		myQs.check_trapezoid_neighbors(  5, 3, null, 2, null, "Spec_4b #2, n#5" );
 		// complex case: attaching to the middle point of to co-linear segments
 		myQs.add_segment_consistently( segListArray[0], 'Spec_4b Main' );
 		//
@@ -1628,55 +1638,79 @@ function test_Trapezoider() {
 		var myPolygonData = new PNLTRI.PolygonData( inPolygonChainList );
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
-		var trap = new PNLTRI.Trapezoider( myPolygonData );
-		trap.trapezoide_polygon();
+		var myTrapezoider = new PNLTRI.Trapezoider( myPolygonData );
+		myTrapezoider.trapezoide_polygon();
 		ok( myPolygonData.allSegsInQueryStructure(), "trapezoid_polygon2: all segments inserted" );
-		equal( trap.nbTrapezoids(), 41, "trapezoid_polygon2: Number of generated Trapezoids" );
+		equal( myTrapezoider.nbTrapezoids(), 41, "trapezoid_polygon2: Number of generated Trapezoids" );
 		//
-		trap.check_trapezoid_neighbors(  0, null, null, 13, 36, "trapezoid_polygon2 #0" );
-		trap.check_trapezoid_neighbors(  1, 7, null, null, null, "trapezoid_polygon2 #1" );
-		trap.check_trapezoid_neighbors(  2, 25, 3, 8, null, "trapezoid_polygon2 #2" );
-		trap.check_trapezoid_neighbors(  3, null, null, 2, null, "trapezoid_polygon2 #3" );
-		trap.check_trapezoid_neighbors(  4, 30, null, 29, null, "trapezoid_polygon2 #4" );
-		trap.check_trapezoid_neighbors(  5, 37, null, 16, 24, "trapezoid_polygon2 #5" );
-		trap.check_trapezoid_neighbors(  6, 40, null, 27, null, "trapezoid_polygon2 #6" );
-		trap.check_trapezoid_neighbors(  7, 29, null, 1, 38, "trapezoid_polygon2 #7" );
-		trap.check_trapezoid_neighbors(  8, 2, 17, null, null, "trapezoid_polygon2 #8" );
-		trap.check_trapezoid_neighbors(  9, null, null, 21, null, "trapezoid_polygon2 #9" );
-		trap.check_trapezoid_neighbors( 10, 36, null, null, null, "trapezoid_polygon2 #10" );
-		trap.check_trapezoid_neighbors( 11, 39, null, 30, null, "trapezoid_polygon2 #11" );
-		trap.check_trapezoid_neighbors( 12, 36, null, 40, null, "trapezoid_polygon2 #12" );
-		trap.check_trapezoid_neighbors( 13, 0, null, 14, null, "trapezoid_polygon2 #13" );
-		trap.check_trapezoid_neighbors( 14, 13, null, 19, null, "trapezoid_polygon2 #14" );
-		trap.check_trapezoid_neighbors( 15, null, null, 20, null, "trapezoid_polygon2 #15" );
-		trap.check_trapezoid_neighbors( 16, 5, null, 22, null, "trapezoid_polygon2 #16" );
-		trap.check_trapezoid_neighbors( 17, 21, 23, 8, null, "trapezoid_polygon2 #17" );
-		trap.check_trapezoid_neighbors( 18, null, null, 23, null, "trapezoid_polygon2 #18" );
-		trap.check_trapezoid_neighbors( 19, 14, null, 25, 34, "trapezoid_polygon2 #19" );
-		trap.check_trapezoid_neighbors( 20, 15, null, 31, null, "trapezoid_polygon2 #20" );
-		trap.check_trapezoid_neighbors( 21, 9, null, 17, null, "trapezoid_polygon2 #21" );
-		trap.check_trapezoid_neighbors( 22, 16, null, null, null, "trapezoid_polygon2 #22" );
-		trap.check_trapezoid_neighbors( 23, 18, 27, 17, null, "trapezoid_polygon2 #23" );
-		trap.check_trapezoid_neighbors( 24, 5, null, null, null, "trapezoid_polygon2 #24" );
-		trap.check_trapezoid_neighbors( 25, 19, null, 2, null, "trapezoid_polygon2 #25" );
-		trap.check_trapezoid_neighbors( 26, null, null, 33, null, "trapezoid_polygon2 #26" );
-		trap.check_trapezoid_neighbors( 27, 6, null, 23, null, "trapezoid_polygon2 #27" );
-		trap.check_trapezoid_neighbors( 28, 34, null, 35, null, "trapezoid_polygon2 #28" );
-		trap.check_trapezoid_neighbors( 29, 33, 4, 7, 37, "trapezoid_polygon2 #29" );
-		trap.check_trapezoid_neighbors( 30, 11, null, 4, null, "trapezoid_polygon2 #30" );
-		trap.check_trapezoid_neighbors( 31, 20, 32, 39, null, "trapezoid_polygon2 #31" );
-		trap.check_trapezoid_neighbors( 32, null, null, 31, null, "trapezoid_polygon2 #32" );
-		trap.check_trapezoid_neighbors( 33, 26, null, 29, null, "trapezoid_polygon2 #33" );
-		trap.check_trapezoid_neighbors( 34, 19, null, 28, null, "trapezoid_polygon2 #34" );
-		trap.check_trapezoid_neighbors( 35, 28, null, null, null, "trapezoid_polygon2 #35" );
-		trap.check_trapezoid_neighbors( 36, 0, null, 10, 12, "trapezoid_polygon2 #36" );
-		trap.check_trapezoid_neighbors( 37, 29, null, 5, null, "trapezoid_polygon2 #37" );
-		trap.check_trapezoid_neighbors( 38, 7, null, null, null, "trapezoid_polygon2 #38" );
-		trap.check_trapezoid_neighbors( 39, 31, null, 11, null, "trapezoid_polygon2 #39" );
-		trap.check_trapezoid_neighbors( 40, 12, null, 6, null, "trapezoid_polygon2 #40" );
+		myTrapezoider.check_trapezoid_neighbors(  0, null, null, 13, 36, "trapezoid_polygon2 #0" );
+		myTrapezoider.check_trapezoid_neighbors(  1, 7, null, null, null, "trapezoid_polygon2 #1" );
+		myTrapezoider.check_trapezoid_neighbors(  2, 25, 3, 8, null, "trapezoid_polygon2 #2" );
+//		myTrapezoider.check_trapezoid_neighbors(  3, null, null, 2, null, "trapezoid_polygon2 #3" );
+//		myTrapezoider.check_trapezoid_neighbors(  4, 30, null, 29, null, "trapezoid_polygon2 #4" );
+		myTrapezoider.check_trapezoid_neighbors(  3, null, null, null, 2, "trapezoid_polygon2 #3" );
+		myTrapezoider.check_trapezoid_neighbors(  4, 30, null, null, 29, "trapezoid_polygon2 #4" );
+		myTrapezoider.check_trapezoid_neighbors(  5, 37, null, 16, 24, "trapezoid_polygon2 #5" );
+//		myTrapezoider.check_trapezoid_neighbors(  6, 40, null, 27, null, "trapezoid_polygon2 #6" );
+		myTrapezoider.check_trapezoid_neighbors(  6, null, 40, null, 27, "trapezoid_polygon2 #6" );
+		myTrapezoider.check_trapezoid_neighbors(  7, 29, null, 1, 38, "trapezoid_polygon2 #7" );
+		myTrapezoider.check_trapezoid_neighbors(  8, 2, 17, null, null, "trapezoid_polygon2 #8" );
+		myTrapezoider.check_trapezoid_neighbors(  9, null, null, 21, null, "trapezoid_polygon2 #9" );
+		myTrapezoider.check_trapezoid_neighbors( 10, 36, null, null, null, "trapezoid_polygon2 #10" );
+//		myTrapezoider.check_trapezoid_neighbors( 11, 39, null, 30, null, "trapezoid_polygon2 #11" );
+//		myTrapezoider.check_trapezoid_neighbors( 12, 36, null, 40, null, "trapezoid_polygon2 #12" );
+		myTrapezoider.check_trapezoid_neighbors( 11, 39, null, null, 30, "trapezoid_polygon2 #11" );
+		myTrapezoider.check_trapezoid_neighbors( 12, null, 36, null, 40, "trapezoid_polygon2 #12" );
+		myTrapezoider.check_trapezoid_neighbors( 13, 0, null, 14, null, "trapezoid_polygon2 #13" );
+		myTrapezoider.check_trapezoid_neighbors( 14, 13, null, 19, null, "trapezoid_polygon2 #14" );
+//		myTrapezoider.check_trapezoid_neighbors( 15, null, null, 20, null, "trapezoid_polygon2 #15" );
+//		myTrapezoider.check_trapezoid_neighbors( 16, 5, null, 22, null, "trapezoid_polygon2 #16" );
+//		myTrapezoider.check_trapezoid_neighbors( 17, 21, 23, 8, null, "trapezoid_polygon2 #17" );
+		myTrapezoider.check_trapezoid_neighbors( 15, null, null, null, 20, "trapezoid_polygon2 #15" );
+		myTrapezoider.check_trapezoid_neighbors( 16, 5, null, null, 22, "trapezoid_polygon2 #16" );
+		myTrapezoider.check_trapezoid_neighbors( 17, 21, 23, null, 8, "trapezoid_polygon2 #17" );
+		myTrapezoider.check_trapezoid_neighbors( 18, null, null, 23, null, "trapezoid_polygon2 #18" );
+		myTrapezoider.check_trapezoid_neighbors( 19, 14, null, 25, 34, "trapezoid_polygon2 #19" );
+//		myTrapezoider.check_trapezoid_neighbors( 20, 15, null, 31, null, "trapezoid_polygon2 #20" );
+		myTrapezoider.check_trapezoid_neighbors( 20, null, 15, 31, null, "trapezoid_polygon2 #20" );
+		myTrapezoider.check_trapezoid_neighbors( 21, 9, null, 17, null, "trapezoid_polygon2 #21" );
+//		myTrapezoider.check_trapezoid_neighbors( 22, 16, null, null, null, "trapezoid_polygon2 #22" );
+//		myTrapezoider.check_trapezoid_neighbors( 23, 18, 27, 17, null, "trapezoid_polygon2 #23" );
+//		myTrapezoider.check_trapezoid_neighbors( 24, 5, null, null, null, "trapezoid_polygon2 #24" );
+		myTrapezoider.check_trapezoid_neighbors( 22, null, 16, null, null, "trapezoid_polygon2 #22" );
+		myTrapezoider.check_trapezoid_neighbors( 23, 18, 27, null, 17, "trapezoid_polygon2 #23" );
+		myTrapezoider.check_trapezoid_neighbors( 24, null, 5, null, null, "trapezoid_polygon2 #24" );
+		myTrapezoider.check_trapezoid_neighbors( 25, 19, null, 2, null, "trapezoid_polygon2 #25" );
+		myTrapezoider.check_trapezoid_neighbors( 26, null, null, 33, null, "trapezoid_polygon2 #26" );
+//		myTrapezoider.check_trapezoid_neighbors( 27, 6, null, 23, null, "trapezoid_polygon2 #27" );
+//		myTrapezoider.check_trapezoid_neighbors( 28, 34, null, 35, null, "trapezoid_polygon2 #28" );
+		myTrapezoider.check_trapezoid_neighbors( 27, null, 6, null, 23, "trapezoid_polygon2 #27" );
+		myTrapezoider.check_trapezoid_neighbors( 28, 34, null, null, 35, "trapezoid_polygon2 #28" );
+		myTrapezoider.check_trapezoid_neighbors( 29, 33, 4, 7, 37, "trapezoid_polygon2 #29" );
+//		myTrapezoider.check_trapezoid_neighbors( 30, 11, null, 4, null, "trapezoid_polygon2 #30" );
+//		myTrapezoider.check_trapezoid_neighbors( 31, 20, 32, 39, null, "trapezoid_polygon2 #31" );
+//		myTrapezoider.check_trapezoid_neighbors( 32, null, null, 31, null, "trapezoid_polygon2 #32" );
+		myTrapezoider.check_trapezoid_neighbors( 30, null, 11, 4, null, "trapezoid_polygon2 #30" );
+		myTrapezoider.check_trapezoid_neighbors( 31, 20, 32, null, 39, "trapezoid_polygon2 #31" );
+		myTrapezoider.check_trapezoid_neighbors( 32, null, null, null, 31, "trapezoid_polygon2 #32" );
+		myTrapezoider.check_trapezoid_neighbors( 33, 26, null, 29, null, "trapezoid_polygon2 #33" );
+//		myTrapezoider.check_trapezoid_neighbors( 34, 19, null, 28, null, "trapezoid_polygon2 #34" );
+//		myTrapezoider.check_trapezoid_neighbors( 35, 28, null, null, null, "trapezoid_polygon2 #35" );
+//		myTrapezoider.check_trapezoid_neighbors( 36, 0, null, 10, 12, "trapezoid_polygon2 #36" );
+//		myTrapezoider.check_trapezoid_neighbors( 37, 29, null, 5, null, "trapezoid_polygon2 #37" );
+//		myTrapezoider.check_trapezoid_neighbors( 38, 7, null, null, null, "trapezoid_polygon2 #38" );
+//		myTrapezoider.check_trapezoid_neighbors( 39, 31, null, 11, null, "trapezoid_polygon2 #39" );
+//		myTrapezoider.check_trapezoid_neighbors( 40, 12, null, 6, null, "trapezoid_polygon2 #40" );
+		myTrapezoider.check_trapezoid_neighbors( 34, null, 19, 28, null, "trapezoid_polygon2 #34" );
+		myTrapezoider.check_trapezoid_neighbors( 35, null, 28, null, null, "trapezoid_polygon2 #35" );
+		myTrapezoider.check_trapezoid_neighbors( 36, null, 0, 10, 12, "trapezoid_polygon2 #36" );
+		myTrapezoider.check_trapezoid_neighbors( 37, null, 29, 5, null, "trapezoid_polygon2 #37" );
+		myTrapezoider.check_trapezoid_neighbors( 38, null, 7, null, null, "trapezoid_polygon2 #38" );
+		myTrapezoider.check_trapezoid_neighbors( 39, null, 31, 11, null, "trapezoid_polygon2 #39" );
+		myTrapezoider.check_trapezoid_neighbors( 40, null, 12, null, 6, "trapezoid_polygon2 #40" );
 		//
 		//
-//		var myQsRoot = myQs.getRoot();
+//		var myQsRoot = myTrapezoider.getQsRoot();
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 1.5 );
 	}

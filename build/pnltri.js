@@ -480,8 +480,8 @@ PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 		
 //	this.sink = null;			// link to corresponding node (T_SINK) in QueryStructure
 		
-//	this.usave = null;			// temp: u0/u1, preserved for next step
-//	this.uside = null;			// temp: PNLTRI.S_LEFT(u0), PNLTRI.S_RIGHT(u1)
+//	this.usave = null;			// temp: uL/uR, preserved for next step
+//	this.uside = null;			// temp: PNLTRI.S_LEFT(uL), PNLTRI.S_RIGHT(uR)
 	
 	this.depth = -1;			// no depth assigned yet
 	
@@ -496,12 +496,16 @@ PNLTRI.Trapezoid.prototype = {
 	clone: function () {
 		var newTrap = new PNLTRI.Trapezoid( this.vHigh, this.vLow, this.lseg, this.rseg );
 		
-		newTrap.u0 = this.u0;
-		newTrap.u1 = this.u1;
+		newTrap.uL = this.uL;
+		newTrap.uR = this.uR;
+		newTrap.u0 = this.uL;
+		newTrap.u1 = this.uR;
 		newTrap.topLoc = this.topLoc;
 		
-		newTrap.d0 = this.d0;
-		newTrap.d1 = this.d1;
+		newTrap.dL = this.dL;
+		newTrap.dR = this.dR;
+		newTrap.d0 = this.dL;
+		newTrap.d1 = this.dR;
 		newTrap.botLoc = this.botLoc;
 		
 		newTrap.sink = this.sink;
@@ -511,12 +515,16 @@ PNLTRI.Trapezoid.prototype = {
 
 	
 	setAbove: function ( inTrap1, inTrap2 ) {
-		if ( inTrap1 != '' )	this.u0 = inTrap1;
-		if ( inTrap2 != '' )	this.u1 = inTrap2;
+		this.uL = inTrap1;
+		this.uR = inTrap2;
+		this.u0 = inTrap1;
+		this.u1 = inTrap2;
 	},
 	setBelow: function ( inTrap1, inTrap2 ) {
-		if ( inTrap1 != '' )	this.d0 = inTrap1;
-		if ( inTrap2 != '' )	this.d1 = inTrap2;
+		this.dL = inTrap1;
+		this.dR = inTrap2;
+		this.d0 = inTrap1;
+		this.d1 = inTrap2;
 	},
 
 	setSink: function ( inQsSink ) {
@@ -525,9 +533,11 @@ PNLTRI.Trapezoid.prototype = {
 
 	
 	replaceAbove: function ( inTrapOld, inTrapNew ) {
-		if ( this.u0 == inTrapOld ) {
+		if ( this.uL == inTrapOld ) {
+			this.uL = inTrapNew;
 			this.u0 = inTrapNew;
-		} else if ( this.u1 == inTrapOld ) {
+		} else if ( this.uR == inTrapOld ) {
+			this.uR = inTrapNew;
 			this.u1 = inTrapNew;
 		}
 	},
@@ -539,11 +549,11 @@ PNLTRI.Trapezoid.prototype = {
 		this.vLow = trLower.vHigh = inSplitPt;
 		this.botLoc = trLower.topLoc = PNLTRI.TRAP_MIDDLE;
 		
-		this.setBelow( trLower, null);
-		trLower.setAbove( this, null );
+		this.setBelow( trLower, null);		// L/R unknown, anyway changed later
+		trLower.setAbove( this, null );		// L/R unknown, anyway changed later
 		
-		if ( trLower.d0 )	trLower.d0.replaceAbove( this, trLower );
-		if ( trLower.d1 )	trLower.d1.replaceAbove( this, trLower );
+		if ( trLower.dL )	trLower.dL.replaceAbove( this, trLower );
+		if ( trLower.dR )	trLower.dR.replaceAbove( this, trLower );
 		
 		return	trLower;
 	},
@@ -701,7 +711,7 @@ PNLTRI.QueryStructure.prototype = {
 		
 		if ( !inTrap.lseg || !inTrap.rseg )		return false;
 		
-		if ( ( !inTrap.u0 && !inTrap.u1 ) || ( !inTrap.d0 && !inTrap.d1 ) ) {
+		if ( ( !inTrap.uL && !inTrap.uR ) || ( !inTrap.dL && !inTrap.dR ) ) {
 			// triangle shaped trapezoid
 			//  CCW ordering of the contour segments:
 			//	 right segment is going upwards <=> triangle is inside the polygon
@@ -839,26 +849,27 @@ PNLTRI.QueryStructure.prototype = {
 	add_segment: function ( inSegment ) {
 		var scope = this;
 		
-		// functions handling the relationship to the upper neighbors (u0, u1)
+		// functions handling the relationship to the upper neighbors (uL, uR)
 		//	of trNewLeft and trNewRight
 		
 		function	fresh_seg_or_upward_cusp() {
 			// trCurrent has at most 1 upper neighbor
 			//	and should also have at least 1, since the high-point trapezoid
 			//	has been split off another one, which is now above
+			var trUpper = trCurrent.uL || trCurrent.uR;
 
-			if ( trCurrent.u0.d0 && trCurrent.u0.d1 ) {
+			if ( trUpper.dL && trUpper.dR ) {
 				// upward cusp: top forms a triangle
 
 				// ATTENTION: the decision whether trNewLeft or trNewRight is the
 				//	triangle trapezoid formed by the two segments has already been taken
-				//	when selecting trCurrent as the left or right lower neighbor to trCurrent.u0 !!
+				//	when selecting trCurrent as the left or right lower neighbor to trCurrent.uL !!
 				
-				if ( trCurrent == trCurrent.u0.d1 ) {
+				if ( trCurrent == trUpper.dR ) {
 					//	*** Case: FUC_UC_RIGHT; prev: ----
 					// console.log( "fresh_seg_or_upward_cusp: upward cusp, new seg from the right!" );
 					// !! trNewLeft and trNewRight cannot have been extended from above !!
-					//		  C.u0
+					//		  upper
 					//   -------*-------
 					//		   / +
 					//		  /   +	 NR
@@ -867,14 +878,13 @@ PNLTRI.QueryStructure.prototype = {
 					trNewLeft.setAbove( null, null );
 					trNewLeft.topLoc = PNLTRI.TRAP_CUSP;
 					trNewRight.topLoc = PNLTRI.TRAP_LEFT;
-					trNewRight.setAbove( '', null );
-					// first parameter is NEVER null (trCurrent.u0.d0)
-					trNewRight.u0.setBelow( '', trNewRight );
+					trNewRight.setAbove( null, trUpper );			// uL: unchanged -- TODO: always BOTH unchanged?
+					trUpper.setBelow( trUpper.dL, trNewRight );		// dL: unchanged, NEVER null
 				} else {
 					//	*** Case: FUC_UC_LEFT; prev: ----
 					// console.log( "fresh_seg_or_upward_cusp: upward cusp, new seg to the left!" );
 					// !! trNewLeft and trNewRight cannot have been extended from above !!
-					//		  C.u0
+					//		  upper
 					//   -------*-------
 					//		   + \
 					//	  NL  +   \
@@ -883,24 +893,24 @@ PNLTRI.QueryStructure.prototype = {
 					trNewRight.setAbove( null, null );
 					trNewRight.topLoc = PNLTRI.TRAP_CUSP;
 					trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
-					trNewLeft.setAbove( '', null );
-					// second parameter is NEVER null (trCurrent.u0.d1)
-					trNewLeft.u0.setBelow( trNewLeft, '' );
+					trNewLeft.setAbove( trUpper, null );			// uL: unchanged -- TODO: always BOTH unchanged?
+					trUpper.setBelow( trNewLeft, trUpper.dR );		// dR: unchanged, NEVER null
 				}
 			} else {
 				//	*** Case: FUC_FS; prev: ----
 				// console.log( "fresh_seg_or_upward_cusp: fresh segment, high adjacent segment still missing" );
 				// !! trNewLeft and trNewRight cannot have been extended from above !!
-				//		  C.u0
+				//		  upper
 				//   -------*-------
 				//		   +
 				//	  NL  +
 				//		 +	NR
 				//		+
-				trNewLeft.u0.setBelow( trNewLeft, trNewRight );
-				trNewLeft.u0.botLoc = PNLTRI.TRAP_MIDDLE;
+				trNewLeft.setAbove( trUpper, null );			// TODO: redundant, if dL is default for unknown L/R ?
 				trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
 				trNewRight.topLoc = PNLTRI.TRAP_LEFT;
+				trNewRight.setAbove( null, trUpper );
+				trUpper.setBelow( trNewLeft, trNewRight );
 			}
  		}
 		
@@ -910,69 +920,67 @@ PNLTRI.QueryStructure.prototype = {
 				// 3 upper neighbors (part II)
 				if ( trCurrent.uside == PNLTRI.S_LEFT ) {
 					//	*** Case: CC_3UN_LEFT; prev: 1B_3UN_LEFT
-					// console.log( "continue_chain_from_above: 3 upper neighbors (part II): u0a, u0b, u1(usave)" );
+					// console.log( "continue_chain_from_above: 3 upper neighbors (part II): u0a, u0b, uR(usave)" );
 					// => left gets one, right gets two of the upper neighbors
 					// !! trNewRight cannot have been extended from above
 					//		and trNewLeft must have been !!
 					//		   +		/
-					//	  C.u0  + C.u1 / C.usave
+					//	  C.uL  + C.uR / C.usave
 					//   --------+----*----------
 					//		NL	  +		NR
-					trNewRight.setAbove( trCurrent.u1, trCurrent.usave );
-					trNewRight.u0.setBelow( trNewRight, null );
-					trNewRight.u1.setBelow( trNewRight, null );
-					trNewRight.topLoc = PNLTRI.TRAP_MIDDLE;
+					trNewRight.setAbove( trCurrent.uR, trCurrent.usave );
+					trNewRight.uL.setBelow( trNewRight, null );
+					trNewRight.uR.setBelow( null, trNewRight );
 				} else {
 					//	*** Case: CC_3UN_RIGHT; prev: 1B_3UN_RIGHT
-					// console.log( "continue_chain_from_above: 3 upper neighbors (part II): u0(usave), u1a, u1b" );
+					// console.log( "continue_chain_from_above: 3 upper neighbors (part II): uL(usave), u1a, u1b" );
 					// => left gets two, right gets one of the upper neighbors
 					// !! trNewLeft cannot have been extended from above
 					//		and trNewRight must have been !!
 					//			\		 +
-					//	 C.usave \ C.u0 + C.u1
+					//	 C.usave \ C.uL + C.uR
 					//   ---------*----+-------
 					//			NL    +   NR
-					trNewLeft.setAbove( trCurrent.usave, trCurrent.u0 );
-					trNewLeft.u0.setBelow( trNewLeft, null );
-					trNewLeft.u1.setBelow( trNewLeft, null );
-					trNewLeft.topLoc = PNLTRI.TRAP_MIDDLE;
+					trNewLeft.setAbove( trCurrent.usave, trCurrent.uL );
+					trNewLeft.uL.setBelow( trNewLeft, null );
+					trNewLeft.uR.setBelow( null, trNewLeft );
 				}
 				trNewLeft.usave = trNewRight.usave = null;
+			} else if ( trCurrent.vHigh == trFirst.vHigh ) {		// && meetsHighAdjSeg ??? TODO
+				//	*** Case: CC_2UN_CONN; prev: ----
+				// console.log( "continue_chain_from_above: 2 upper neighbors, fresh seg, continues high adjacent seg" );
+				// !! trNewLeft and trNewRight cannot have been extended from above !!
+				//	  C.uL	 /  C.uR
+				//   -------*---------
+				//	   NL  +	NR
+				trNewRight.setAbove( null, trCurrent.uR );			// uR unchanged ?
+				trNewRight.uR.setBelow( null, trNewRight );
+				trNewRight.topLoc = PNLTRI.TRAP_LEFT;
+				trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
+				trNewLeft.setAbove( trCurrent.uL, null );
 			} else {
-				//	*** Case: CC_2UN; prev: 1B_1UN_CONT, 2B_NCON_LEFT, 2B_NCON_RIGHT, 2B_NCON_TOUCH
-				// console.log( "continue_chain_from_above: simple case, 2 neighbors above (no usave)" );
-				//	  C.u0	 +  C.u1
+				//	*** Case: CC_2UN; prev: 1B_1UN_CONT, 2B_NCON_RIGHT, 2B_NCON_LEFT, 2B_NCON_TOUCH
+				// console.log( "continue_chain_from_above: simple case, 2 upper neighbors (no usave, not fresh seg)" );
+				// !! trNewLeft OR trNewRight will have been extended from above !!
+				//	  C.uL	 +  C.uR
 				//   -------+---------
 				//	   NL  +	NR
-				
-				//
-				//	Alternativ: Continuation of other segment ?			TODO
-				//
-				
 				if ( changeRightUp ) {
-					trNewRight.setAbove( trCurrent.u1, null );
+					trNewRight.setAbove( trCurrent.uR, null );
 					// second parameter is NOT always null (prev: 2B_NCON_LEFT, 2B_NCON_TOUCH)
-					trNewRight.u0.setBelow( trNewRight, '' );
-					if ( trCurrent.vHigh == trFirst.vHigh ) {		// && meetsHighAdjSeg ??? TODO
-						trNewRight.topLoc = PNLTRI.TRAP_LEFT;
-					}
+					trNewRight.uL.setBelow( trNewRight, trNewRight.uL.dR );		// dR: unchanged
 				}
-				if ( changeLeftUp ) {
-					trNewLeft.setAbove( trCurrent.u0, null );
-					if ( trCurrent.vHigh == trFirst.vHigh ) {
-						trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
-					}
-				}
+				if ( changeLeftUp )	trNewLeft.setAbove( null, trCurrent.uL );
 			}
  		}
 		
-		// functions handling the relationship to the lower neighbors (d0, d1)
+		// functions handling the relationship to the lower neighbors (dL, dR)
 		//	of trNewLeft and trNewRight
 		
 		function	only_one_trap_below( inTrNext ) {
 			// console.log( "only_one_trap_below: (act.vLow.y, last.vLow.y)", trCurrent.vLow.y, trLast.vLow.y );
 			// make trNewLeft and trNewRight the upper neighbors of the sole lower trapezoid inTrNext
-			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {
+			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {	// meetsLowAdjSeg necessary? TODO
 				// downward cusp: bottom forms a triangle
 				
 				// ATTENTION: the decision whether trNewLeft or trNewRight is the
@@ -992,8 +1000,7 @@ PNLTRI.QueryStructure.prototype = {
 					trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
 					trNewRight.botLoc = PNLTRI.TRAP_CUSP;
 					trNewRight.setBelow( null, null );
-					// second parameter is NEVER null (inTrNext.u1)
-					inTrNext.setAbove( trNewLeft, '' );
+					inTrNext.setAbove( trNewLeft, inTrNext.uR );	// uR: unchanged, NEVER null
 				} else {
 					//	*** Case: 1B_DC_RIGHT; next: ----
 					// console.log( "only_one_trap_below: downward cusp, new seg to the right!" );
@@ -1003,42 +1010,47 @@ PNLTRI.QueryStructure.prototype = {
 					//		   \ +
 					//   -------*-------
 					//		  next
-					trNewRight.setBelow( inTrNext, null );
+					trNewRight.setBelow( null, inTrNext );
 					trNewRight.botLoc = PNLTRI.TRAP_LEFT;
 					trNewLeft.botLoc = PNLTRI.TRAP_CUSP;
 					trNewLeft.setBelow( null, null );
-					// first parameter is NEVER null (inTrNext.u0)
-					inTrNext.setAbove( '', trNewRight );
+					inTrNext.setAbove( inTrNext.uL, trNewRight );	// uL: unchanged, NEVER null
 				}
 			} else {
-				if ( inTrNext.u0 && inTrNext.u1 ) {
+				if ( inTrNext.uL && inTrNext.uR ) {
 					// inTrNext has two upper neighbors
 					// => a segment ends on the upper Y-line of inTrNext
 					// => inTrNext has temporarily 3 upper neighbors
 					// => marks whether the new segment cuts through
-					//		u0 or u1 of inTrNext and saves the other in .usave
-					if ( inTrNext.u0 == trCurrent ) {
+					//		uL or uR of inTrNext and saves the other in .usave
+					if ( inTrNext.uL == trCurrent ) {
 						//	*** Case: 1B_3UN_LEFT; next: CC_3UN_LEFT
-						// console.log( "only_one_trap_below: inTrNext has 3 upper neighbors (part I): u0a, u0b, u1(usave)" );
+						// console.log( "only_one_trap_below: inTrNext has 3 upper neighbors (part I): u0a, u0b, uR(usave)" );
 						//		 +		  /
 						//	  NL  +	 NR	 /
 						//		   +	/
 						//   -------+--*----
 						//			 +
 						//		  next
-						inTrNext.usave = inTrNext.u1;
+						inTrNext.usave = inTrNext.uR;
 						inTrNext.uside = PNLTRI.S_LEFT;
+
+						trNewLeft.setBelow( inTrNext, null );		// L/R undefined, will be extended down and changed anyway
+						trNewRight.setBelow( inTrNext, null );
 					} else {
 						//	*** Case: 1B_3UN_RIGHT; next: CC_3UN_RIGHT
-						// console.log( "only_one_trap_below: inTrNext has 3 upper neighbors (part I): u0(usave), u1a, u1b" );
+						// console.log( "only_one_trap_below: inTrNext has 3 upper neighbors (part I): uL(usave), u1a, u1b" );
 						//	 \		   +
 						//	  \	  NL  +  NR
 						//	   \	 +
 						//   ---*---+-------
 						//		   +
 						//		  next
-						inTrNext.usave = inTrNext.u0;
+						inTrNext.usave = inTrNext.uL;
 						inTrNext.uside = PNLTRI.S_RIGHT;
+
+						trNewLeft.setBelow( null, inTrNext );
+						trNewRight.setBelow( null, inTrNext );		// L/R undefined, will be extended down and changed anyway
 					}		    
 				} else {
 					if ( trCurrent.vLow == trLast.vLow ) {
@@ -1049,10 +1061,12 @@ PNLTRI.QueryStructure.prototype = {
 						//			+
 						//   ------*-------
 						//		  next
-						inTrNext.topLoc = PNLTRI.TRAP_MIDDLE;
 						trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
 						trNewRight.botLoc = PNLTRI.TRAP_LEFT;
-					// } else {
+						
+						trNewLeft.setBelow( inTrNext, null );
+						trNewRight.setBelow( null, inTrNext );
+					} else {
 						//	*** Case: 1B_1UN_CONT; next: CC_2UN
 						// console.log( "only_one_trap_below: simple case, new seg continues down" );
 						//			  +
@@ -1061,34 +1075,36 @@ PNLTRI.QueryStructure.prototype = {
 						//   ------+-------
 						//	 	  +
 						//		next
+						
+						// L/R in one case undefined, which one is not fixed
+						//	but that one will be extended down and changed anyway
+						trNewLeft.setBelow( null, inTrNext );		// if defined, vLow is to the left
+						trNewRight.setBelow( inTrNext, null );		// if defined, vLow is to the right
 					}
 				}
 				inTrNext.setAbove( trNewLeft, trNewRight );
-				
-				trNewLeft.setBelow( inTrNext, null );
-				trNewRight.setBelow( inTrNext, null );
 			}
 		}
 	
 		function two_trap_below() {
-			// Find out which one (d0,d1) is intersected by this segment and
+			// Find out which one (dL,dR) is intersected by this segment and
 			//	continue down that one
 			var trNext;
-			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {
+			if ( ( trCurrent.vLow == trLast.vLow ) && meetsLowAdjSeg ) {	// meetsLowAdjSeg necessary? TODO
 				//	*** Case: 2B_CON_END; next: ----
 				// console.log( "two_trap_below: finished, meets low adjacent segment" );
 				//			  +
 				//		NL	 +  NR
 				//			+
 				//   ------*-------
-				//	 		\  C.d1
-				//	  C.d0	 \
-				trCurrent.d0.setAbove( trNewLeft, null );
-				trCurrent.d1.setAbove( trNewRight, null );
+				//	 		\  C.dR
+				//	  C.dL	 \
+				trCurrent.dL.setAbove( trNewLeft, null );
+				trCurrent.dR.setAbove( null, trNewRight );
 				
-				trNext = trCurrent.d1;		// temporary store, in case: trCurrent == trNewLeft
-				trNewLeft.setBelow( trCurrent.d0, null );
-				trNewRight.setBelow( trNext, null );
+				trNext = trCurrent.dR;		// temporary store, in case: trCurrent == trNewLeft
+				trNewLeft.setBelow( trCurrent.dL, null );
+				trNewRight.setBelow( null, trNext );
 
 				trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
 				trNewRight.botLoc = PNLTRI.TRAP_LEFT;
@@ -1100,63 +1116,66 @@ PNLTRI.QueryStructure.prototype = {
 				var compRes = scope.is_left_of( inSegment, trCurrent.vLow, true );
 				if ( compRes > 0 ) {				// trCurrent.vLow is left of inSegment
 					//	*** Case: 2B_NCON_RIGHT; next: CC_2UN
-					// console.log( "two_trap_below: (intersecting d1)" );
+					// console.log( "two_trap_below: (intersecting dR)" );
 					//		 +
 					//	  NL  +  NR
 					//		   +
 					//   ---*---+-------
 					//		 \	 +
-					//	 C.d0 \	C.d1
-					trNext = trCurrent.d1;
+					//	 C.dL \	C.dR
+					trNext = trCurrent.dR;
 					
-					trCurrent.d0.setAbove( trNewLeft, null );
-					trCurrent.d1.setAbove( trNewLeft, trNewRight );
+					trCurrent.dL.setAbove( trNewLeft, null );
+					trCurrent.dR.setAbove( trNewLeft, trNewRight );
 					
 					// change FIRST trNewLeft then trNewRight !!
-					trNewLeft.setBelow( trCurrent.d0, trCurrent.d1 );
-					trNewRight.setBelow( trCurrent.d1, null );
+					trNewLeft.setBelow( trCurrent.dL, trCurrent.dR );
+					trNewRight.setBelow( null, trCurrent.dR );		// L/R undefined, will be extended down and changed anyway
 				} else if ( compRes < 0 ) {			// trCurrent.vLow is right of inSegment
 					//	*** Case: 2B_NCON_LEFT; next: CC_2UN
-					// console.log( "two_trap_below: (intersecting d0)" );
+					// console.log( "two_trap_below: (intersecting dL)" );
 					//			  +
 					//		NL	 +  NR
 					//			+
 					//   ------+---*-------
-					//	 	  +		\  C.d1
-					//	 	 C.d0	 \
-					trNext = trCurrent.d0;
+					//	 	  +		\  C.dR
+					//	 	 C.dL	 \
+					trNext = trCurrent.dL;
 		
-					trCurrent.d0.setAbove( trNewLeft, trNewRight );
-					trCurrent.d1.setAbove( trNewRight, null );
+					trCurrent.dL.setAbove( trNewLeft, trNewRight );
+					trCurrent.dR.setAbove( null, trNewRight );
 					
 					// change FIRST trNewRight then trNewLeft !!
-					trNewRight.setBelow( trCurrent.d0, trCurrent.d1 );
-					trNewLeft.setBelow( trCurrent.d0, null );
+					trNewRight.setBelow( trCurrent.dL, trCurrent.dR );
+					trNewLeft.setBelow( trCurrent.dL, null );		// L/R undefined, will be extended down and changed anyway
 				} else {							// trCurrent.vLow lies ON inSegment
-					//	*** Case: 2B_NCON_TOUCH; next: CC_2UN
-					// console.log( "two_trap_below: vLow ON new segment" );
+					//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
+					// console.log( "two_trap_below: vLow ON new segment, touching from left" );
 					//			  +
 					//		NL	 +  NR
 					//			+
 					//   ------*-------
-					//	 	  +	\  C.d1
-					//	  C.d0	 \
-					// OR:
+					//	 	  +	\  C.dR
+					//	  C.dL	 \
+					trNext = trCurrent.dL;				// TODO: for test_add_segment_spezial_4A -> like intersecting dL
+		
+					trCurrent.dL.setAbove( trNewLeft, trNewRight );
+					trCurrent.dR.setAbove( null, trNewRight );
+					
+					// change FIRST trNewRight then trNewLeft !!
+					trNewRight.setBelow( trCurrent.dL, trCurrent.dR );
+					trNewLeft.setBelow( trCurrent.dL, null );		// L/R undefined, will be extended down and changed anyway
+					//
+					// OR:			TODO
+					//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
+					// console.log( "two_trap_below: vLow ON new segment, touching from right" );
 					//		 +
 					//	  NL  +  NR
 					//		   +
 					//   -------*-------
 					//		   / +
-					//	 C.d0 /	C.d1
-					trNext = trCurrent.d0;				// TODO: for test_add_segment_spezial_4A -> like intersecting d0
-//					trNext = trCurrent.d1;				// TODO: for test_add_segment_spezial_9 -> like intersecting d1
-		
-					trCurrent.d0.setAbove( trNewLeft, trNewRight );
-					trCurrent.d1.setAbove( trNewRight, null );
-					
-					// change FIRST trNewRight then trNewLeft !!
-					trNewRight.setBelow( trCurrent.d0, trCurrent.d1 );
-					trNewLeft.setBelow( trCurrent.d0, null );
+					//	 C.dL /	C.dR
+//					trNext = trCurrent.dR;				// TODO: -> like intersecting dR
 				}
 			}	    
 			
@@ -1235,7 +1254,7 @@ PNLTRI.QueryStructure.prototype = {
 				console.log( "ERR add_segment: infinite loop", trCurrent, inSegment, this );
 				return;
 			}
-			if ( !trCurrent.d0 && !trCurrent.d1 ) {
+			if ( !trCurrent.dL && !trCurrent.dR ) {
 				// ERROR: no successors, cannot arise if data is correct
 				console.log( "ERR add_segment: missing successors", trCurrent, inSegment, this );
 				return;
@@ -1282,22 +1301,22 @@ PNLTRI.QueryStructure.prototype = {
 			}
 		
 			// handle neighbors above
-			if ( trCurrent.u0 && trCurrent.u1 )	{
+			if ( trCurrent.uL && trCurrent.uR )	{
 				continue_chain_from_above();
 			} else {
 				fresh_seg_or_upward_cusp();
 			}
 
 			// handle neighbors below
-			if ( trCurrent.d0 && trCurrent.d1 ) {
+			if ( trCurrent.dL && trCurrent.dR ) {
 				trNext = two_trap_below();
 			} else {
-				if ( trCurrent.d0 ) {
-					// console.log( "add_segment: only_one_trap_below! (d0)" );
-					trNext = trCurrent.d0;
+				if ( trCurrent.dL ) {
+					// console.log( "add_segment: only_one_trap_below! (dL)" );
+					trNext = trCurrent.dL;
 				} else {
-					// console.log( "add_segment: only_one_trap_below! (d1)" );
-					trNext = trCurrent.d1;
+					// console.log( "add_segment: only_one_trap_below! (dR)" );
+					trNext = trCurrent.dR;
 				}
 				only_one_trap_below( trNext );
 			}

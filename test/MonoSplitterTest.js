@@ -124,6 +124,8 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
+		if ( myTrap.u1 )	myTrap.setAbove( myTrap.u1, null );		// exchange u0, u1		// d0/d1 -> dL/dR
+		if ( myTrap.d1 )	myTrap.setBelow( myTrap.d1, null );		// exchange d0, d1		// d0/d1 -> dL/dR
 		mock_set_expected( [ [ myTrap.d0, true, false, 0 ] ] );
 		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BL: from UP0, no diag");
@@ -244,6 +246,7 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
+		if ( myTrap.u1 )	myTrap.setAbove( myTrap.u1, null );		// exchange u0, u1		// d0/d1 -> dL/dR
 		mock_set_expected( [	[ myTrap.u0, false, false, 0 ] ] );
 		myMono.alyTrap_check( myTrap, true, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TL_BLR: from UP0, no diag");
@@ -332,6 +335,7 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from DN0
+		if ( myTrap.d1 )	myTrap.setBelow( myTrap.d1, null );		// exchange d0, d1		// d0/d1 -> dL/dR
 		mock_set_expected( [	[ myTrap.d0, true, false, 0 ] ] );
 		myMono.alyTrap_check( myTrap, false, true );
 		equal( myTrap.monoDiag, PNLTRI.TRAP_NOSPLIT, "TLR_BL: from DN0, no diag");
@@ -481,6 +485,7 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(4);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
+		if ( myTrap.d1 )	myTrap.setBelow( myTrap.d1, null );		// exchange d0, d1		// d0/d1 -> dL/dR
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], true ],		// (15,10)->(35,30)
 								[ myTrap.d0, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true );
@@ -544,6 +549,7 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(3);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP0
+		if ( myTrap.u1 )	myTrap.setAbove( myTrap.u1, null );		// exchange u0, u1		// d0/d1 -> dL/dR
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (10,30)->(20,15)
 								[ myTrap.d1, true, false, 0 ],
 								[ myTrap.u0, false, false, 0 ],
@@ -680,6 +686,7 @@ function test_MonoSplitter() {
 		var myTrap = myQs.getTrapByIdx(2);
 //		drawTrapezoids( myTrap.sink, false, 1 );
 			// from UP-left
+		if ( myTrap.d1 )	myTrap.setBelow( myTrap.d1, null );		// exchange d0, d1		// d0/d1 -> dL/dR
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[4], true ],		// (15,10)->(20,25)
 								[ myTrap.u1, false, false, 7 ],
 								[ myTrap.d0, true, false, 7 ] ], [	7 ] );
