@@ -1448,12 +1448,12 @@ PNLTRI.MonoSplitter.prototype = {
 		
 		function trapList_addItems( inNewItems ) {
 			for (var i=inNewItems.length-1; i>=0; i--) {
-				trapQueue.unshift( inNewItems[i] );
+				trapQueue.push( inNewItems[i] );
 			}
 		}
 		
 		function trapList_getItem() {
-			return	trapQueue.shift();
+			return	trapQueue.pop();
 		}
 		
 		if ( inDirection == null ) {

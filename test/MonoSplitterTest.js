@@ -12,7 +12,7 @@ PNLTRI.MonoSplitter.prototype.alyTrap_check = function ( inTrap, inFromUp, inFro
 	var trapQueue = this.alyTrap( inChain, inTrap, inFromUp, inFromLeft, true );
 	if ( mockDoChecks ) {
 		var paras;
-		while ( paras = trapQueue.shift() ) { mock_check( paras ) }
+		while ( paras = trapQueue.pop() ) { mock_check( paras ) }
 	}
 };
 PNLTRI.MonoSplitter.prototype.mockSetup = function () {
