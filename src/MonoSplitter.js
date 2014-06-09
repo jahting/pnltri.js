@@ -11,6 +11,13 @@
 
 // for splitting trapezoids
 PNLTRI.TRAP_NOSPLIT = -1;	// no diagonal
+//  on which segment lies the point defining the top or bottom y-line?
+//	all combinations are possible, except two cusps
+PNLTRI.TRAP_MIDDLE	= 0;		// middle: 2 neighbors, separated by a cusp
+PNLTRI.TRAP_LEFT	= 1;		// left: point lies on the left segment
+PNLTRI.TRAP_RIGHT	= 2;		// right: point lies on the right segment
+PNLTRI.TRAP_CUSP	= 1+2;		// cusp: point is the tip of a cusp of a triangular trapezoid
+								//	lying on the left and right segment
 
 /** @constructor */
 PNLTRI.MonoSplitter = function ( inPolygonData ) {
@@ -115,25 +122,44 @@ PNLTRI.MonoSplitter.prototype = {
 
 				var dblOnUp = null;
 				var dblSideL, dblSideR;
-				if ( thisTrap.topLoc == PNLTRI.TRAP_MIDDLE ) {
-					dblOnUp = true;			// double-Side is UP-side
-					dblSideL = thisTrap.uL;
-					dblSideR = thisTrap.uR;
+				var topLoc, botLoc;
+				if ( thisTrap.uL ) {
+					if ( thisTrap.uR ) {
+						dblOnUp = true;			// double-Side is UP-side
+						dblSideL = thisTrap.uL;
+						dblSideR = thisTrap.uR;
+						topLoc = PNLTRI.TRAP_MIDDLE;
+					} else {
+						topLoc = PNLTRI.TRAP_RIGHT;
+					}
+				} else if ( thisTrap.uR ) {
+					topLoc = PNLTRI.TRAP_LEFT;
+				} else {
+					topLoc = PNLTRI.TRAP_CUSP;
 				}
-				if ( thisTrap.botLoc == PNLTRI.TRAP_MIDDLE ) {
-					dblOnUp = false;		// double-Side is DN-side
-					dblSideL = thisTrap.dL;
-					dblSideR = thisTrap.dR;
+				if ( thisTrap.dL ) {
+					if ( thisTrap.dR ) {
+						dblOnUp = false;		// double-Side is DN-side
+						dblSideL = thisTrap.dL;
+						dblSideR = thisTrap.dR;
+						botLoc = PNLTRI.TRAP_MIDDLE;
+					} else {
+						botLoc = PNLTRI.TRAP_RIGHT;
+					}
+				} else if ( thisTrap.dR ) {
+					botLoc = PNLTRI.TRAP_LEFT;
+				} else {
+					botLoc = PNLTRI.TRAP_CUSP;
 				}
 				var sglSide, sglLeft;
 
-				thisTrap.monoDiag = 1 + 4*thisTrap.topLoc + thisTrap.botLoc;
+				thisTrap.monoDiag = 1 + 4*topLoc + botLoc;
 				
 				if ( dblOnUp != null ) {
 					// TM|BM: 2 neighbors on at least one side
 					
 					// first, degenerate case: triangle trapezoid
-					if ( ( thisTrap.topLoc == PNLTRI.TRAP_CUSP ) || ( thisTrap.botLoc == PNLTRI.TRAP_CUSP ) ) {
+					if ( ( topLoc == PNLTRI.TRAP_CUSP ) || ( botLoc == PNLTRI.TRAP_CUSP ) ) {
 						// TLR_BM, TM_BLR
 						// console.log( "triangle (cusp), 2 neighbors on in-side; from " + ( fromLeft ? "left" : "right" ) );
 						//	could be start triangle -> visit ALL neighbors, no optimization !
@@ -141,7 +167,7 @@ PNLTRI.MonoSplitter.prototype = {
 						trapList_addItems(  [ [ ( fromLeft ? dblSideL : dblSideR ), !fromUp, fromLeft, curChain ],
 											  [ ( fromLeft ? dblSideR : dblSideL ), !fromUp, !fromLeft, newChain ] ] );
 					// second: trapezoid with 4 (max) neighbors
-					} else if ( ( thisTrap.topLoc == PNLTRI.TRAP_MIDDLE ) && ( thisTrap.botLoc == PNLTRI.TRAP_MIDDLE ) ) {
+					} else if ( ( topLoc == PNLTRI.TRAP_MIDDLE ) && ( botLoc == PNLTRI.TRAP_MIDDLE ) ) {
 						// TM_BM
 						// console.log( "2 trapezoids above & 2 below; from " + ( fromLeft ? "left" : "right" ) );
 						newChain = this.doSplit( curChain, vLow, vHigh, fromLeft );
@@ -160,11 +186,11 @@ PNLTRI.MonoSplitter.prototype = {
 						if ( dblOnUp ) {
 							// 2 trapezoids above, 1 below, sglLeft: vLow to the left?
 							sglSide = thisTrap.dL ? thisTrap.dL : thisTrap.dR;
-							sglLeft = ( thisTrap.botLoc == PNLTRI.TRAP_LEFT );
+							sglLeft = ( botLoc == PNLTRI.TRAP_LEFT );
 						} else {
 							// 1 trapezoid above, 2 below, sglLeft: vHigh to the left?
 							sglSide = thisTrap.uL ? thisTrap.uL : thisTrap.uR;
-							sglLeft = ( thisTrap.topLoc == PNLTRI.TRAP_LEFT );
+							sglLeft = ( topLoc == PNLTRI.TRAP_LEFT );
 						}
 						if ( ( fromUp == dblOnUp ) && ( fromLeft == sglLeft ) ) {
 							// TM_BL(from UP-left), TL_BM(from DN-left), TM_BR(from UP-right), TR_BM(from DN-right)
@@ -183,7 +209,7 @@ PNLTRI.MonoSplitter.prototype = {
 					// at most 1 neighbor on any side
 					var toUp;
 					// first, degenerate case: triangle trapezoid
-					if ( ( thisTrap.topLoc == PNLTRI.TRAP_CUSP ) || ( thisTrap.botLoc == PNLTRI.TRAP_CUSP ) ) {
+					if ( ( topLoc == PNLTRI.TRAP_CUSP ) || ( botLoc == PNLTRI.TRAP_CUSP ) ) {
 						// triangle (cusp): only one neighbor on in-side, nothing on the other side => no diagonal
 						//	could be start triangle -> visit neighbor in any case !
 						
@@ -194,12 +220,12 @@ PNLTRI.MonoSplitter.prototype = {
 					// fourth: both sides with one neighbor
 					} else {
 						// 1 trapezoid above, 1 below
-						if ( thisTrap.topLoc == thisTrap.botLoc ) {		// same side => no diag
+						if ( topLoc == botLoc ) {		// same side => no diag
 							// TL_BL, TR_BR
 							// console.log( "1 trapezoid above, 1 below; no split possible" );
 							thisTrap.monoDiag = PNLTRI.TRAP_NOSPLIT;
 						} else {
-							if ( thisTrap.topLoc == PNLTRI.TRAP_LEFT ) {		// && botLoc == RIGHT
+							if ( topLoc == PNLTRI.TRAP_LEFT ) {		// && botLoc == RIGHT
 								// TL_BR, !fromLeft !!
 								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "vHigh(left)->vLow(right) (in from above)" : "vLow(right)->vHigh(left) (in from below)" ) );
 								curChain = this.doSplit( curChain, vLow, vHigh, !fromUp );
@@ -213,10 +239,10 @@ PNLTRI.MonoSplitter.prototype = {
 					}
 					if ( toUp ) {
 						sglSide = thisTrap.uL ? thisTrap.uL : thisTrap.uR;
-						sglLeft = ( thisTrap.topLoc == PNLTRI.TRAP_LEFT );
+						sglLeft = ( topLoc == PNLTRI.TRAP_LEFT );
 					} else {
 						sglSide = thisTrap.dL ? thisTrap.dL : thisTrap.dR;
-						sglLeft = ( thisTrap.botLoc == PNLTRI.TRAP_LEFT );
+						sglLeft = ( botLoc == PNLTRI.TRAP_LEFT );
 					}
 					trapList_addItems(	[ [ sglSide, !toUp, !sglLeft, curChain ] ] );
 				}	// end ( dblOnUp == null )

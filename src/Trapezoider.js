@@ -5,15 +5,6 @@
  *	 according to Seidel's algorithm [Sei91]
  */
 
-// for splitting trapezoids
-//  on which segment lies the point defining the top or bottom y-line?
-//	all combinations are possible, except two cusps
-PNLTRI.TRAP_MIDDLE	= 0;		// middle: 2 neighbors, separated by a cusp
-PNLTRI.TRAP_LEFT	= 1;		// left: point lies on the left segment
-PNLTRI.TRAP_RIGHT	= 2;		// right: point lies on the right segment
-PNLTRI.TRAP_CUSP	= 1+2;		// cusp: point is the tip of a cusp of a triangular trapezoid
-								//	lying on the left and right segment
-
 PNLTRI.trapCnt = 0;		// Sequence for trapezoid IDs
 
 /** @constructor */
@@ -47,11 +38,9 @@ PNLTRI.Trapezoid.prototype = {
 		
 		newTrap.uL = this.uL;
 		newTrap.uR = this.uR;
-		newTrap.topLoc = this.topLoc;
 		
 		newTrap.dL = this.dL;
 		newTrap.dR = this.dR;
-		newTrap.botLoc = this.botLoc;
 		
 		newTrap.sink = this.sink;
 
@@ -86,7 +75,6 @@ PNLTRI.Trapezoid.prototype = {
 		var trLower = this.clone();				// new lower trapezoid
 		
 		this.vLow = trLower.vHigh = inSplitPt;
-		this.botLoc = trLower.topLoc = PNLTRI.TRAP_MIDDLE;
 		
 		this.setBelow( trLower, null);		// L/R unknown, anyway changed later
 		trLower.setAbove( this, null );		// L/R unknown, anyway changed later
@@ -415,8 +403,6 @@ PNLTRI.QueryStructure.prototype = {
 					//		 /	NL +
 					//		/		+
 					trNewLeft.setAbove( null, null );
-					trNewLeft.topLoc = PNLTRI.TRAP_CUSP;
-					trNewRight.topLoc = PNLTRI.TRAP_LEFT;
 					trNewRight.setAbove( null, trUpper );			// uL: unchanged -- TODO: always BOTH unchanged?
 					trUpper.setBelow( trUpper.dL, trNewRight );		// dL: unchanged, NEVER null
 				} else {
@@ -430,8 +416,6 @@ PNLTRI.QueryStructure.prototype = {
 					//		 +	NR \
 					//		+		\
 					trNewRight.setAbove( null, null );
-					trNewRight.topLoc = PNLTRI.TRAP_CUSP;
-					trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
 					trNewLeft.setAbove( trUpper, null );			// uL: unchanged -- TODO: always BOTH unchanged?
 					trUpper.setBelow( trNewLeft, trUpper.dR );		// dR: unchanged, NEVER null
 				}
@@ -446,8 +430,6 @@ PNLTRI.QueryStructure.prototype = {
 				//		 +	NR
 				//		+
 				trNewLeft.setAbove( trUpper, null );			// TODO: redundant, if dL is default for unknown L/R ?
-				trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
-				trNewRight.topLoc = PNLTRI.TRAP_LEFT;
 				trNewRight.setAbove( null, trUpper );
 				trUpper.setBelow( trNewLeft, trNewRight );
 			}
@@ -494,8 +476,6 @@ PNLTRI.QueryStructure.prototype = {
 				//	   NL  +	NR
 				trNewRight.setAbove( null, trCurrent.uR );			// uR unchanged ?
 				trNewRight.uR.setBelow( null, trNewRight );
-				trNewRight.topLoc = PNLTRI.TRAP_LEFT;
-				trNewLeft.topLoc = PNLTRI.TRAP_RIGHT;
 				trNewLeft.setAbove( trCurrent.uL, null );
 			} else {
 				//	*** Case: CC_2UN; prev: 1B_1UN_CONT, 2B_NCON_RIGHT, 2B_NCON_LEFT, 2B_NCON_TOUCH
@@ -536,8 +516,6 @@ PNLTRI.QueryStructure.prototype = {
 					//   -------*-------
 					//		  next
 					trNewLeft.setBelow( inTrNext, null );
-					trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
-					trNewRight.botLoc = PNLTRI.TRAP_CUSP;
 					trNewRight.setBelow( null, null );
 					inTrNext.setAbove( trNewLeft, inTrNext.uR );	// uR: unchanged, NEVER null
 				} else {
@@ -550,8 +528,6 @@ PNLTRI.QueryStructure.prototype = {
 					//   -------*-------
 					//		  next
 					trNewRight.setBelow( null, inTrNext );
-					trNewRight.botLoc = PNLTRI.TRAP_LEFT;
-					trNewLeft.botLoc = PNLTRI.TRAP_CUSP;
 					trNewLeft.setBelow( null, null );
 					inTrNext.setAbove( inTrNext.uL, trNewRight );	// uL: unchanged, NEVER null
 				}
@@ -600,9 +576,6 @@ PNLTRI.QueryStructure.prototype = {
 						//			+
 						//   ------*-------
 						//		  next
-						trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
-						trNewRight.botLoc = PNLTRI.TRAP_LEFT;
-						
 						trNewLeft.setBelow( inTrNext, null );
 						trNewRight.setBelow( null, inTrNext );
 					} else {
@@ -644,9 +617,6 @@ PNLTRI.QueryStructure.prototype = {
 				trNext = trCurrent.dR;		// temporary store, in case: trCurrent == trNewLeft
 				trNewLeft.setBelow( trCurrent.dL, null );
 				trNewRight.setBelow( null, trNext );
-
-				trNewLeft.botLoc = PNLTRI.TRAP_RIGHT;
-				trNewRight.botLoc = PNLTRI.TRAP_LEFT;
 				
 				trNext = null;	      	// segment finished
 			} else {
@@ -818,7 +788,6 @@ PNLTRI.QueryStructure.prototype = {
 				trNewLeft = trCurrent;
 				trNewRight = trPrevRight;
 				trNewRight.vLow = trCurrent.vLow;
-				trNewRight.botLoc = trCurrent.botLoc;
 				// redirect parent PNLTRI.T_X-Node to extended sink
 				qs_trCurrent.right = trPrevRight.sink;
 				trNewLeft.sink  = qs_trCurrent.newLeft( PNLTRI.T_SINK, trNewLeft );		// left trapezoid sink (use existing one)
@@ -828,7 +797,6 @@ PNLTRI.QueryStructure.prototype = {
 				trNewRight = trCurrent;
 				trNewLeft = trPrevLeft;
 				trNewLeft.vLow = trCurrent.vLow;
-				trNewLeft.botLoc = trCurrent.botLoc;
 				// redirect parent PNLTRI.T_X-Node to extended sink
 				qs_trCurrent.left = trPrevLeft.sink;
 				trNewRight.sink = qs_trCurrent.newRight( PNLTRI.T_SINK, trNewRight );	// right trapezoid sink (use existing one)
