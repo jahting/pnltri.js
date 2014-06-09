@@ -3,9 +3,6 @@
  */
 
 
-/* TODO: Tests for PNLTRI.Trapezoid.replaceAbove */
-
-
 /*	Base class extensions - for testing only */
 	
 PNLTRI.QueryStructure.prototype.setup_segments = function ( inSeg ) {
@@ -793,7 +790,7 @@ function test_QueryStructure() {
 	
 
 	function test_assign_depths() {
-		var testPolygon = [ { x: 5, y: 5 }, { x: 15, y: 40 }, { x: 45, y: 20 } ];
+		var testPolygon = [ { x: 5, y: 5 }, { x: 45, y: 20 }, { x: 15, y: 40 } ];
 
 		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
 		//
@@ -807,7 +804,7 @@ function test_QueryStructure() {
 		ok( myPolygonData.allSegsInQueryStructure(), "assign_depths: all segments inserted" );
 		//
 		var startTrap = myQs.find_first_inside();
-		equal( startTrap.trapID, 2, "assign_depths: Start-Trap-ID" );
+		equal( startTrap.trapID, 1, "assign_depths: Start-Trap-ID" );
 		//
 		//	Main test: standard case
 		//
