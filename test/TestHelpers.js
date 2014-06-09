@@ -106,7 +106,7 @@ function replaceObjByID( key, val ) {
 }
 
 function showDataStructure( inObject, inTempKeys ) {
-	tempKeys = inTempKeys || [ 'd0', 'd1', 'u0', 'u1', 'sprev', 'snext', 'mprev', 'mnext', 'rootFrom', 'rootTo' ];
+	tempKeys = inTempKeys || [ 'dL', 'dR', 'uL', 'uR', 'sprev', 'snext', 'mprev', 'mnext', 'rootFrom', 'rootTo' ];
 	try {
 		var output = JSON.stringify( inObject, replaceObjByID, '\t' );
 		output = output.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
@@ -259,10 +259,10 @@ function showDataStructure( inObject, inTempKeys ) {
 //			myFillText( inTrapezoid.trapID, (lowLineRight.x + lowLineLeft.x)/2, (lowLineLeft.y + highLineLeft.y)/2 );
 //		}
 		
-		if ( inTrapezoid.u0 && inTrapezoid.u1 ) {
+		if ( inTrapezoid.uL && inTrapezoid.uR ) {
 			// two upper neighbors
 			addLines.push( { vFrom: inTrapezoid.vHigh, vTo: inTrapezoid.vLow } );
-		} else if ( inTrapezoid.d0 && inTrapezoid.d1 ) {
+		} else if ( inTrapezoid.dL && inTrapezoid.dR ) {
 			// two lower neighbors
 			addLines.push( { vFrom: inTrapezoid.vHigh, vTo: inTrapezoid.vLow } );
 		}

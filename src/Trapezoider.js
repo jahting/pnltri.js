@@ -47,14 +47,10 @@ PNLTRI.Trapezoid.prototype = {
 		
 		newTrap.uL = this.uL;
 		newTrap.uR = this.uR;
-		newTrap.u0 = this.uL;
-		newTrap.u1 = this.uR;
 		newTrap.topLoc = this.topLoc;
 		
 		newTrap.dL = this.dL;
 		newTrap.dR = this.dR;
-		newTrap.d0 = this.dL;
-		newTrap.d1 = this.dR;
 		newTrap.botLoc = this.botLoc;
 		
 		newTrap.sink = this.sink;
@@ -66,14 +62,10 @@ PNLTRI.Trapezoid.prototype = {
 	setAbove: function ( inTrap1, inTrap2 ) {
 		this.uL = inTrap1;
 		this.uR = inTrap2;
-		this.u0 = inTrap1;
-		this.u1 = inTrap2;
 	},
 	setBelow: function ( inTrap1, inTrap2 ) {
 		this.dL = inTrap1;
 		this.dR = inTrap2;
-		this.d0 = inTrap1;
-		this.d1 = inTrap2;
 	},
 
 	setSink: function ( inQsSink ) {
@@ -84,10 +76,8 @@ PNLTRI.Trapezoid.prototype = {
 	replaceAbove: function ( inTrapOld, inTrapNew ) {
 		if ( this.uL == inTrapOld ) {
 			this.uL = inTrapNew;
-			this.u0 = inTrapNew;
 		} else if ( this.uR == inTrapOld ) {
 			this.uR = inTrapNew;
-			this.u1 = inTrapNew;
 		}
 	},
 

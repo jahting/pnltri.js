@@ -31,10 +31,10 @@ PNLTRI.QueryStructure.prototype.assignDepth = function ( inTrap, inDepth ) {
 	if (! inTrap)				return;
 	if (inTrap.depth != -1)		return;
 	inTrap.depth = inDepth;
-	this.assignDepth( inTrap.u0, inDepth );
-	this.assignDepth( inTrap.u1, inDepth );
-	this.assignDepth( inTrap.d0, inDepth );
-	this.assignDepth( inTrap.d1, inDepth );
+	this.assignDepth( inTrap.uL, inDepth );
+	this.assignDepth( inTrap.uR, inDepth );
+	this.assignDepth( inTrap.dL, inDepth );
+	this.assignDepth( inTrap.dR, inDepth );
 };
 PNLTRI.QueryStructure.prototype.assignDepths = function () {
 	this.assignDepth( this.trapArray[0], 0 );
@@ -59,38 +59,38 @@ PNLTRI.QueryStructure.prototype.check_trapezoids_link_consistency = function () 
 	var currTrap;
 	for (var i=0, j=this.trapArray.length; i<j; i++) {
 		currTrap = this.trapArray[i];
-		if ( currTrap.u0 ) {
-			if ( currTrap.u0 == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".u0: self-link" ); };
-			if ( currTrap.u0 == currTrap.u1 )	{ bugList.push( "ID#"+currTrap.trapID+".u0 == u1" ); };
-			if ( currTrap.u0 == currTrap.d0 )	{ bugList.push( "ID#"+currTrap.trapID+".u0 == d0" ); };
-			if ( currTrap.u0 == currTrap.d1 )	{ bugList.push( "ID#"+currTrap.trapID+".u0 == d1" ); };
-			if ( ( currTrap.u0.d0 != currTrap ) &&
-				 ( currTrap.u0.d1 != currTrap ) )	{
-				bugList.push( "ID#"+currTrap.trapID+".u0: reverse dN-Link missing in ID#" + currTrap.u0.trapID );
+		if ( currTrap.uL ) {
+			if ( currTrap.uL == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".uL: self-link" ); };
+			if ( currTrap.uL == currTrap.uR )	{ bugList.push( "ID#"+currTrap.trapID+".uL == uR" ); };
+			if ( currTrap.uL == currTrap.dL )	{ bugList.push( "ID#"+currTrap.trapID+".uL == dL" ); };
+			if ( currTrap.uL == currTrap.dR )	{ bugList.push( "ID#"+currTrap.trapID+".uL == dR" ); };
+			if ( ( currTrap.uL.dL != currTrap ) &&
+				 ( currTrap.uL.dR != currTrap ) )	{
+				bugList.push( "ID#"+currTrap.trapID+".uL: reverse dN-Link missing in ID#" + currTrap.uL.trapID );
 			}
 		}
-		if ( currTrap.u1 ) {
-			if ( currTrap.u1 == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".u1: self-link" ); };
-			if ( currTrap.u1 == currTrap.d0 )	{ bugList.push( "ID#"+currTrap.trapID+".u1 == d0" ); };
-			if ( currTrap.u1 == currTrap.d1 )	{ bugList.push( "ID#"+currTrap.trapID+".u1 == d1" ); };
-			if ( ( currTrap.u1.d0 != currTrap ) &&
-				 ( currTrap.u1.d1 != currTrap ) )	{
-				bugList.push( "ID#"+currTrap.trapID+".u1: reverse dN-Link missing in ID#" + currTrap.u1.trapID );
+		if ( currTrap.uR ) {
+			if ( currTrap.uR == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".uR: self-link" ); };
+			if ( currTrap.uR == currTrap.dL )	{ bugList.push( "ID#"+currTrap.trapID+".uR == dL" ); };
+			if ( currTrap.uR == currTrap.dR )	{ bugList.push( "ID#"+currTrap.trapID+".uR == dR" ); };
+			if ( ( currTrap.uR.dL != currTrap ) &&
+				 ( currTrap.uR.dR != currTrap ) )	{
+				bugList.push( "ID#"+currTrap.trapID+".uR: reverse dN-Link missing in ID#" + currTrap.uR.trapID );
 			}
 		}
-		if ( currTrap.d0 ) {
-			if ( currTrap.d0 == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".d0: self-link" ); };
-			if ( currTrap.d0 == currTrap.d1 )	{ bugList.push( "ID#"+currTrap.trapID+".d0 == d1" ); };
-			if ( ( currTrap.d0.u0 != currTrap ) &&
-				 ( currTrap.d0.u1 != currTrap ) )	{
-				bugList.push( "ID#"+currTrap.trapID+".d0: reverse uN-Link missing in ID#" + currTrap.d0.trapID );
+		if ( currTrap.dL ) {
+			if ( currTrap.dL == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".dL: self-link" ); };
+			if ( currTrap.dL == currTrap.dR )	{ bugList.push( "ID#"+currTrap.trapID+".dL == dR" ); };
+			if ( ( currTrap.dL.uL != currTrap ) &&
+				 ( currTrap.dL.uR != currTrap ) )	{
+				bugList.push( "ID#"+currTrap.trapID+".dL: reverse uN-Link missing in ID#" + currTrap.dL.trapID );
 			}
 		}
-		if ( currTrap.d1 ) {
-			if ( currTrap.d1 == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".d1: self-link" ); };
-			if ( ( currTrap.d1.u0 != currTrap ) &&
-				 ( currTrap.d1.u1 != currTrap ) )	{
-				bugList.push( "ID#"+currTrap.trapID+".d1: reverse uN-Link missing in ID#" + currTrap.d1.trapID );
+		if ( currTrap.dR ) {
+			if ( currTrap.dR == currTrap )		{ bugList.push( "ID#"+currTrap.trapID+".dR: self-link" ); };
+			if ( ( currTrap.dR.uL != currTrap ) &&
+				 ( currTrap.dR.uR != currTrap ) )	{
+				bugList.push( "ID#"+currTrap.trapID+".dR: reverse uN-Link missing in ID#" + currTrap.dR.trapID );
 			}
 		}
 	}
@@ -141,13 +141,13 @@ PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId,
 		ok( trapezoid, inTestName + ": trapezoid exists" );
 	}
 }
-// Computes topLoc, botLoc from u0/u1/vHigh, d0/d1/vLow
+// Computes topLoc, botLoc from uL/uR/vHigh, dL/dR/vLow
 //	might not work correctly for outside/hole trapezoids
 PNLTRI.QueryStructure.prototype.find_topLoc = function ( inTrap ) {
-	if ( inTrap.u0 && inTrap.u1 ) {
+	if ( inTrap.uL && inTrap.uR ) {
 		return	PNLTRI.TRAP_MIDDLE;		// TM
 	} else if ( inTrap.lseg && ( inTrap.vHigh == inTrap.lseg.vFrom ) ) {
-		return	( !inTrap.u0 && !inTrap.u1 ) ?
+		return	( !inTrap.uL && !inTrap.uR ) ?
 			PNLTRI.TRAP_CUSP :		// TLR, highVert == inTrap.rseg.vTo
 			PNLTRI.TRAP_LEFT;		// TL
 	} else if ( inTrap.rseg ) {		// exclude infinite borders
@@ -158,10 +158,10 @@ PNLTRI.QueryStructure.prototype.find_topLoc = function ( inTrap ) {
 	}
 }
 PNLTRI.QueryStructure.prototype.find_botLoc = function ( inTrap ) {
-	if ( inTrap.d0 && inTrap.d1 ) {
+	if ( inTrap.dL && inTrap.dR ) {
 		return	PNLTRI.TRAP_MIDDLE;		// BM
 	} else if ( inTrap.lseg && ( inTrap.vLow == inTrap.lseg.vTo ) ) {
-		return	( !inTrap.d0 && !inTrap.d1 ) ?
+		return	( !inTrap.dL && !inTrap.dR ) ?
 			PNLTRI.TRAP_CUSP :		// BLR, highVert == inTrap.rseg.vFrom
 			PNLTRI.TRAP_LEFT;		// BL
 	} else if ( inTrap.rseg ) {		// exclude infinite borders
@@ -223,7 +223,7 @@ function test_QueryStructure() {
 		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap no rseg!" );
 		myTrap = { rseg: {} };
 		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap no lseg!" );
-		myTrap = { lseg: {}, rseg: {}, u0: {}, d0: {} };
+		myTrap = { lseg: {}, rseg: {}, uL: {}, dL: {} };
 		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap no triangle!" );
 		myTrap = { lseg: {}, rseg: { vFrom: { x:0, y:10 }, vTo: { x:10, y:0 }, upward: false } };
 		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap rseg going downwards!" );
@@ -478,11 +478,11 @@ function test_QueryStructure() {
 		var tr2 = myQs.getTrapByIdx(2);
 		var tr3 = myQs.getTrapByIdx(3);
 		// test exchangeability
-		ok( ( tr2.u0 == tr1 ), "trap_setAbove: tr2.u0 -> tr1" );
-		ok( ( tr2.u1 == tr3 ), "trap_setAbove: tr2.u1 -> tr3" );
-		tr2.setAbove( tr2.u1, tr2.u0 );
-		ok( ( tr2.u0 == tr3 ), "trap_setAbove: tr2.u0 -> tr3" );
-		ok( ( tr2.u1 == tr1 ), "trap_setAbove: tr2.u1 -> tr1" );
+		ok( ( tr2.uL == tr1 ), "trap_setAbove: tr2.uL -> tr1" );
+		ok( ( tr2.uR == tr3 ), "trap_setAbove: tr2.uR -> tr3" );
+		tr2.setAbove( tr2.uR, tr2.uL );
+		ok( ( tr2.uL == tr3 ), "trap_setAbove: tr2.uL -> tr3" );
+		ok( ( tr2.uR == tr1 ), "trap_setAbove: tr2.uR -> tr1" );
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -512,6 +512,11 @@ function test_QueryStructure() {
 		var myQs = new PNLTRI.QueryStructure();
 		var myQsRoot = myQs.setup_segments( base_segment );
 		ok( base_segment.is_inserted, "trap_splitOffLower: Segment inserted" );
+		//	check Trapezoid-Neighborhood
+		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "trap_splitOffLower: top" );
+		myQs.check_trapezoid_neighbors(  1, 0, null, 2, null, "trap_splitOffLower: left" );
+		myQs.check_trapezoid_neighbors(  2, 1, 3, null, null, "trap_splitOffLower: bottom" );
+		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "trap_splitOffLower: right" );
 		// get existing Trapezoids
 		var tr0 = myQs.getTrapByIdx(0);
 		var tr1 = myQs.getTrapByIdx(1);
@@ -519,31 +524,29 @@ function test_QueryStructure() {
 		var tr3 = myQs.getTrapByIdx(3);
 		//
 		//	Test: split tr0
-		var tr0org_hi = tr0.vHigh;		// save original values
-		var tr0org_lo = tr0.vLow;
+		var tr0org_vH = tr0.vHigh;		// save original values
+		var tr0org_vL = tr0.vLow;
 		var tr0org_dL = tr0.dL;
 		var tr0org_dR = tr0.dR;
-		ok( !tr0.uL, "trap_splitOffLower: tr0.uL undefined" );
-		ok( !tr0.uR, "trap_splitOffLower: tr0.uR undefined" );
 		var splitPt4 = { x: 2 , y: 5 };
 		var tr0b = tr0.splitOffLower( splitPt4 );
 		strictEqual( tr0.lseg, tr0b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr0.rseg, tr0b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr0.vHigh, tr0org_hi, "trap_splitOffLower: tr0.vHigh unchanged" );
+		strictEqual( tr0.vHigh, tr0org_vH, "trap_splitOffLower: tr0.vHigh unchanged" );
 		strictEqual( tr0.vLow, splitPt4, "trap_splitOffLower: tr0.vLow == splitPt4" );
 		strictEqual( tr0b.vHigh, splitPt4, "trap_splitOffLower: tr0b.vHigh == splitPt4" );
-		strictEqual( tr0b.vLow, tr0org_lo, "trap_splitOffLower: tr0b.vLow unchanged" );
+		strictEqual( tr0b.vLow, tr0org_vL, "trap_splitOffLower: tr0b.vLow unchanged" );
 		//
 		strictEqual( tr0.sink, tr0b.sink, "trap_splitOffLower: sink equal" );
-		strictEqual( tr0.usave, tr0b.usave, "trap_splitOffLower: usave equal" );
-		strictEqual( tr0.uside, tr0b.uside, "trap_splitOffLower: uside equal" );
+		ok( !tr0b.usave, "trap_splitOffLower: tr0b.usave null" );
+		ok( !tr0b.uside, "trap_splitOffLower: tr0b.uside null" );
 		//
 		ok( !tr0.uL, "trap_splitOffLower: tr0.uL unchanged" );
 		ok( !tr0.uR, "trap_splitOffLower: tr0.uR unchanged" );
-		strictEqual( tr0.dL, tr0b, "trap_splitOffLower: tr0.dL == tr0b" );
+		strictEqual( tr0.dL, tr0b, "trap_splitOffLower: tr0.dL == tr0b" );		// L/R undef -> default L
 		ok( !tr0.dR, "trap_splitOffLower: tr0.dR null" );
 		//
-		strictEqual( tr0b.uL, tr0, "trap_splitOffLower: tr0b.uL == tr0" );
+		strictEqual( tr0b.uL, tr0, "trap_splitOffLower: tr0b.uL == tr0" );		// L/R undef -> default L
 		ok( !tr0b.uR, "trap_splitOffLower: tr0.uR null" );
 		strictEqual( tr0b.dL, tr0org_dL, "trap_splitOffLower: tr0b.dL == tr0org_dL" );
 		strictEqual( tr0b.dR, tr0org_dR, "trap_splitOffLower: tr0b.dR == tr0org_dR" );
@@ -552,107 +555,97 @@ function test_QueryStructure() {
 		ok( ( tr0org_dR.uR == tr0b ), "trap_splitOffLower: tr0org_dR.uR == tr0b" );
 		//
 		//	Test: split tr1
-		var tr1u0 = tr1.uL;
-		var tr1hi = tr1.vHigh;
-		var tr1lo = tr1.vLow;
-		var tr1d0 = tr1.d0;
-		ok( ( tr1d0 == tr2 ), "trap_splitOffLower: tr1.d0 == tr2" );
+		var tr1org_uL = tr1.uL;		// save original values
+		var tr1org_vH = tr1.vHigh;
+		var tr1org_vL = tr1.vLow;
+		var tr1org_dL = tr1.dL;
 		var splitPt1 = { x: 2 , y: 2 };
 		var tr1b = tr1.splitOffLower( splitPt1 );
 		strictEqual( tr1.lseg, tr1b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr1.rseg, tr1b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr1.vHigh, tr1hi, "trap_splitOffLower: tr1.vHigh unchanged" );
+		strictEqual( tr1.vHigh, tr1org_vH, "trap_splitOffLower: tr1.vHigh unchanged" );
 		strictEqual( tr1.vLow, splitPt1, "trap_splitOffLower: tr1.vLow == splitPt1" );
 		strictEqual( tr1b.vHigh, splitPt1, "trap_splitOffLower: tr1b.vHigh == splitPt1" );
-		strictEqual( tr1b.vLow, tr1lo, "trap_splitOffLower: tr1b.vLow unchanged" );
+		strictEqual( tr1b.vLow, tr1org_vL, "trap_splitOffLower: tr1b.vLow unchanged" );
 		//
 		strictEqual( tr1.sink, tr1b.sink, "trap_splitOffLower: sink equal" );
-		strictEqual( tr1.usave, tr1b.usave, "trap_splitOffLower: usave equal" );
-		strictEqual( tr1.uside, tr1b.uside, "trap_splitOffLower: uside equal" );
+		ok( !tr1b.usave, "trap_splitOffLower: tr1b.usave null" );
+		ok( !tr1b.uside, "trap_splitOffLower: tr1b.uside null" );
 		//
-		strictEqual( tr1.uL, tr1u0, "trap_splitOffLower: tr1.uL unchanged" );
-		ok( !tr1.u1, "trap_splitOffLower: tr1.u1 unchanged" );
-		strictEqual( tr1.d0, tr1b, "trap_splitOffLower: tr1.d0 == tr1b" );
-		ok( !tr1.d1, "trap_splitOffLower: tr1.d1 null" );
+		strictEqual( tr1.uL, tr1org_uL, "trap_splitOffLower: tr1.uL unchanged" );
+		ok( !tr1.uR, "trap_splitOffLower: tr1.uR unchanged" );
+		strictEqual( tr1.dL, tr1b, "trap_splitOffLower: tr1.dL == tr1b" );		// L/R undef -> default L
+		ok( !tr1.dR, "trap_splitOffLower: tr1.dR null" );
 		//
-		strictEqual( tr1b.uL, tr1, "trap_splitOffLower: tr1b.uL == tr1" );
-		ok( !tr1b.u1, "trap_splitOffLower: tr1.u1 null" );
-		strictEqual( tr1b.d0, tr1d0, "trap_splitOffLower: tr1b.d0 == tr1d0" );
-		ok( !tr1b.d1, "trap_splitOffLower: tr1b.d1 null" );
+		strictEqual( tr1b.uL, tr1, "trap_splitOffLower: tr1b.uL == tr1" );		// L/R undef -> default L
+		ok( !tr1b.uR, "trap_splitOffLower: tr1.uR null" );
+		strictEqual( tr1b.dL, tr1org_dL, "trap_splitOffLower: tr1b.dL == tr1org_dL" );
+		ok( !tr1b.dR, "trap_splitOffLower: tr1b.dR null" );
 		//
-		strictEqual( tr1d0.uL, tr1b, "trap_splitOffLower: tr1d0.uL == tr1b" );
-		ok( ( tr1d0.u1 == tr3 ), "trap_splitOffLower: tr1d0.u1 == tr3" );
+		ok( ( tr1org_dL.uL == tr1b ), "trap_splitOffLower: tr1org_dL.uL == tr1b" );
+		ok( ( tr1org_dL.uR == tr3 ), "trap_splitOffLower: tr1org_dL.uR == tr3" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot );
 		//
 		//	Test: split tr2
-		var tr2u0 = tr2.u0;
-		var tr2u1 = tr2.u1;
-		var tr2hi = tr2.vHigh;
-		var tr2lo = tr2.vLow;
-		ok( !tr2.d0, "trap_splitOffLower: tr2.d0 undefined" );
-		ok( !tr2.d1, "trap_splitOffLower: tr2.d1 undefined" );
+		var tr2org_uL = tr2.uL;		// save original values
+		var tr2org_uR = tr2.uR;
+		var tr2org_vH = tr2.vHigh;
+		var tr2org_vL = tr2.vLow;
 		var splitPt2 = { x: 0 , y: 0 };
 		var tr2b = tr2.splitOffLower( splitPt2 );
 		strictEqual( tr2.lseg, tr2b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr2.rseg, tr2b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr2.vHigh, tr2hi, "trap_splitOffLower: tr2.vHigh unchanged" );
+		strictEqual( tr2.vHigh, tr2org_vH, "trap_splitOffLower: tr2.vHigh unchanged" );
 		strictEqual( tr2.vLow, splitPt2, "trap_splitOffLower: tr2.vLow == splitPt2" );
 		strictEqual( tr2b.vHigh, splitPt2, "trap_splitOffLower: tr2b.vHigh == splitPt2" );
-		strictEqual( tr2b.vLow, tr2lo, "trap_splitOffLower: tr2b.vLow unchanged" );
+		strictEqual( tr2b.vLow, tr2org_vL, "trap_splitOffLower: tr2b.vLow unchanged" );
 		//
 		strictEqual( tr2.sink, tr2b.sink, "trap_splitOffLower: sink equal" );
-		strictEqual( tr2.usave, tr2b.usave, "trap_splitOffLower: usave equal" );
-		strictEqual( tr2.uside, tr2b.uside, "trap_splitOffLower: uside equal" );
+		ok( !tr2b.usave, "trap_splitOffLower: tr2b.usave null" );
+		ok( !tr2b.uside, "trap_splitOffLower: tr2b.uside null" );
 		//
-		strictEqual( tr2.u0, tr2u0, "trap_splitOffLower: tr2.u0 unchanged" );
-		strictEqual( tr2.u1, tr2u1, "trap_splitOffLower: tr2.u1 unchanged" );
-		strictEqual( tr2.d0, tr2b, "trap_splitOffLower: tr2.d0 == tr2b" );
-		ok( !tr2.d1, "trap_splitOffLower: tr2.d1 null" );
+		strictEqual( tr2.uL, tr2org_uL, "trap_splitOffLower: tr2.uL unchanged" );
+		strictEqual( tr2.uR, tr2org_uR, "trap_splitOffLower: tr2.uR unchanged" );
+		strictEqual( tr2.dL, tr2b, "trap_splitOffLower: tr2.dL == tr2b" );		// L/R undef -> default L
+		ok( !tr2.dR, "trap_splitOffLower: tr2.dR null" );
 		//
-		strictEqual( tr2b.u0, tr2, "trap_splitOffLower: tr2b.u0 == tr2" );
-		ok( !tr2b.u1, "trap_splitOffLower: tr2.u1 null" );
-		ok( !tr2b.d0, "trap_splitOffLower: tr2b.d0 null" );
-		ok( !tr2b.d1, "trap_splitOffLower: tr2b.d1 null" );
+		strictEqual( tr2b.uL, tr2, "trap_splitOffLower: tr2b.uL == tr2" );		// L/R undef -> default L
+		ok( !tr2b.uR, "trap_splitOffLower: tr2.uR null" );
+		ok( !tr2b.dL, "trap_splitOffLower: tr2b.dL null" );
+		ok( !tr2b.dR, "trap_splitOffLower: tr2b.dR null" );
 		//
 		//	Test: split tr3
-//		var tr3u0 = tr3.u0;
-		var tr3u1 = tr3.u1;
-		var tr3hi = tr3.vHigh;
-		var tr3lo = tr3.vLow;
-//		var tr3d0 = tr3.d0;
-		var tr3d0 = tr3.d1;														// d0/d1 -> dL/dR
-		ok( ( tr3d0 == tr2 ), "trap_splitOffLower: tr3.d0 == tr2" );
+		var tr3org_uR = tr3.uR;		// save original values
+		var tr3org_vH = tr3.vHigh;
+		var tr3org_vL = tr3.vLow;
+		var tr3org_dR = tr3.dR;
 		var splitPt3 = { x: 2 , y: 3 };
 		var tr3b = tr3.splitOffLower( splitPt3 );
 		strictEqual( tr3.lseg, tr3b.lseg, "trap_splitOffLower: lseg unchanged" );
 		strictEqual( tr3.rseg, tr3b.rseg, "trap_splitOffLower: rseg unchanged" );
-		strictEqual( tr3.vHigh, tr3hi, "trap_splitOffLower: tr3.vHigh unchanged" );
+		strictEqual( tr3.vHigh, tr3org_vH, "trap_splitOffLower: tr3.vHigh unchanged" );
 		strictEqual( tr3.vLow, splitPt3, "trap_splitOffLower: tr3.vLow == splitPt3" );
 		strictEqual( tr3b.vHigh, splitPt3, "trap_splitOffLower: tr3b.vHigh == splitPt3" );
-		strictEqual( tr3b.vLow, tr3lo, "trap_splitOffLower: tr3b.vLow unchanged" );
+		strictEqual( tr3b.vLow, tr3org_vL, "trap_splitOffLower: tr3b.vLow unchanged" );
 		//
 		strictEqual( tr3.sink, tr3b.sink, "trap_splitOffLower: sink equal" );
-		strictEqual( tr3.usave, tr3b.usave, "trap_splitOffLower: usave equal" );
-		strictEqual( tr3.uside, tr3b.uside, "trap_splitOffLower: uside equal" );
+		ok( !tr3b.usave, "trap_splitOffLower: tr3b.usave null" );
+		ok( !tr3b.uside, "trap_splitOffLower: tr3b.uside null" );
 		//
-//		strictEqual( tr3.u0, tr3u0, "trap_splitOffLower: tr3.u0 unchanged" );
-//		ok( !tr3.u1, "trap_splitOffLower: tr3.u1 unchanged" );
-		ok( !tr3.u0, "trap_splitOffLower: tr3.u0 unchanged" );					// d0/d1 -> dL/dR
-		strictEqual( tr3.u1, tr3u1, "trap_splitOffLower: tr3.u1 unchanged" );
-		strictEqual( tr3.d0, tr3b, "trap_splitOffLower: tr3.d0 == tr3b" );
-		ok( !tr3.d1, "trap_splitOffLower: tr3.d1 null" );
+		ok( !tr3.uL, "trap_splitOffLower: tr3.uL unchanged" );
+		strictEqual( tr3.uR, tr3org_uR, "trap_splitOffLower: tr3.uR unchanged" );
+		strictEqual( tr3.dL, tr3b, "trap_splitOffLower: tr3.dL == tr3b" );		// L/R undef -> default L
+		ok( !tr3.dR, "trap_splitOffLower: tr3.dR null" );
 		//
-		strictEqual( tr3b.u0, tr3, "trap_splitOffLower: tr3b.u0 == tr3" );
-		ok( !tr3b.u1, "trap_splitOffLower: tr3.u1 null" );
-//		ok( ( tr3b.d0 == tr3d0 ), "trap_splitOffLower: tr3b.d0 == tr3d0" );
-//		ok( !tr3b.d1, "trap_splitOffLower: tr3b.d1 null" );
-		ok( ( tr3b.d1 == tr3d0 ), "trap_splitOffLower: tr3b.d0 == tr3d0" );		// d0/d1 -> dL/dR
-		ok( !tr3b.d0, "trap_splitOffLower: tr3b.d1 null" );
+		strictEqual( tr3b.uL, tr3, "trap_splitOffLower: tr3b.uL == tr3" );		// L/R undef -> default L
+		ok( !tr3b.uR, "trap_splitOffLower: tr3.uR null" );
+		ok( !tr3b.dL, "trap_splitOffLower: tr3b.dL null" );
+		ok( ( tr3b.dR == tr3org_dR ), "trap_splitOffLower: tr3b.dR == tr3org_dR" );
 		//
-		ok( ( tr3d0.u0 == tr1b ), "trap_splitOffLower: tr3d0.u0 == tr1b" );
-		ok( ( tr3d0.u1 == tr3b ), "trap_splitOffLower: tr3d0.u1 == tr3b" );
+		ok( ( tr3org_dR.uL == tr1b ), "trap_splitOffLower: tr3org_dR.uL == tr1b" );
+		ok( ( tr3org_dR.uR == tr3b ), "trap_splitOffLower: tr3org_dR.uR == tr3b" );
 	}
 
 	function test_splitNodeAtPoint1() {
@@ -688,8 +681,8 @@ function test_QueryStructure() {
 		strictEqual( qs_tr1.right.trap, tr1, "splitNodeAtPoint1: right -> OrigTrap(tr1)" );
 		strictEqual( qs_tr1.right, tr1.sink, "splitNodeAtPoint1: right == sink(OrigTrap(tr1))" );
 		strictEqual( qs_tr1.left, qs_tr5, "splitNodeAtPoint1: left -> NewTrap(tr5)" );
-		strictEqual( qs_tr1.left.trap.u0, tr1, "splitNodeAtPoint1: left -> NewTrap(tr5) [u0==tr1]" );
-		ok( ( qs_tr1.left.trap.d0 == tr3 ), "splitNodeAtPoint1: left -> NewTrap(tr5) [d0==tr3]" );
+		strictEqual( qs_tr1.left.trap.uL, tr1, "splitNodeAtPoint1: left -> NewTrap(tr5) [uL==tr1]" );
+		ok( ( qs_tr1.left.trap.dL == tr3 ), "splitNodeAtPoint1: left -> NewTrap(tr5) [dL==tr3]" );
 		//
 		//	insert lower point into QueryStructure
 		var qs_trX = myQs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom, true );
@@ -698,9 +691,9 @@ function test_QueryStructure() {
 		equal( qs_tr3.yval.y, 10, "splitNodeAtPoint1: yval = 10" );
 		strictEqual( qs_tr3.right.trap, tr3, "splitNodeAtPoint1: right -> OrigTrap(tr3)" );
 		strictEqual( qs_tr3.right, tr3.sink, "splitNodeAtPoint1: right == sink(OrigTrap(tr3))" );
-		strictEqual( qs_tr3.left.trap.u0, tr3, "splitNodeAtPoint1: left -> NewTrap(tr6) [u0==tr3]" );
-		ok( !qs_tr3.left.trap.d0, "splitNodeAtPoint1: left -> NewTrap(tr6) [d0==null]" );
-		ok( !qs_tr3.left.trap.d1, "splitNodeAtPoint1: left -> NewTrap(tr6) [d1==null]" );
+		strictEqual( qs_tr3.left.trap.uL, tr3, "splitNodeAtPoint1: left -> NewTrap(tr6) [uL==tr3]" );
+		ok( !qs_tr3.left.trap.dL, "splitNodeAtPoint1: left -> NewTrap(tr6) [dL==null]" );
+		ok( !qs_tr3.left.trap.dR, "splitNodeAtPoint1: left -> NewTrap(tr6) [dR==null]" );
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -739,8 +732,8 @@ function test_QueryStructure() {
 		strictEqual( qs_tr1.right.trap, tr1, "SplitN#2: right -> OrigTrap(tr1)" );
 		strictEqual( qs_tr1.right, tr1.sink, "SplitN#2: right == sink(OrigTrap(tr1))" );
 		strictEqual( qs_tr1.left, qs_tr5, "SplitN#2: left -> NewTrap(tr5)" );
-		strictEqual( qs_tr1.left.trap.u0, tr1, "SplitN#2: left -> NewTrap(tr5) [u0==tr1]" );
-		strictEqual( qs_tr1.left.trap.d0, tr3, "SplitN#2: left -> NewTrap(tr5) [d0==tr3]" );		*/
+		strictEqual( qs_tr1.left.trap.uL, tr1, "SplitN#2: left -> NewTrap(tr5) [uL==tr1]" );
+		strictEqual( qs_tr1.left.trap.dL, tr3, "SplitN#2: left -> NewTrap(tr5) [dL==tr3]" );		*/
 		//
 		//	insert lower point into QueryStructure
 		var qs_trX = myQs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom, true );
@@ -749,9 +742,9 @@ function test_QueryStructure() {
 		equal( qs_tr3.yval.y, 10, "SplitN#2: yval = 10" );
 		strictEqual( qs_tr3.right.trap, tr3, "SplitN#2: right -> OrigTrap(tr3)" );
 		strictEqual( qs_tr3.right, tr3.sink, "SplitN#2: right == sink(OrigTrap(tr3))" );
-		strictEqual( qs_tr3.left.trap.u0, tr3, "SplitN#2: left -> NewTrap(tr6) [u0==tr3]" );
-		ok( !qs_tr3.left.trap.d0, "SplitN#2: left -> NewTrap(tr6) [d0==null]" );
-		ok( !qs_tr3.left.trap.d1, "SplitN#2: left -> NewTrap(tr6) [d1==null]" );			*/
+		strictEqual( qs_tr3.left.trap.uL, tr3, "SplitN#2: left -> NewTrap(tr6) [uL==tr3]" );
+		ok( !qs_tr3.left.trap.dL, "SplitN#2: left -> NewTrap(tr6) [dL==null]" );
+		ok( !qs_tr3.left.trap.dR, "SplitN#2: left -> NewTrap(tr6) [dR==null]" );			*/
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -1045,8 +1038,8 @@ function test_QueryStructure() {
 		strictEqual( qs_tr1.right.trap, tr1, "Add#1: right -> OrigTrap(tr1)" );
 		strictEqual( qs_tr1.right, tr1.sink, "Add#1: right == sink(OrigTrap(tr1))" );
 		strictEqual( qs_tr1.left, qs_tr5, "Add#1: left -> NewTrap(tr5)" );
-		strictEqual( qs_tr1.left.trap.u0, tr1, "Add#1: left -> NewTrap(tr5) [u0==tr1]" );
-		strictEqual( qs_tr1.left.trap.d0, tr3, "Add#1: left -> NewTrap(tr5) [d0==tr3]" );		*/
+		strictEqual( qs_tr1.left.trap.uL, tr1, "Add#1: left -> NewTrap(tr5) [uL==tr1]" );
+		strictEqual( qs_tr1.left.trap.dL, tr3, "Add#1: left -> NewTrap(tr5) [dL==tr3]" );		*/
 		//	lower point inserted -> test_splitNodeAtPoint();		TODO Tests
 /*		var tr6 = myQs.getTrapByIdx(5), qs_tr6 = tr6.sink;
 		equal( qs_tr3.nodetype, PNLTRI.T_Y, "Add#1: nodetype(tr3) -> T_Y" );
@@ -1055,9 +1048,9 @@ function test_QueryStructure() {
 		strictEqual( qs_tr3.right.trap, tr3, "Add#1: right -> OrigTrap(tr3)" );
 		strictEqual( qs_tr3.right, tr3.sink, "Add#1: right == sink(OrigTrap(tr3))" );
 		strictEqual( qs_tr3.left, qs_tr6, "Add#1: left -> NewTrap(tr6)" );
-		strictEqual( qs_tr3.left.trap.u0, tr3, "Add#1: left -> NewTrap(tr6) [u0==tr3]" );
-		ok( !qs_tr3.left.trap.d0, "Add#1: left -> NewTrap(tr6) [d0==null]" );
-		ok( !qs_tr3.left.trap.d1, "Add#1: left -> NewTrap(tr6) [d1==null]" );		*/
+		strictEqual( qs_tr3.left.trap.uL, tr3, "Add#1: left -> NewTrap(tr6) [uL==tr3]" );
+		ok( !qs_tr3.left.trap.dL, "Add#1: left -> NewTrap(tr6) [dL==null]" );
+		ok( !qs_tr3.left.trap.dR, "Add#1: left -> NewTrap(tr6) [dR==null]" );		*/
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -1264,11 +1257,9 @@ function test_QueryStructure() {
 		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_4a #2, n#0" );
 		myQs.check_trapezoid_neighbors(  1, 0, null, 4, null, "Spec_4a #2, n#1" );
 		myQs.check_trapezoid_neighbors(  2, 4, 3, null, null, "Spec_4a #2, n#2" );
-//		myQs.check_trapezoid_neighbors(  3, 0, null, 2, null, "Spec_4a #2, n#3" );
-		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "Spec_4a #2, n#3" );		// d0/d1 -> dL/dR
+		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "Spec_4a #2, n#3" );
 		myQs.check_trapezoid_neighbors(  4, 1, 5, 2, null, "Spec_4a #2, n#4" );
-//		myQs.check_trapezoid_neighbors(  5, null, null, 4, null, "Spec_4a #2, n#5" );
-		myQs.check_trapezoid_neighbors(  5, null, null, null, 4, "Spec_4a #2, n#5" );		// d0/d1 -> dL/dR
+		myQs.check_trapezoid_neighbors(  5, null, null, null, 4, "Spec_4a #2, n#5" );
 		// complex case: goes back on same x-line
 		myQs.add_segment_consistently( segListArray[2], 'Spec_4a Main' );
 		//
@@ -1286,11 +1277,9 @@ function test_QueryStructure() {
 		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_4b #2, n#0" );
 		myQs.check_trapezoid_neighbors(  1, 0, null, 2, null, "Spec_4b #2, n#1" );
 		myQs.check_trapezoid_neighbors(  2, 1, 5, null, null, "Spec_4b #2, n#2" );
-//		myQs.check_trapezoid_neighbors(  3, 0, null, 4, 5, "Spec_4b #2, n#3" );
-		myQs.check_trapezoid_neighbors(  3, null, 0, 4, 5, "Spec_4b #2, n#3" );			// d0/d1 -> dL/dR
+		myQs.check_trapezoid_neighbors(  3, null, 0, 4, 5, "Spec_4b #2, n#3" );
 		myQs.check_trapezoid_neighbors(  4, 3, null, null, null, "Spec_4b #2, n#4" );
-		myQs.check_trapezoid_neighbors(  5, null, 3, null, 2, "Spec_4b #2, n#5" );		// d0/d1 -> dL/dR
-//		myQs.check_trapezoid_neighbors(  5, 3, null, 2, null, "Spec_4b #2, n#5" );
+		myQs.check_trapezoid_neighbors(  5, null, 3, null, 2, "Spec_4b #2, n#5" );
 		// complex case: attaching to the middle point of to co-linear segments
 		myQs.add_segment_consistently( segListArray[0], 'Spec_4b Main' );
 		//

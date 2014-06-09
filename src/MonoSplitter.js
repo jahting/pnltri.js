@@ -85,11 +85,11 @@ PNLTRI.MonoSplitter.prototype = {
 		
 		if ( inDirection == null ) {
 			inFromLeft = true;
-			if ( inTrap.u0 )		inDirection = true;
-			else if ( inTrap.d0 )	inDirection = false;
+			if ( inTrap.uL )		inDirection = true;
+			else if ( inTrap.dL )	inDirection = false;
 			else {
 				inFromLeft = false;
-				if ( inTrap.u1 )	inDirection = true;
+				if ( inTrap.uR )	inDirection = true;
 				else				inDirection = false;
 			}
 		}
@@ -117,13 +117,13 @@ PNLTRI.MonoSplitter.prototype = {
 				var dblSideL, dblSideR;
 				if ( thisTrap.topLoc == PNLTRI.TRAP_MIDDLE ) {
 					dblOnUp = true;			// double-Side is UP-side
-					dblSideL = thisTrap.u0;
-					dblSideR = thisTrap.u1;
+					dblSideL = thisTrap.uL;
+					dblSideR = thisTrap.uR;
 				}
 				if ( thisTrap.botLoc == PNLTRI.TRAP_MIDDLE ) {
 					dblOnUp = false;		// double-Side is DN-side
-					dblSideL = thisTrap.d0;
-					dblSideR = thisTrap.d1;
+					dblSideL = thisTrap.dL;
+					dblSideR = thisTrap.dR;
 				}
 				var sglSide, sglLeft;
 
@@ -135,7 +135,7 @@ PNLTRI.MonoSplitter.prototype = {
 					// first, degenerate case: triangle trapezoid
 					if ( ( thisTrap.topLoc == PNLTRI.TRAP_CUSP ) || ( thisTrap.botLoc == PNLTRI.TRAP_CUSP ) ) {
 						// TLR_BM, TM_BLR
-						// console.log( "triangle (cusp), 2 neighbors on in-side; from " + ( fromLeft ? "left(u0/d0)" : "right(u1/d1)" ) );
+						// console.log( "triangle (cusp), 2 neighbors on in-side; from " + ( fromLeft ? "left" : "right" ) );
 						//	could be start triangle -> visit ALL neighbors, no optimization !
 						newChain = this.doSplit( curChain, vLow, vHigh, fromLeft );
 						trapList_addItems(  [ [ ( fromLeft ? dblSideL : dblSideR ), !fromUp, fromLeft, curChain ],
@@ -143,27 +143,27 @@ PNLTRI.MonoSplitter.prototype = {
 					// second: trapezoid with 4 (max) neighbors
 					} else if ( ( thisTrap.topLoc == PNLTRI.TRAP_MIDDLE ) && ( thisTrap.botLoc == PNLTRI.TRAP_MIDDLE ) ) {
 						// TM_BM
-						// console.log( "2 trapezoids above & 2 below; from " + ( fromLeft ? "left(u0/d0)" : "right(u1/d1)" ) );
+						// console.log( "2 trapezoids above & 2 below; from " + ( fromLeft ? "left" : "right" ) );
 						newChain = this.doSplit( curChain, vLow, vHigh, fromLeft );
 						if ( !fromLeft ) {
 							var tmp = newChain;
 							newChain = curChain;
 							curChain = tmp;
 						}
-						trapList_addItems(  [ [ thisTrap.u0, false, true, curChain ],
-											  [ thisTrap.d0, true, true, curChain ],
-											  [ thisTrap.u1, false, false, newChain ],
-											  [ thisTrap.d1, true, false, newChain ] ] );
+						trapList_addItems(  [ [ thisTrap.uL, false, true, curChain ],
+											  [ thisTrap.dL, true, true, curChain ],
+											  [ thisTrap.uR, false, false, newChain ],
+											  [ thisTrap.dR, true, false, newChain ] ] );
 					// third: one side with two neighbors
 					} else {
 						// 2 trapezoids on one side (extern cusp) & 1 on the other side
 						if ( dblOnUp ) {
 							// 2 trapezoids above, 1 below, sglLeft: vLow to the left?
-							sglSide = thisTrap.d0 ? thisTrap.d0 : thisTrap.d1;
+							sglSide = thisTrap.dL ? thisTrap.dL : thisTrap.dR;
 							sglLeft = ( thisTrap.botLoc == PNLTRI.TRAP_LEFT );
 						} else {
 							// 1 trapezoid above, 2 below, sglLeft: vHigh to the left?
-							sglSide = thisTrap.u0 ? thisTrap.u0 : thisTrap.u1;
+							sglSide = thisTrap.uL ? thisTrap.uL : thisTrap.uR;
 							sglLeft = ( thisTrap.topLoc == PNLTRI.TRAP_LEFT );
 						}
 						if ( ( fromUp == dblOnUp ) && ( fromLeft == sglLeft ) ) {
@@ -212,10 +212,10 @@ PNLTRI.MonoSplitter.prototype = {
 						toUp = !fromUp;		// going to other side
 					}
 					if ( toUp ) {
-						sglSide = thisTrap.u0 ? thisTrap.u0 : thisTrap.u1;
+						sglSide = thisTrap.uL ? thisTrap.uL : thisTrap.uR;
 						sglLeft = ( thisTrap.topLoc == PNLTRI.TRAP_LEFT );
 					} else {
-						sglSide = thisTrap.d0 ? thisTrap.d0 : thisTrap.d1;
+						sglSide = thisTrap.dL ? thisTrap.dL : thisTrap.dR;
 						sglLeft = ( thisTrap.botLoc == PNLTRI.TRAP_LEFT );
 					}
 					trapList_addItems(	[ [ sglSide, !toUp, !sglLeft, curChain ] ] );
