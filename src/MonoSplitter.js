@@ -9,16 +9,6 @@
  *		to split the main polygon into uni-y-monotone sub-polygons
  */
 
-// for splitting trapezoids
-PNLTRI.TRAP_NOSPLIT = -1;	// no diagonal
-//  on which segment lies the point defining the top or bottom y-line?
-//	all combinations are possible, except two cusps
-PNLTRI.TRAP_MIDDLE	= 0;		// middle: 2 neighbors, separated by a cusp
-PNLTRI.TRAP_LEFT	= 1;		// left: point lies on the left segment
-PNLTRI.TRAP_RIGHT	= 2;		// right: point lies on the right segment
-PNLTRI.TRAP_CUSP	= 1+2;		// cusp: point is the tip of a cusp of a triangular trapezoid
-								//	lying on the left and right segment
-
 /** @constructor */
 PNLTRI.MonoSplitter = function ( inPolygonData ) {
 	
@@ -77,177 +67,99 @@ PNLTRI.MonoSplitter.prototype = {
 	//		lseg: always goes downwards
 	//	This is preserved during the splitting.
 		
-	alyTrap: function ( inChain, inTrap, inDirection, inFromLeft, inOneStep ) {
-		var trapQueue = [], trapQItem = [];
+	alyTrap: function ( inChain, inTrap, inFromUp, inFromLeft, inOneStep ) {
+
+		var trapQueue = [];
+		var thisTrap, fromUp, fromLeft, curChain, newChain;
 		
-		function trapList_addItems( inNewItems ) {
-			for (var i=inNewItems.length-1; i>=0; i--) {
-				trapQueue.push( inNewItems[i] );
-			}
+		function trapList_addItem( inTrap, inFromUp, inFromLeft, inChain ) {
+			if ( inTrap )	trapQueue.push( [ inTrap, inFromUp, inFromLeft, inChain ] );
 		}
 		
 		function trapList_getItem() {
-			return	trapQueue.pop();
+			var trapQItem;
+			if ( trapQItem = trapQueue.pop() ) {
+				thisTrap = trapQItem[0];
+				fromUp	 = trapQItem[1];
+				fromLeft = trapQItem[2];
+				curChain = trapQItem[3];
+				return	true;
+			} else	return	false;
 		}
 		
-		if ( inDirection == null ) {
+		//
+		// main function body
+		//
+		
+		if ( inFromUp == null ) {
 			inFromLeft = true;
-			if ( inTrap.uL )		inDirection = true;
-			else if ( inTrap.dL )	inDirection = false;
+			if ( inTrap.uL )		inFromUp = true;
+			else if ( inTrap.dL )	inFromUp = false;
 			else {
 				inFromLeft = false;
-				if ( inTrap.uR )	inDirection = true;
-				else				inDirection = false;
+				if ( inTrap.uR )	inFromUp = true;
+				else				inFromUp = false;
 			}
 		}
-		trapList_addItems( [ [ inTrap, inDirection, inFromLeft, inChain ] ] );
+		trapList_addItem( inTrap, inFromUp, inFromLeft, inChain );
 		
-		while ( trapQItem = trapList_getItem() ) {
-			var thisTrap;
-			if ( ( thisTrap = trapQItem[0] ) && !thisTrap.monoDiag ) {
-			
-				if ( !thisTrap.lseg || !thisTrap.rseg ) {
-					console.log("ERR alyTrap: lseg/rseg missing", thisTrap);
-					thisTrap.monoDiag = PNLTRI.TRAP_NOSPLIT;
-					return	trapQueue;
-				}
-				
-				var fromUp = trapQItem[1];
-				var fromLeft = trapQItem[2];
-				var curChain = trapQItem[3], newChain;
-				
-				
-				var vHigh = thisTrap.vHigh;
-				var vLow = thisTrap.vLow;
-
-				var dblOnUp = null;
-				var dblSideL, dblSideR;
-				var topLoc, botLoc;
-				if ( thisTrap.uL ) {
-					if ( thisTrap.uR ) {
-						dblOnUp = true;			// double-Side is UP-side
-						dblSideL = thisTrap.uL;
-						dblSideR = thisTrap.uR;
-						topLoc = PNLTRI.TRAP_MIDDLE;
-					} else {
-						topLoc = PNLTRI.TRAP_RIGHT;
-					}
-				} else if ( thisTrap.uR ) {
-					topLoc = PNLTRI.TRAP_LEFT;
-				} else {
-					topLoc = PNLTRI.TRAP_CUSP;
-				}
-				if ( thisTrap.dL ) {
-					if ( thisTrap.dR ) {
-						dblOnUp = false;		// double-Side is DN-side
-						dblSideL = thisTrap.dL;
-						dblSideR = thisTrap.dR;
-						botLoc = PNLTRI.TRAP_MIDDLE;
-					} else {
-						botLoc = PNLTRI.TRAP_RIGHT;
-					}
-				} else if ( thisTrap.dR ) {
-					botLoc = PNLTRI.TRAP_LEFT;
-				} else {
-					botLoc = PNLTRI.TRAP_CUSP;
-				}
-				var sglSide, sglLeft;
-
-				thisTrap.monoDiag = 1 + 4*topLoc + botLoc;
-				
-				if ( dblOnUp != null ) {
-					// TM|BM: 2 neighbors on at least one side
-					
-					// first, degenerate case: triangle trapezoid
-					if ( ( topLoc == PNLTRI.TRAP_CUSP ) || ( botLoc == PNLTRI.TRAP_CUSP ) ) {
-						// TLR_BM, TM_BLR
-						// console.log( "triangle (cusp), 2 neighbors on in-side; from " + ( fromLeft ? "left" : "right" ) );
-						//	could be start triangle -> visit ALL neighbors, no optimization !
-						newChain = this.doSplit( curChain, vLow, vHigh, fromLeft );
-						trapList_addItems(  [ [ ( fromLeft ? dblSideL : dblSideR ), !fromUp, fromLeft, curChain ],
-											  [ ( fromLeft ? dblSideR : dblSideL ), !fromUp, !fromLeft, newChain ] ] );
-					// second: trapezoid with 4 (max) neighbors
-					} else if ( ( topLoc == PNLTRI.TRAP_MIDDLE ) && ( botLoc == PNLTRI.TRAP_MIDDLE ) ) {
-						// TM_BM
-						// console.log( "2 trapezoids above & 2 below; from " + ( fromLeft ? "left" : "right" ) );
-						newChain = this.doSplit( curChain, vLow, vHigh, fromLeft );
-						if ( !fromLeft ) {
-							var tmp = newChain;
-							newChain = curChain;
-							curChain = tmp;
-						}
-						trapList_addItems(  [ [ thisTrap.uL, false, true, curChain ],
-											  [ thisTrap.dL, true, true, curChain ],
-											  [ thisTrap.uR, false, false, newChain ],
-											  [ thisTrap.dR, true, false, newChain ] ] );
-					// third: one side with two neighbors
-					} else {
-						// 2 trapezoids on one side (extern cusp) & 1 on the other side
-						if ( dblOnUp ) {
-							// 2 trapezoids above, 1 below, sglLeft: vLow to the left?
-							sglSide = thisTrap.dL ? thisTrap.dL : thisTrap.dR;
-							sglLeft = ( botLoc == PNLTRI.TRAP_LEFT );
-						} else {
-							// 1 trapezoid above, 2 below, sglLeft: vHigh to the left?
-							sglSide = thisTrap.uL ? thisTrap.uL : thisTrap.uR;
-							sglLeft = ( topLoc == PNLTRI.TRAP_LEFT );
-						}
-						if ( ( fromUp == dblOnUp ) && ( fromLeft == sglLeft ) ) {
-							// TM_BL(from UP-left), TL_BM(from DN-left), TM_BR(from UP-right), TR_BM(from DN-right)
-							// console.log( "2 neighbors on in-side, 1 on the other with y-point on same l/r-side where we come in." );
-							curChain = this.doSplit( curChain, vLow, vHigh, sglLeft );
-						} else {
-							// TM_BL(from UP-right, DN), TL_BM(from UP, DN-right), TM_BR(from UP-left, DN), TR_BM(from UP, DN-left)
-							// console.log( "2 neighbors on one and 1 on the other side, coming from single-side or on double-side not from the l/r-side with the y-point on single-side" );
-							newChain = this.doSplit( curChain, vLow, vHigh, !sglLeft );
-							trapList_addItems(  [ [ ( sglLeft ? dblSideL : dblSideR ), !dblOnUp, sglLeft, newChain ] ] );
-						}
-						trapList_addItems(	[ [ ( sglLeft ? dblSideR : dblSideL ), !dblOnUp, !sglLeft, curChain ],
-											  [ sglSide, dblOnUp, !sglLeft, curChain ] ] );
-					}
-				} else {	// ( dblOnUp == null )
-					// at most 1 neighbor on any side
-					var toUp;
-					// first, degenerate case: triangle trapezoid
-					if ( ( topLoc == PNLTRI.TRAP_CUSP ) || ( botLoc == PNLTRI.TRAP_CUSP ) ) {
-						// triangle (cusp): only one neighbor on in-side, nothing on the other side => no diagonal
-						//	could be start triangle -> visit neighbor in any case !
-						
-						// TLR_BL, TLR_BR; TL_BLR, TR_BLR
-						// console.log( "triangle (cusp), one neighbor on in-side; no split possible" );
-						thisTrap.monoDiag = PNLTRI.TRAP_NOSPLIT;
-						toUp = fromUp;		// going back
-					// fourth: both sides with one neighbor
-					} else {
-						// 1 trapezoid above, 1 below
-						if ( topLoc == botLoc ) {		// same side => no diag
-							// TL_BL, TR_BR
-							// console.log( "1 trapezoid above, 1 below; no split possible" );
-							thisTrap.monoDiag = PNLTRI.TRAP_NOSPLIT;
-						} else {
-							if ( topLoc == PNLTRI.TRAP_LEFT ) {		// && botLoc == RIGHT
-								// TL_BR, !fromLeft !!
-								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "vHigh(left)->vLow(right) (in from above)" : "vLow(right)->vHigh(left) (in from below)" ) );
-								curChain = this.doSplit( curChain, vLow, vHigh, !fromUp );
-							} else {				// topLoc == RIGHT && botLoc == LEFT
-								// TR_BL, fromLeft !!
-								// console.log( "1 trapezoid above, 1 below; " + ( fromUp ? "vLow(left)->vHigh(right) (in from above)" : "vHigh(right)->vLow(left) (in from below)" ) );
-								curChain = this.doSplit( curChain, vLow, vHigh, fromUp );
-							}
-						}
-						toUp = !fromUp;		// going to other side
-					}
-					if ( toUp ) {
-						sglSide = thisTrap.uL ? thisTrap.uL : thisTrap.uR;
-						sglLeft = ( topLoc == PNLTRI.TRAP_LEFT );
-					} else {
-						sglSide = thisTrap.dL ? thisTrap.dL : thisTrap.dR;
-						sglLeft = ( botLoc == PNLTRI.TRAP_LEFT );
-					}
-					trapList_addItems(	[ [ sglSide, !toUp, !sglLeft, curChain ] ] );
-				}	// end ( dblOnUp == null )
-				
+		while ( trapList_getItem() ) {
+			if ( thisTrap.monoDiag )	continue;
+		
+			if ( !thisTrap.lseg || !thisTrap.rseg ) {
+				console.log("ERR alyTrap: lseg/rseg missing", thisTrap);
+				return	trapQueue;
 			}
+
+			// mirror neighbors into norm-position
+			var neighIn, neighSameUD, neighSameLR, neighAcross;
+			if ( fromUp ) {
+				if ( fromLeft ) {
+					neighIn = thisTrap.uL;
+					neighSameUD = thisTrap.uR;
+					neighSameLR = thisTrap.dL;
+					neighAcross = thisTrap.dR;
+				} else {
+					neighIn = thisTrap.uR;
+					neighSameUD = thisTrap.uL;
+					neighSameLR = thisTrap.dR;
+					neighAcross = thisTrap.dL;
+				}
+			} else {
+				if ( fromLeft ) {
+					neighIn = thisTrap.dL;
+					neighSameUD = thisTrap.dR;
+					neighSameLR = thisTrap.uL;
+					neighAcross = thisTrap.uR;
+				} else {
+					neighIn = thisTrap.dR;
+					neighSameUD = thisTrap.dL;
+					neighSameLR = thisTrap.uR;
+					neighAcross = thisTrap.uL;
+				}
+			}
+
+			if ( neighSameUD || neighAcross ) {
+				// TM|BM: TM_BM, TM_BL, TL_BM, TM_BR, TR_BM, TLR_BM, TM_BLR; TL_BR, TR_BL
+				// console.log( "2 neighbors on at least one side or 1 neighbor on each with vHigh and vLow on different L/R-sides => split" );
+				newChain = this.doSplit( curChain, thisTrap.vLow, thisTrap.vHigh, fromLeft );
+			// } else {
+				// TL_BL, TR_BR; degenerate cases (triangle trapezoid): TLR_BL, TLR_BR; TL_BLR, TR_BLR
+				// console.log( "1 neighbor on in-Side, 1 on same L/R-side or none on the other => no split possible" );
+			}
+
+			trapList_addItem( neighAcross, fromUp, !fromLeft, newChain );
+			trapList_addItem( neighSameUD, !fromUp, !fromLeft, newChain );
+			trapList_addItem( neighSameLR, fromUp, fromLeft, curChain );
+
+			if ( !neighSameLR && !neighAcross ) {
+				// TLR_BL, TLR_BR; TL_BLR, TR_BLR,    TLR_BM, TM_BLR
+				// console.log( "degenerate case: triangle (cusp), 1 or 2 neighbors on in-side, nothing on the other side" );
+				//	could be start triangle -> visit IN-neighbor in any case !
+				trapList_addItem( neighIn, !fromUp, fromLeft, curChain );
+			}
+			
+			thisTrap.monoDiag = true;
 
 			if ( inOneStep )	return trapQueue;
 		}
