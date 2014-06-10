@@ -76,6 +76,9 @@ PNLTRI.MonoTriangulator.prototype = {
 
 		frontMono = frontMono.mnext;
 		var frontVert = frontMono.vFrom;
+		
+		// check for robustness		// TODO
+		if (frontVert == endVert)	return;		// Error: only 2 vertices
 
 		while ( (frontVert != endVert) || (vertBackLogIdx > 1) ) {
 			if (vertBackLogIdx > 0) {

@@ -123,6 +123,26 @@ function test_MonoTriangulator() {
 		deepEqual(	triangList, [	[ 0, 1, 2 ], [ 5, 0, 2 ], [ 5, 2, 3 ], [ 5, 3, 4 ],
 									], "LHS n-vert: Triangles, CCW: start at posmax.mnext, that is posmin" );
 //		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
+		//
+		// 2-Vert MonoChain: Robustness, Error Case
+		myVertices = [ { x:8,y:14 }, { x:9,y:20 }, { x:6,y:18 } ];
+		initSeglistMonoChain( myVertices );
+		// shortens MonoChain to length 2, leaves outSegs unchanged (should not matter)
+		myMonoChain[1].mnext.mnext = myMonoChain[1];
+		myMonoChain[1].mnext.mprev = myMonoChain[1];
+		myMonoChain[1].mprev = myMonoChain[1].mnext;
+		myMonoTriang.triangulate_single_polygon( myMonoChain[1] );
+		equal( triangList.length, 0, "No Triangle from 2 vertices" );
+		//
+		// 1-Vert MonoChain: Robustness, Error Case
+		myVertices = [ { x:8,y:14 }, { x:9,y:20 }, { x:6,y:18 } ];
+		initSeglistMonoChain( myVertices );
+		// shortens MonoChain to length 1, leaves outSegs unchanged (should not matter)
+		myMonoChain[1].mnext = myMonoChain[1];
+		myMonoChain[1].mprev = myMonoChain[1];
+//		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
+		myMonoTriang.triangulate_single_polygon( myMonoChain[1] );
+		equal( triangList.length, 0, "No Triangle from 1 vertex" );
 	}
 
 	

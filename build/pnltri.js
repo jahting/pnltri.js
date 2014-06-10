@@ -277,7 +277,6 @@ PNLTRI.PolygonData.prototype = {
 			this.segments[i].mprev = this.segments[i].sprev;
 			this.segments[i].mnext = this.segments[i].snext;
 			// out-going segments of a vertex (max: 4)
-//			this.segments[i].vFrom.outSegs = [ {vertTo: this.segments[i].snext.vFrom, 	// next vertex: first outgoing segment
 			this.segments[i].vFrom.outSegs = [ { segOut: this.segments[i],			// first outgoing segment
 												 vertTo: this.segments[i].vTo } ];	// next vertex: other end of outgoing segment
 		}
@@ -1144,6 +1143,12 @@ PNLTRI.QueryStructure.prototype = {
 		}
 		var trFirst = qsNodeSinkWithPt.trap;		// top-most trapezoid for this segment
 
+		// check for robustness		// TODO
+		if ( !trFirst.uL && !trFirst.uR ) {
+			console.log("ERR add_segment: missing trFirst.uX: ", trFirst );
+			return;
+		}
+
 		//	insert lower vertex into QueryStructure
 		//		Get the bottom-most intersecting trapezoid
 		qsNodeSinkWithPt = this.ptNode( segLowVert, segHighVert, segLowRoot );
@@ -1612,6 +1617,9 @@ PNLTRI.MonoTriangulator.prototype = {
 
 		frontMono = frontMono.mnext;
 		var frontVert = frontMono.vFrom;
+		
+		// check for robustness		// TODO
+		if (frontVert == endVert)	return;		// Error: only 2 vertices
 
 		while ( (frontVert != endVert) || (vertBackLogIdx > 1) ) {
 			if (vertBackLogIdx > 0) {

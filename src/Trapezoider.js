@@ -693,6 +693,12 @@ PNLTRI.QueryStructure.prototype = {
 		}
 		var trFirst = qsNodeSinkWithPt.trap;		// top-most trapezoid for this segment
 
+		// check for robustness		// TODO
+		if ( !trFirst.uL && !trFirst.uR ) {
+			console.log("ERR add_segment: missing trFirst.uX: ", trFirst );
+			return;
+		}
+
 		//	insert lower vertex into QueryStructure
 		//		Get the bottom-most intersecting trapezoid
 		qsNodeSinkWithPt = this.ptNode( segLowVert, segHighVert, segLowRoot );
