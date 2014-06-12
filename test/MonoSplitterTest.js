@@ -843,6 +843,9 @@ function test_MonoSplitter() {
 		test_monotonate_trapezoids( "three_error#3", 28, 0 );			// 3000; 3.Error, integrating into Three.js (logbuffer)
 		test_monotonate_trapezoids( "three_error#4", 32, 0 );			// 1; 4.Error, integrating into Three.js (USA Maine)
 		test_monotonate_trapezoids( "three_error#4b", 32, 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_monotonate_trapezoids( "two_polygons#1", 14, 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
+		test_monotonate_trapezoids( "two_polygons#2", 2, 0 );			// 1; my#6: two trivial polygons
+		test_monotonate_trapezoids( "polygons_inside_hole", 5, 0 );		// 0.7; my#7: square with unregular hole with two polygons inside
 	});
 }
 

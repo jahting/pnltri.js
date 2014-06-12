@@ -23,19 +23,7 @@ PNLTRI.QueryStructure.prototype.nbTrapezoids = function () {
 PNLTRI.QueryStructure.prototype.getTrapByIdx = function ( inIdx ) {
 	return	this.trapArray[inIdx];
 };
-// Assign a depth to the trapezoids; 0: outside, -1: other;  // future: 1: main polygon, 2: holes
-PNLTRI.QueryStructure.prototype.assignDepth = function ( inTrap, inDepth ) {
-	if (! inTrap)				return;
-	if (inTrap.depth != -1)		return;
-	inTrap.depth = inDepth;
-	this.assignDepth( inTrap.uL, inDepth );
-	this.assignDepth( inTrap.uR, inDepth );
-	this.assignDepth( inTrap.dL, inDepth );
-	this.assignDepth( inTrap.dR, inDepth );
-};
-PNLTRI.QueryStructure.prototype.assignDepths = function () {
-	this.assignDepth( this.trapArray[0], 0 );
-};
+// Check depth of the trapezoids
 PNLTRI.QueryStructure.prototype.minDepth = function () {
 	var myMinDepth = 1000;
 	for (var i=0,j=this.trapArray.length; i<j; i++) {
@@ -46,7 +34,13 @@ PNLTRI.QueryStructure.prototype.minDepth = function () {
 	return	myMinDepth;
 };
 PNLTRI.QueryStructure.prototype.maxDepth = function () {
-	return	this.trapArray[0].depth;
+	var myMaxDepth = -2;
+	for (var i=0,j=this.trapArray.length; i<j; i++) {
+		if ( this.trapArray[i].depth > myMaxDepth ) {
+			myMaxDepth = this.trapArray[i].depth;
+		}
+	}
+	return	myMaxDepth;
 };
 // check all trapezoids for link consistency
 PNLTRI.QueryStructure.prototype.check_trapezoids_link_consistency = function () {
@@ -143,24 +137,7 @@ PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId,
 
 function test_QueryStructure() {
 	
-	/* TODO: Tests for PNLTRI.QueryStructure.cloneTrap */
-
-	function test_inside_polygon() {
-		var	myQs = new PNLTRI.QueryStructure();
-		var myTrap;
-		myTrap = {};
-		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap empty!" );
-		myTrap = { lseg: {} };
-		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap no rseg!" );
-		myTrap = { rseg: {} };
-		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap no lseg!" );
-		myTrap = { lseg: {}, rseg: {}, uL: {}, dL: {} };
-		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap no triangle!" );
-		myTrap = { lseg: {}, rseg: { vFrom: { x:0, y:10 }, vTo: { x:10, y:0 }, upward: false } };
-		ok( !myQs.inside_polygon( myTrap ), "inside_polygon: Trap rseg going downwards!" );
-		myTrap = { lseg: {}, rseg: { vFrom: { x:10, y:0 }, vTo: { x:0, y:10 }, upward: true } };
-		ok( myQs.inside_polygon( myTrap ), "inside_polygon: Trap rseg going upwards!" );
-	}
+	/* TODO: Tests for PNLTRI.QueryStructure.cloneTrap, trLeft, trRight */
 
 	function test_is_left_of() {
 		var	myQs = new PNLTRI.QueryStructure();
@@ -803,18 +780,17 @@ function test_QueryStructure() {
 		myQs.add_segment_consistently( segListArray[2], 'assign_depths #2' );
 		ok( myPolygonData.allSegsInQueryStructure(), "assign_depths: all segments inserted" );
 		//
-		var startTrap = myQs.find_first_inside();
-		equal( startTrap.trapID, 1, "assign_depths: Start-Trap-ID" );
-		//
 		//	Main test: standard case
 		//
 		equal( myQs.minDepth(), -1, "assign_depths: Min depth: -1" );
 		equal( myQs.maxDepth(), -1, "assign_depths: Max depth: -1" );
 		myQs.assignDepths();			// marks outside trapezoids
-		equal( myQs.minDepth(), -1, "assign_depths: Min depth: -1" );
-		equal( myQs.maxDepth(), 0, "assign_depths: Max depth: 0" );
+		equal( myQs.minDepth(), 0, "assign_depths: Min depth: 0" );
+		equal( myQs.maxDepth(), 1, "assign_depths: Max depth: 1" );
 		//
-		equal( startTrap.depth, -1, "assign_depths: Max depth of startTrap == -1" );		// still unasigned
+		var startTrap = myQs.find_first_inside();
+		equal( startTrap.trapID, 1, "assign_depths: Start-Trap-ID" );
+		equal( startTrap.depth, 1, "assign_depths: Max depth of startTrap == 1" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 1 );
@@ -829,7 +805,7 @@ function test_QueryStructure() {
 		//
 		//	Main test: all outside
 		//
-		myQs.assignDepths();			// marks outside trapezoids
+		myQs.assignDepths();			// marks all trapezoids as outside
 		equal( myQs.minDepth(), 0, "assign_depths: Min depth: 0" );
 		equal( myQs.maxDepth(), 0, "assign_depths: Max depth: 0" );
 		//
@@ -1341,7 +1317,7 @@ function test_QueryStructure() {
 		ok( myPolygonData.allSegsInQueryStructure(), "add_segment_NEW: all segments inserted" );
 		console.log("add_segment_NEW: Number of Trapezoids: ", myQs.nbTrapezoids() );
 		myQs.assignDepths();			// marks outside trapezoids
-		equal( myQs.minDepth(), -1, "add_segment_Error: Min depth == -1 (closed polygon)" );		
+		equal( myQs.minDepth(), -1, "add_segment_NEW: Min depth == -1 (closed polygon)" );		
 		//
 //		showDataStructure( myQsRoot );
 		drawTrapezoids( myQsRoot, false, 1 );
@@ -1349,7 +1325,6 @@ function test_QueryStructure() {
 
 	
 	test( "QueryStructure", function() {
-		test_inside_polygon();
 		test_is_left_of();
 		//
 		test_init_query_structure_up();
@@ -1397,16 +1372,17 @@ PNLTRI.Trapezoider.prototype.getQsRoot = function () {
 PNLTRI.Trapezoider.prototype.nbTrapezoids = function () {
 	return	this.queryStructure.nbTrapezoids();
 };
+PNLTRI.Trapezoider.prototype.minDepth = function () {
+	return	this.queryStructure.minDepth();
+};
+PNLTRI.Trapezoider.prototype.maxDepth = function () {
+	return	this.queryStructure.maxDepth();
+};
 PNLTRI.Trapezoider.prototype.check_trapezoids_segment_orientation = function () {
 	return	this.queryStructure.check_trapezoids_segment_orientation();
 };
 PNLTRI.Trapezoider.prototype.check_trapezoid_neighbors = function ( inTrapId, inSollU0, inSollU1, inSollD0, inSollD1, inTestName ) {
 	return	this.queryStructure.check_trapezoid_neighbors( inTrapId, inSollU0, inSollU1, inSollD0, inSollD1, inTestName );
-}
-// log the random segment sequence
-PNLTRI.Trapezoider.prototype.random_sequence_log = function ( inSegListArray ) {
-	var logList = inSegListArray.map( function (val) { return val.vFrom.id } );
-	console.log( "Random Segment Sequence: ", logList.join(", ") );
 }
 
 
@@ -1441,7 +1417,7 @@ function test_Trapezoider() {
 	}
 
 
-	function test_trapezoide_polygon( inDataName, inExpectedSegs, inExpectedTraps, inExpectedStartTrap, inDebug ) {
+	function test_trapezoide_polygon( inDataName, inExpectedSegs, inExpectedTraps, inExpectedStartTrap, inExpectedMaxDepth, inDebug ) {
 		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
 		//
 		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( inDataName ) );
@@ -1453,15 +1429,20 @@ function test_Trapezoider() {
 		// Main Test
 		//
 		var myTrapezoider = new PNLTRI.Trapezoider( myPolygonData );
-		var startTrap = myTrapezoider.trapezoide_polygon();
+		myTrapezoider.trapezoide_polygon();
 		var buglist = [];
 		//
 		ok( myPolygonData.allSegsInQueryStructure(), "trapezoide_polygon ("+inDataName+"): all segments inserted" );
+		equal( myTrapezoider.nbTrapezoids(), inExpectedTraps, "trapezoide_polygon ("+inDataName+"): Number of generated Trapezoids" );
+		equal( myTrapezoider.minDepth(), 0, "trapezoide_polygon: depths assigned to all" );
+		equal( myTrapezoider.maxDepth(), inExpectedMaxDepth, "trapezoide_polygon ("+inDataName+"): Max depth" );
+		//
 		if ( buglist = myPolygonData.check_segments_consistency() )
 			ok( !buglist, "trapezoide_polygon ("+inDataName+") segment consistency: " + buglist.join(", ") );
-		equal( myTrapezoider.nbTrapezoids(), inExpectedTraps, "trapezoide_polygon ("+inDataName+"): Number of generated Trapezoids" );
 		if ( buglist = myTrapezoider.check_trapezoids_segment_orientation() )
 			ok( !buglist, "trapezoide_polygon ("+inDataName+") trapezoid segment consistency: " + buglist.join(", ") );
+		//
+		var startTrap = myTrapezoider.find_first_inside();
 		equal( startTrap.trapID, inExpectedStartTrap, "trapezoide_polygon ("+inDataName+"): Start-Trap-ID" );
 		//
 		if ( inDebug > 0 ) {
@@ -1490,61 +1471,37 @@ function test_Trapezoider() {
 		myTrapezoider.check_trapezoid_neighbors(  0, null, null, 13, 36, "trapezoid_polygon2 #0" );
 		myTrapezoider.check_trapezoid_neighbors(  1, 7, null, null, null, "trapezoid_polygon2 #1" );
 		myTrapezoider.check_trapezoid_neighbors(  2, 25, 3, 8, null, "trapezoid_polygon2 #2" );
-//		myTrapezoider.check_trapezoid_neighbors(  3, null, null, 2, null, "trapezoid_polygon2 #3" );
-//		myTrapezoider.check_trapezoid_neighbors(  4, 30, null, 29, null, "trapezoid_polygon2 #4" );
 		myTrapezoider.check_trapezoid_neighbors(  3, null, null, null, 2, "trapezoid_polygon2 #3" );
 		myTrapezoider.check_trapezoid_neighbors(  4, 30, null, null, 29, "trapezoid_polygon2 #4" );
 		myTrapezoider.check_trapezoid_neighbors(  5, 37, null, 16, 24, "trapezoid_polygon2 #5" );
-//		myTrapezoider.check_trapezoid_neighbors(  6, 40, null, 27, null, "trapezoid_polygon2 #6" );
 		myTrapezoider.check_trapezoid_neighbors(  6, null, 40, null, 27, "trapezoid_polygon2 #6" );
 		myTrapezoider.check_trapezoid_neighbors(  7, 29, null, 1, 38, "trapezoid_polygon2 #7" );
 		myTrapezoider.check_trapezoid_neighbors(  8, 2, 17, null, null, "trapezoid_polygon2 #8" );
 		myTrapezoider.check_trapezoid_neighbors(  9, null, null, 21, null, "trapezoid_polygon2 #9" );
 		myTrapezoider.check_trapezoid_neighbors( 10, 36, null, null, null, "trapezoid_polygon2 #10" );
-//		myTrapezoider.check_trapezoid_neighbors( 11, 39, null, 30, null, "trapezoid_polygon2 #11" );
-//		myTrapezoider.check_trapezoid_neighbors( 12, 36, null, 40, null, "trapezoid_polygon2 #12" );
 		myTrapezoider.check_trapezoid_neighbors( 11, 39, null, null, 30, "trapezoid_polygon2 #11" );
 		myTrapezoider.check_trapezoid_neighbors( 12, null, 36, null, 40, "trapezoid_polygon2 #12" );
 		myTrapezoider.check_trapezoid_neighbors( 13, 0, null, 14, null, "trapezoid_polygon2 #13" );
 		myTrapezoider.check_trapezoid_neighbors( 14, 13, null, 19, null, "trapezoid_polygon2 #14" );
-//		myTrapezoider.check_trapezoid_neighbors( 15, null, null, 20, null, "trapezoid_polygon2 #15" );
-//		myTrapezoider.check_trapezoid_neighbors( 16, 5, null, 22, null, "trapezoid_polygon2 #16" );
-//		myTrapezoider.check_trapezoid_neighbors( 17, 21, 23, 8, null, "trapezoid_polygon2 #17" );
 		myTrapezoider.check_trapezoid_neighbors( 15, null, null, null, 20, "trapezoid_polygon2 #15" );
 		myTrapezoider.check_trapezoid_neighbors( 16, 5, null, null, 22, "trapezoid_polygon2 #16" );
 		myTrapezoider.check_trapezoid_neighbors( 17, 21, 23, null, 8, "trapezoid_polygon2 #17" );
 		myTrapezoider.check_trapezoid_neighbors( 18, null, null, 23, null, "trapezoid_polygon2 #18" );
 		myTrapezoider.check_trapezoid_neighbors( 19, 14, null, 25, 34, "trapezoid_polygon2 #19" );
-//		myTrapezoider.check_trapezoid_neighbors( 20, 15, null, 31, null, "trapezoid_polygon2 #20" );
 		myTrapezoider.check_trapezoid_neighbors( 20, null, 15, 31, null, "trapezoid_polygon2 #20" );
 		myTrapezoider.check_trapezoid_neighbors( 21, 9, null, 17, null, "trapezoid_polygon2 #21" );
-//		myTrapezoider.check_trapezoid_neighbors( 22, 16, null, null, null, "trapezoid_polygon2 #22" );
-//		myTrapezoider.check_trapezoid_neighbors( 23, 18, 27, 17, null, "trapezoid_polygon2 #23" );
-//		myTrapezoider.check_trapezoid_neighbors( 24, 5, null, null, null, "trapezoid_polygon2 #24" );
 		myTrapezoider.check_trapezoid_neighbors( 22, null, 16, null, null, "trapezoid_polygon2 #22" );
 		myTrapezoider.check_trapezoid_neighbors( 23, 18, 27, null, 17, "trapezoid_polygon2 #23" );
 		myTrapezoider.check_trapezoid_neighbors( 24, null, 5, null, null, "trapezoid_polygon2 #24" );
 		myTrapezoider.check_trapezoid_neighbors( 25, 19, null, 2, null, "trapezoid_polygon2 #25" );
 		myTrapezoider.check_trapezoid_neighbors( 26, null, null, 33, null, "trapezoid_polygon2 #26" );
-//		myTrapezoider.check_trapezoid_neighbors( 27, 6, null, 23, null, "trapezoid_polygon2 #27" );
-//		myTrapezoider.check_trapezoid_neighbors( 28, 34, null, 35, null, "trapezoid_polygon2 #28" );
 		myTrapezoider.check_trapezoid_neighbors( 27, null, 6, null, 23, "trapezoid_polygon2 #27" );
 		myTrapezoider.check_trapezoid_neighbors( 28, 34, null, null, 35, "trapezoid_polygon2 #28" );
 		myTrapezoider.check_trapezoid_neighbors( 29, 33, 4, 7, 37, "trapezoid_polygon2 #29" );
-//		myTrapezoider.check_trapezoid_neighbors( 30, 11, null, 4, null, "trapezoid_polygon2 #30" );
-//		myTrapezoider.check_trapezoid_neighbors( 31, 20, 32, 39, null, "trapezoid_polygon2 #31" );
-//		myTrapezoider.check_trapezoid_neighbors( 32, null, null, 31, null, "trapezoid_polygon2 #32" );
 		myTrapezoider.check_trapezoid_neighbors( 30, null, 11, 4, null, "trapezoid_polygon2 #30" );
 		myTrapezoider.check_trapezoid_neighbors( 31, 20, 32, null, 39, "trapezoid_polygon2 #31" );
 		myTrapezoider.check_trapezoid_neighbors( 32, null, null, null, 31, "trapezoid_polygon2 #32" );
 		myTrapezoider.check_trapezoid_neighbors( 33, 26, null, 29, null, "trapezoid_polygon2 #33" );
-//		myTrapezoider.check_trapezoid_neighbors( 34, 19, null, 28, null, "trapezoid_polygon2 #34" );
-//		myTrapezoider.check_trapezoid_neighbors( 35, 28, null, null, null, "trapezoid_polygon2 #35" );
-//		myTrapezoider.check_trapezoid_neighbors( 36, 0, null, 10, 12, "trapezoid_polygon2 #36" );
-//		myTrapezoider.check_trapezoid_neighbors( 37, 29, null, 5, null, "trapezoid_polygon2 #37" );
-//		myTrapezoider.check_trapezoid_neighbors( 38, 7, null, null, null, "trapezoid_polygon2 #38" );
-//		myTrapezoider.check_trapezoid_neighbors( 39, 31, null, 11, null, "trapezoid_polygon2 #39" );
-//		myTrapezoider.check_trapezoid_neighbors( 40, 12, null, 6, null, "trapezoid_polygon2 #40" );
 		myTrapezoider.check_trapezoid_neighbors( 34, null, 19, 28, null, "trapezoid_polygon2 #34" );
 		myTrapezoider.check_trapezoid_neighbors( 35, null, 28, null, null, "trapezoid_polygon2 #35" );
 		myTrapezoider.check_trapezoid_neighbors( 36, null, 0, 10, 12, "trapezoid_polygon2 #36" );
@@ -1564,17 +1521,18 @@ function test_Trapezoider() {
 		test_math_logstar_n();
 		test_math_NH();
 		//
-		test_trapezoide_polygon( "article_poly", 20, 41, 1, 0 );			// 1.5: from article [Sei91]
-		test_trapezoide_polygon( "square_3triangholes", 13, 27, 19, 0 );	// 5; from	"Narkhede A. and Manocha D.", data_1
-		test_trapezoide_polygon( "trap_2up_2down", 6, 13, 3, 0 );			// 4: trapezoid with 2 upper and 2 lower neighbors
-		test_trapezoide_polygon( "pt_3_diag_max", 7, 15, 10, 0 );			// 4: vertex (6,6) with 3 additional diagonals (max)
-		test_trapezoide_polygon( "xy_bad_saw", 39, 79, 14, 0 );				// 2: very inconvenient contour in X- and Y-direction
+		test_trapezoide_polygon( "article_poly", 20, 41, 1, 1, 0 );			// 1.5: from article [Sei91]
+		test_trapezoide_polygon( "square_3triangholes", 13, 27, 19, 2, 0 );	// 5; from	"Narkhede A. and Manocha D.", data_1
+		test_trapezoide_polygon( "trap_2up_2down", 6, 13, 3, 1, 0 );		// 4: trapezoid with 2 upper and 2 lower neighbors
+		test_trapezoide_polygon( "pt_3_diag_max", 7, 15, 10, 1, 0 );		// 4: vertex (6,6) with 3 additional diagonals (max)
+		test_trapezoide_polygon( "xy_bad_saw", 39, 79, 14, 1, 0 );			// 2: very inconvenient contour in X- and Y-direction
 		//
-		test_trapezoide_polygon( "three_error#1", 92, 185, 36, 0 );			// 1; 1.Error, integrating into Three.js (letter "t")
-		test_trapezoide_polygon( "three_error#2", 51, 103, 28, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
-		test_trapezoide_polygon( "three_error#3", 91, 183, 22, 0 );			// 3000; 3.Error, integrating into Three.js (logbuffer)
-		test_trapezoide_polygon( "three_error#4", 102, 205, 15, 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
-		test_trapezoide_polygon( "three_error#4b", 102, 205, 15, 0 );		// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_trapezoide_polygon( "three_error#1", 92, 185, 36, 1, 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
+		test_trapezoide_polygon( "three_error#2", 51, 103, 28, 1, 0 );		// 0.7; 2.Error, integrating into Three.js (letter "1")
+		test_trapezoide_polygon( "three_error#3", 91, 183, 22, 1, 0 );		// 3000; 3.Error, integrating into Three.js (logbuffer)
+		test_trapezoide_polygon( "three_error#4", 102, 205, 15, 1, 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
+		test_trapezoide_polygon( "three_error#4b", 102, 205, 15, 1, 0 );	// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_trapezoide_polygon( "hole_first", 19, 39, 13, 2, 0 );			// 0.5; 5.Error, integrating into Three.js ("R")
 		//
 //		console.perform();
 //		test_trapezoide_polygon( "squares_perftest_mid", 904, 1809, 505, 1 );	// 1: 15x15 Squares in Squares Performance Test
@@ -1584,7 +1542,6 @@ function test_Trapezoider() {
 	});
 }
 
-
 function compute_Trapezoider( inResultTarget ) {
 		var myPolygonData = new PNLTRI.PolygonData( [ [
 			{ x:10, y:35 }, { x:15, y: 5 },	{ x:22, y:15 },
@@ -1592,10 +1549,9 @@ function compute_Trapezoider( inResultTarget ) {
 			] ] );
 		//
 		var myTrapezoider = new PNLTRI.Trapezoider( myPolygonData );
-		var startTrap = myTrapezoider.trapezoide_polygon();
+		myTrapezoider.trapezoide_polygon();
 		//
 		var myQsRoot = myTrapezoider.getQsRoot();
-//		drawTrapezoids( startTrap.sink, false, 1 );
 //		showDataStructure( myQsRoot );
 		drawTrapezoids( myQsRoot, false, 1 );
 }

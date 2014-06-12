@@ -148,17 +148,21 @@ PNLTRI.PolygonData.prototype.checkMonoChainVertexIDs = function ( chainIdx, inVe
 	return	resultStr;
 };
 //	for display of the monotone polygons
+PNLTRI.PolygonData.prototype.monotone_chain_2_polygon = function ( inMonoChain ) {
+	var monoChain, firstEntry;
+	var polygon = [];
+	monoChain = firstEntry = inMonoChain;
+	do {
+		polygon.push( monoChain.vFrom );
+		monoChain = monoChain.mnext;
+	} while ( monoChain != firstEntry );	// monoChain not yet closed
+	return	polygon;
+};
 PNLTRI.PolygonData.prototype.monotone_chains_2_polygons = function () {
 	var monoChain, firstEntry;
 	var polygon, polygons = [];
 	for (var i=0; i<this.monoSubPolyChains.length; i++) {
-		polygon = [];
-		monoChain = firstEntry = this.monoSubPolyChains[i];
-		do {
-			polygon.push( monoChain.vFrom );
-			monoChain = monoChain.mnext;
-		} while ( monoChain != firstEntry );	// monoChain not yet closed
-		polygons.push( polygon );
+		polygons.push( this.monotone_chain_2_polygon( this.monoSubPolyChains[i] ) );
 	}
 	return	polygons;
 };

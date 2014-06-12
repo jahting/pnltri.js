@@ -81,6 +81,10 @@ function test_Triangulator() {
 		test_triangulate_polygon( "three_error#3", 28, 0 );				// 3000; 3.Error, integrating into Three.js (logbuffer)
 		test_triangulate_polygon( "three_error#4", 32, 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
 		test_triangulate_polygon( "three_error#4b", 32, 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_triangulate_polygon( "hole_first", 7, 0 );					// 0.5; 5.Error, integrating into Three.js ("R")
+		test_triangulate_polygon( "two_polygons#1", 14, 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
+		test_triangulate_polygon( "two_polygons#2", 2, 0 );				// 1; my#6: two trivial polygons
+		test_triangulate_polygon( "polygons_inside_hole", 5, 0 );		// 0.7; my#7: square with unregular hole with two polygons inside
 		//
 		test_triangulate_polygon( "squares_perftest_min", 14, 0 );		// 1: 3x3 squares in square, performance test
 //		test_triangulate_polygon( "squares_perftest_mid", 422, 1 );		// 1: 15x15 squares in square, performance test

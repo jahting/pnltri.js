@@ -350,7 +350,7 @@ PNLTRI.PolygonData.prototype = {
 			while ( (frontPt = frontMono.vFrom) != firstPt ) {
 				if (frontMono.marked) {
 					processed = true;
-					break;		// break from while
+					break;	// from while
 				} else {
 					frontMono.marked = true;
 				}
@@ -359,11 +359,10 @@ PNLTRI.PolygonData.prototype = {
 					monoPosmax = frontMono;
 				}
 				frontMono = frontMono.mnext;
-			}	// end while
-			if (processed) continue;		// Go to next polygon
+			}
+			if (processed) continue;	// Go to next polygon
 			uniqueMonoChainsMax.push(monoPosmax);
-		}	// end for
-		//
+		}
 		return	uniqueMonoChainsMax;
 	},
 	

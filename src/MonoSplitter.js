@@ -33,14 +33,25 @@ PNLTRI.MonoSplitter.prototype = {
 		// Trapezoidation
 		this.trapezoider = new PNLTRI.Trapezoider( this.polyData );
 		//	=> one triangular trapezoid which lies inside the polygon
-		this.startTrap = this.trapezoider.trapezoide_polygon();
+		this.trapezoider.trapezoide_polygon();
+		this.startTrap = this.trapezoider.find_first_inside();
 				
 		// Generate the uni-y-monotone sub-polygons from
 		//	the trapezoidation of the polygon.
 		//	!!  for the start triangle trapezoid it doesn't matter
 		//	!!	from where we claim to enter it
 		this.polyData.initMonoChains();
-		this.alyTrap( 0, this.startTrap, null, null, null );
+		
+		var curChain = 0;
+		var curStart = this.startTrap;
+		while (curStart) {
+			this.polyData.monoSubPolyChains[curChain] = curStart.lseg;
+			this.alyTrap( curChain, curStart, null, null, null );
+			if ( curStart = this.trapezoider.find_first_inside() ) {
+				// console.log("another Polygon");
+				curChain = this.polyData.monoSubPolyChains.length;
+			}
+		};
 
 		// return number of UNIQUE sub-polygons created
 		return	this.polyData.normalize_monotone_chains();

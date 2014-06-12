@@ -413,7 +413,7 @@ PNLTRI.PolygonData.prototype = {
 			while ( (frontPt = frontMono.vFrom) != firstPt ) {
 				if (frontMono.marked) {
 					processed = true;
-					break;		// break from while
+					break;	// from while
 				} else {
 					frontMono.marked = true;
 				}
@@ -422,11 +422,10 @@ PNLTRI.PolygonData.prototype = {
 					monoPosmax = frontMono;
 				}
 				frontMono = frontMono.mnext;
-			}	// end while
-			if (processed) continue;		// Go to next polygon
+			}
+			if (processed) continue;	// Go to next polygon
 			uniqueMonoChainsMax.push(monoPosmax);
-		}	// end for
-		//
+		}
 		return	uniqueMonoChainsMax;
 	},
 	
@@ -640,26 +639,6 @@ PNLTRI.QueryStructure.prototype = {
 	},
 
 	
-	// Returns TRUE if the trapezoid is triangular and lies inside the polygon.
-	// !! depends on the correct orientation of segments (contour: CCW, hole: CW) !!
-	
-	inside_polygon: function ( inTrap ) {
-
-		var rseg = inTrap.rseg;
-		
-		if ( !inTrap.lseg || !inTrap.rseg )		return false;
-		
-		if ( ( !inTrap.uL && !inTrap.uR ) || ( !inTrap.dL && !inTrap.dR ) ) {
-			// triangle shaped trapezoid
-			//  CCW ordering of the contour segments:
-			//	 right segment is going upwards <=> triangle is inside the polygon
-			return ( rseg.upward );
-		}
-		
-		return false;
-	},
-
-
 	// Checks, whether the vertex inPt is to the left of line segment inSeg.
 	//	Returns:
 	//		>0: inPt is left of inSeg,
@@ -1246,7 +1225,11 @@ PNLTRI.QueryStructure.prototype = {
 				only_one_trap_below( trNext );
 			}
       
+			if ( trNewLeft.rseg )	trNewLeft.rseg.trLeft = trNewRight;
+			if ( trNewRight.lseg )	trNewRight.lseg.trRight = trNewLeft;
 			trNewLeft.rseg = trNewRight.lseg  = inSegment;
+			inSegment.trLeft = trNewLeft;
+			inSegment.trRight = trNewRight;
 
 			// further loop-step down ?
 			if ( trCurrent.vLow != trLast.vLow ) {
@@ -1264,12 +1247,84 @@ PNLTRI.QueryStructure.prototype = {
 	},
 
 	
+	// Assign a depth to the trapezoids; 0: outside, 1: main polygon, 2: holes
+	assignDepths: function () {
+		var thisDepth = [ this.trapArray[0] ];
+		var nextDepth = [];
+		
+		function assignDepth( inTrap, inDepth ) {
+			if ( !inTrap )				return;
+			if ( inTrap.depth != -1 )	return;
+			inTrap.depth = inDepth;
+			//
+			var otherSide;
+			if ( ( otherSide = inTrap.lseg ) && ( otherSide.trLeft.depth == -1 ) )
+				nextDepth.push( otherSide.trLeft );
+			if ( ( otherSide = inTrap.rseg ) && ( otherSide.trRight.depth == -1 ) )
+				nextDepth.push( otherSide.trRight );
+			//
+			assignDepth( inTrap.uL, inDepth );
+			assignDepth( inTrap.uR, inDepth );
+			assignDepth( inTrap.dL, inDepth );
+			assignDepth( inTrap.dR, inDepth );
+		};
+		
+		var thisTrap, curDepth = 0;
+		do {
+			while ( thisTrap = thisDepth.shift() ) {
+				assignDepth( thisTrap, curDepth );
+			}
+			thisDepth = nextDepth; nextDepth = [];
+			curDepth++;
+		} while ( thisDepth.length > 0 );
+	},
+	
+
+	// reverse winding order of a polygon chain
+	reverse_polygon_chain: function ( inSomeSegment ) {
+		var tmp, frontSeg = inSomeSegment;
+		do {
+			// change link direction
+			tmp = frontSeg.snext;
+			frontSeg.snext = frontSeg.sprev;
+			frontSeg.sprev = tmp;
+			// exchange vertices
+			tmp = frontSeg.vTo;
+			frontSeg.vTo = frontSeg.vFrom;
+			frontSeg.vFrom = tmp;
+			frontSeg.upward = !frontSeg.upward;
+			// continue with old snext
+			frontSeg = frontSeg.sprev;
+		} while ( frontSeg != inSomeSegment );
+	},
+
+
+	// Check segment orientation and reverse polyChain winding order if necessary
+	//	=> contour: CCW, holes: CW
+	//	=> all trapezoids lseg/rseg have opposing directions,
+	//		assumed, the missing outer segments have CW orientation !
+	
+	normalize_segment_orientation: function () {
+		var thisSeg;
+		for ( var i = 0; i < this.segListArray.length; i++ ) {
+			thisSeg = this.segListArray[i];
+			if ( thisSeg.upward == ( ( thisSeg.trLeft.depth % 2 ) == 0 ) )
+				this.reverse_polygon_chain( thisSeg );
+		}
+	},
+
+
 	// Find one triangular trapezoid which lies inside the polygon
+	// !! does NOT depend on the orientation of segments CCW/CW !!
 	
 	find_first_inside: function () {
-		for (var i=0, j=this.trapArray.length; i<j; i++) { 
-			if ( this.inside_polygon( this.trapArray[i] ) ) {
-				return this.trapArray[i];
+		var thisTrap;
+		for (var i=0, j=this.trapArray.length; i<j; i++) {
+			thisTrap = this.trapArray[i];
+			if ( ( ( thisTrap.depth % 2 ) == 1 ) && ( !thisTrap.monoDiag ) &&
+				 ( ( !thisTrap.uL && !thisTrap.uR ) || ( !thisTrap.dL && !thisTrap.dR ) )
+			 	) {
+				return	thisTrap;
 			}
 		}
 		return	null;
@@ -1294,8 +1349,11 @@ PNLTRI.Trapezoider = function ( inPolygonData ) {
 PNLTRI.Trapezoider.prototype = {
 
 	constructor: PNLTRI.Trapezoider,
-
-
+	
+	find_first_inside: function () {
+		return	 this.queryStructure.find_first_inside();
+	},
+	
 	/*
 	 * Mathematics & Geometry helper methods
 	 */
@@ -1339,10 +1397,12 @@ PNLTRI.Trapezoider.prototype = {
 	//	neighbor links.
 	
 	trapezoide_polygon: function () {							// <<<< public
+		var myQs = this.queryStructure;
 		
-		var randSegListArray = this.queryStructure.segListArray.slice(0);
+		var randSegListArray = myQs.segListArray.slice(0);
+//		console.log( "Polygon Chains: ", dumpSegmentList( randSegListArray ) );
 		PNLTRI.Math.array_shuffle( randSegListArray );
-//		this.random_sequence_log( randSegListArray );
+//		console.log( "Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
 		
 		var i, h;
 		var anzSegs = randSegListArray.length;
@@ -1350,8 +1410,8 @@ PNLTRI.Trapezoider.prototype = {
 		var logStarN = this.math_logstar_n(anzSegs);
 		for (h = 1; h <= logStarN; h++) {
 			for (i = this.math_NH(anzSegs, h -1); i < this.math_NH(anzSegs, h); i++) {
-				this.queryStructure.add_segment( randSegListArray[i-1] );
-//				this.queryStructure.add_segment_consistently( randSegListArray[i-1], 'RandomA#'+(i-1) );
+				myQs.add_segment( randSegListArray[i-1] );
+//				myQs.add_segment_consistently( randSegListArray[i-1], 'RandomA#'+(i-1) );
 			}
 			// Find a new sub-tree root for each of the segment endpoints
 			for (i = 0; i < anzSegs; i++) {
@@ -1360,11 +1420,12 @@ PNLTRI.Trapezoider.prototype = {
 		}
 		
 		for (i = this.math_NH( anzSegs, logStarN ); i <= anzSegs; i++) {
-			this.queryStructure.add_segment( randSegListArray[i-1] );
-//			this.queryStructure.add_segment_consistently( randSegListArray[i-1], 'RandomB#'+(i-1) );
+			myQs.add_segment( randSegListArray[i-1] );
+//			myQs.add_segment_consistently( randSegListArray[i-1], 'RandomB#'+(i-1) );
 		}
 		
-		return	this.queryStructure.find_first_inside();
+		myQs.assignDepths();
+		myQs.normalize_segment_orientation();
 	},
 
 };
@@ -1404,14 +1465,25 @@ PNLTRI.MonoSplitter.prototype = {
 		// Trapezoidation
 		this.trapezoider = new PNLTRI.Trapezoider( this.polyData );
 		//	=> one triangular trapezoid which lies inside the polygon
-		this.startTrap = this.trapezoider.trapezoide_polygon();
+		this.trapezoider.trapezoide_polygon();
+		this.startTrap = this.trapezoider.find_first_inside();
 				
 		// Generate the uni-y-monotone sub-polygons from
 		//	the trapezoidation of the polygon.
 		//	!!  for the start triangle trapezoid it doesn't matter
 		//	!!	from where we claim to enter it
 		this.polyData.initMonoChains();
-		this.alyTrap( 0, this.startTrap, null, null, null );
+		
+		var curChain = 0;
+		var curStart = this.startTrap;
+		while (curStart) {
+			this.polyData.monoSubPolyChains[curChain] = curStart.lseg;
+			this.alyTrap( curChain, curStart, null, null, null );
+			if ( curStart = this.trapezoider.find_first_inside() ) {
+				// console.log("another Polygon");
+				curChain = this.polyData.monoSubPolyChains.length;
+			}
+		};
 
 		// return number of UNIQUE sub-polygons created
 		return	this.polyData.normalize_monotone_chains();

@@ -5,8 +5,9 @@ pnltri.js
 
 This project implements an algorithm by Raimund Seidel [Sei91] for the triangulation of simple polygons in expected near-linear time with several improvements and extensions. It includes extensive unit and functional tests.
 
-At present the algorithm handles simple polygons (no crossing edges) with holes. The contour and the holes are specified as vertex sequences. Since the first sequence is the contour and all others the holes, there is no need for a specific winding order clock-wise or counter-clock-wise.
-Repeating points (zero-length edges) and crossing edges are not allowed.
+At present the algorithm handles simple polygons (no crossing edges) with holes. The contour and the holes are specified as vertex sequences.
+The input can contain several polygons and or holes in any order. There is no need for a specific winding order clockwise (CW) or counterclockwise (CCW) as usual.
+But repeating points (zero-length edges) and crossing edges are not allowed.
 
 The output is a list of triangles. Each triangle is a triple of vertex indices. These refer to the order of the vertices in the input sequences, as if those had all been concatenated (numbering starts at 0). No Steiner points are added.
 The output triangles for a specific polygon (with holes) are always the same, but since there is a random part in the algorithm and output is not sorted, their order changes.

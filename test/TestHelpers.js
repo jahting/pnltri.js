@@ -379,3 +379,39 @@ function drawPolygonLayers( inPolygonLayers, inScale ) {
 
 }
 
+/* =============================================================================
+ *
+ *	Helper for dumping segment list (several polygon chains) -> String
+ *
+ * ===========================================================================*/
+
+// polygon chains -> String
+function dumpSegmentList( inSegListArray, inHtmlBreaks ) {
+	var lineBreak = inHtmlBreaks ? " <br/>\n" : " \n";
+	
+	var dumpStr = '', maxVertId = -1;
+	var actSeg, firstSeg;
+	while ( maxVertId < inSegListArray.length-1 ) {
+		maxVertId++;
+		var count = inSegListArray.length + 1;		// to prevent endless loop
+	
+		actSeg = firstSeg = inSegListArray[maxVertId];
+		dumpStr += "[";
+		do {
+			dumpStr += " { x:" + actSeg.vFrom.x + ", y:" + actSeg.vFrom.y + " },";
+			if ( actSeg.vFrom.id > maxVertId ) maxVertId = actSeg.vFrom.id;
+			actSeg = actSeg.snext;
+			count--;
+		} while ( ( actSeg != firstSeg ) && ( count > 0 ) );
+		
+		dumpStr += " ]," + lineBreak;
+	}
+	return	dumpStr;
+}
+
+// random segment sequence -> String
+function dumpRandomSequence( inSegListArray ) {
+	var logList = inSegListArray.map( function (val) { return val.vFrom.id } );
+	return	logList.join(", ");
+}
+
