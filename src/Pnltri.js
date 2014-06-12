@@ -5,7 +5,7 @@
  *
  */
  
-var PNLTRI = { REVISION: '0.8' };
+var PNLTRI = { REVISION: '0.9' };
 
 //	#####  Global Constants  #####
 

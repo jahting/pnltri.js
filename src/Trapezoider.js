@@ -798,32 +798,27 @@ PNLTRI.QueryStructure.prototype = {
 	},
 
 	
-	// Assign a depth to the trapezoids; 0: outside, 1: main polygon, 2: holes
+	// Assign a depth to the trapezoids;
+	//	0: outside, 1: main polygon, 2: holes, 3:polygons in holes, ...
 	assignDepths: function () {
 		var thisDepth = [ this.trapArray[0] ];
 		var nextDepth = [];
 		
-		function assignDepth( inTrap, inDepth ) {
-			if ( !inTrap )				return;
-			if ( inTrap.depth != -1 )	return;
-			inTrap.depth = inDepth;
-			//
-			var otherSide;
-			if ( ( otherSide = inTrap.lseg ) && ( otherSide.trLeft.depth == -1 ) )
-				nextDepth.push( otherSide.trLeft );
-			if ( ( otherSide = inTrap.rseg ) && ( otherSide.trRight.depth == -1 ) )
-				nextDepth.push( otherSide.trRight );
-			//
-			assignDepth( inTrap.uL, inDepth );
-			assignDepth( inTrap.uR, inDepth );
-			assignDepth( inTrap.dL, inDepth );
-			assignDepth( inTrap.dR, inDepth );
-		};
-		
-		var thisTrap, curDepth = 0;
+		var thisTrap, otherSide, curDepth = 0;
 		do {
-			while ( thisTrap = thisDepth.shift() ) {
-				assignDepth( thisTrap, curDepth );
+			while ( thisTrap = thisDepth.pop() ) {
+				if ( thisTrap.depth != -1 )	continue;
+				thisTrap.depth = curDepth;
+				//
+				if ( thisTrap.uL )	thisDepth.push( thisTrap.uL );
+				if ( thisTrap.uR )	thisDepth.push( thisTrap.uR );
+				if ( thisTrap.dL )	thisDepth.push( thisTrap.dL );
+				if ( thisTrap.dR )	thisDepth.push( thisTrap.dR );
+				//
+				if ( ( otherSide = thisTrap.lseg ) && ( otherSide.trLeft.depth == -1 ) )
+					nextDepth.push( otherSide.trLeft );
+				if ( ( otherSide = thisTrap.rseg ) && ( otherSide.trRight.depth == -1 ) )
+					nextDepth.push( otherSide.trRight );
 			}
 			thisDepth = nextDepth; nextDepth = [];
 			curDepth++;

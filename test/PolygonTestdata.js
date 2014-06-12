@@ -1143,7 +1143,7 @@ PolygonTestdata.prototype = {
 			 ( inDataName == "squares_perftest_mid" ) ||
 			 ( inDataName == "squares_perftest_max" ) ) {
 			// for Performance-Test with 40x40 holes
-			var	anzSquare = ( inDataName == "squares_perftest_max" ) ? 40 : 
+			var	anzSquare = ( inDataName == "squares_perftest_max" ) ? 40 : 		// 160: 3-3.2 seconds
 								( ( inDataName == "squares_perftest_mid" ) ? 15 : 3 );
 			var scale = Math.floor( 40.0/anzSquare );
 			var shape = [ { x:40, y:40 }, { x: 0, y:40 }, { x: 0, y: 0 }, { x:40, y: 0 } ];
