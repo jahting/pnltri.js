@@ -1527,11 +1527,11 @@ function test_Trapezoider() {
 		test_trapezoide_polygon( "pt_3_diag_max", 7, 15, 10, 1, 0 );		// 4: vertex (6,6) with 3 additional diagonals (max)
 		test_trapezoide_polygon( "xy_bad_saw", 39, 79, 14, 1, 0 );			// 2: very inconvenient contour in X- and Y-direction
 		//
-		test_trapezoide_polygon( "three_error#1", 92, 185, 36, 1, 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
-		test_trapezoide_polygon( "three_error#2", 51, 103, 28, 1, 0 );		// 0.7; 2.Error, integrating into Three.js (letter "1")
-		test_trapezoide_polygon( "three_error#3", 91, 183, 22, 1, 0 );		// 3000; 3.Error, integrating into Three.js (logbuffer)
+		test_trapezoide_polygon( "three_error#1", 92, 185, 27, 1, 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
+		test_trapezoide_polygon( "three_error#2", 51, 103, 5, 1, 0 );		// 0.7; 2.Error, integrating into Three.js (letter "1")
+		test_trapezoide_polygon( "three_error#3", 91, 183, 41, 1, 0 );		// 3000; 3.Error, integrating into Three.js (logbuffer)
 		test_trapezoide_polygon( "three_error#4", 102, 205, 15, 1, 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
-		test_trapezoide_polygon( "three_error#4b", 102, 205, 15, 1, 0 );	// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_trapezoide_polygon( "three_error#4b", 102, 205, 6, 1, 0 );		// 0.04; 4.Error, integrating into Three.js (USA Maine)
 		test_trapezoide_polygon( "hole_first", 19, 39, 13, 2, 0 );			// 0.5; 5.Error, integrating into Three.js ("R")
 		//
 //		console.perform();

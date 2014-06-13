@@ -4,7 +4,7 @@
 
 /*	TODO: Tests for appendVertexEntry, appendVertexOutsegEntry,
 	createSegmentEntry, appendSegmentEntry,
-	addVertexChain, addPolygonChain: second parameter, suppression of zero-length segments	*/
+	addVertexChain, addPolygonChain: suppression of zero-length segments	*/
 
 
 /*	Base class extensions - for testing only */
@@ -26,7 +26,8 @@ PNLTRI.PolygonData.prototype.allSegsInQueryStructure = function () {
 };
 PNLTRI.PolygonData.prototype.check_segments_consistency = function () {
 	var bugList = [];
-	for ( var i=1, j=this.segments.length; i < j; i++ ) {
+	for ( var i=0, j=this.segments.length; i < j; i++ ) {
+		if ( this.segments[i].chainId == null )		bugList.push( "SegNo#"+i+".chainId: missing" );
 		if ( this.segments[i].vFrom == null )		bugList.push( "SegNo#"+i+".vFrom: missing" );
 		if ( this.segments[i].vTo == null )			bugList.push( "SegNo#"+i+".vTo: missing" );
 		if ( this.segments[i].vFrom == this.segments[i].vTo )		bugList.push( "SegNo#"+i+": equal endpoints" );
@@ -222,7 +223,15 @@ PNLTRI.PolygonData.prototype.map_segments_and_vertices = function ( inSegListArr
 	document.body.appendChild( info );
 //	showDataStructure( vertMap );
 };
-
+// calculates the area of a polygon: remainder from checking for winding order of polygon chains
+PNLTRI.PolygonData.prototype.polygon_area = function ( inContour ) {
+	var cLen = inContour.length;
+	var dblArea = 0.0;
+	for( var p = cLen - 1, q = 0; q < cLen; p = q++ ) {
+		dblArea += inContour[ p ].x * inContour[ q ].y - inContour[ q ].x * inContour[ p ].y;
+	}
+	return dblArea * 0.5;
+};
 
 
 function test_PolygonData() {
@@ -283,6 +292,7 @@ function test_PolygonData() {
 		//
 		equal( myPolygonData.addPolygonChain( [ { x:0.0, y:0.0 }, { x:6.0, y:0.0 }, { x:6.0, y:6.0 } ] ), 3, "addPolygonChain_errors: 3 vertex polygon chain");
 		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_errors: Number of generated Segments" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_errors: Number of Polygon Chains" );
 	}
 
 	function test_addPolygonChain_ok() {
@@ -291,18 +301,31 @@ function test_PolygonData() {
 		//
 		equal( myPolygonData.addPolygonChain( polyChains[0] ), 4, "addPolygonChain_ok: 4 vertex polygon contour");
 		equal( myPolygonData.nbSegments(), 4, "addPolygonChain_ok: Number of Segments #1" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_ok: Number of Polygon Chains #1" );
 		equal( myPolygonData.addPolygonChain( polyChains[1] ), 3, "addPolygonChain_ok: 3 vertex polygon hole#1");
 		equal( myPolygonData.nbSegments(), 7, "addPolygonChain_ok: Number of Segments #2" );
+		equal( myPolygonData.nbPolyChains(), 2, "addPolygonChain_ok: Number of Polygon Chains #2" );
 		equal( myPolygonData.addPolygonChain( polyChains[2] ), 3, "addPolygonChain_ok: 3 vertex polygon hole#2");
 		equal( myPolygonData.nbSegments(), 10, "addPolygonChain_ok: Number of Segments #3" );
+		equal( myPolygonData.nbPolyChains(), 3, "addPolygonChain_ok: Number of Polygon Chains #3" );
 		equal( myPolygonData.addPolygonChain( polyChains[3] ), 3, "addPolygonChain_ok: 3 vertex polygon hole#3");
 		equal( myPolygonData.nbSegments(), 13, "addPolygonChain_ok: Number of Segments #3" );
+		equal( myPolygonData.nbPolyChains(), 4, "addPolygonChain_ok: Number of Polygon Chains #4" );
 		//
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
 		var myVertices = myPolygonData.getVertices();
 		var mySegArray = myPolygonData.getSegments();
 		for (var i=0; i<mySegArray.length; i++) {
+			if ( i < 4 ) {
+				equal( mySegArray[i].chainId, 0, "addPolygonChain_ok: ChainID Seg#"+i );
+			} else if ( i < 7 ) {
+				equal( mySegArray[i].chainId, 1, "addPolygonChain_ok: ChainID Seg#"+i );
+			} else if ( i < 10 ) {
+				equal( mySegArray[i].chainId, 2, "addPolygonChain_ok: ChainID Seg#"+i );
+			} else {
+				equal( mySegArray[i].chainId, 3, "addPolygonChain_ok: ChainID Seg#"+i );
+			}
 			strictEqual( mySegArray[i].vFrom, myVertices[i], "addPolygonChain_ok: segList["+i+"].vFrom == vertices["+i+"]" );
 			strictEqual( mySegArray[i].vTo, mySegArray[i].snext.vFrom, "addPolygonChain_ok: segList["+i+"].vTo == segList["+i+"].snext.vFrom" );
 		}

@@ -17,6 +17,7 @@ PNLTRI.PolygonData = function ( inPolygonChainList ) {
 	//  during the subdivision into uni-y-monotone polygons (s. this.monoSubPolyChains)
 	// doubly linked by: snext, sprev
 	this.segments = [];
+	this.idNextPolyChain = 0;
 	
 	// indices into this.segments: at least one for each monoton chain for the polygon
 	//  these subdivide the polygon into uni-y-monotone polygons, that is
@@ -30,9 +31,8 @@ PNLTRI.PolygonData = function ( inPolygonChainList ) {
 	
 	// initialize optional polygon chains
 	if ( inPolygonChainList ) {
-		this.addPolygonChain( inPolygonChainList[0], false );		// contour
-		for (var i=1, j=inPolygonChainList.length; i<j; i++) {		// holes
-			this.addPolygonChain( inPolygonChainList[i], true );
+		for (var i=0, j=inPolygonChainList.length; i<j; i++) {
+			this.addPolygonChain( inPolygonChainList[i] );
 		}
 	}
 
@@ -54,6 +54,10 @@ PNLTRI.PolygonData.prototype = {
 	},
 	getTriangles: function () {
 		return	this.triangles.concat();
+	},
+
+	nbPolyChains: function () {
+		return	this.idNextPolyChain;
 	},
 
 		
@@ -79,16 +83,6 @@ PNLTRI.PolygonData.prototype = {
 		}
 	},
 
-	// calculates the area of a polygon
-	polygon_area: function ( inContour ) {
-		var cLen = inContour.length;
-		var dblArea = 0.0;
-		for( var p = cLen - 1, q = 0; q < cLen; p = q++ ) {
-			dblArea += inContour[ p ].x * inContour[ q ].y - inContour[ q ].x * inContour[ p ].y;
-		}
-		return dblArea * 0.5;
-	},
-
 	
 	/*	Operations  */
 	
@@ -106,6 +100,7 @@ PNLTRI.PolygonData.prototype = {
 
 	createSegmentEntry: function ( inVertexFrom, inVertexTo ) {			// private
 		return	{
+			chainId: this.idNextPolyChain,
 			// end points of segment
 			vFrom: inVertexFrom,	// -> start point entry in vertices
 			vTo: inVertexTo,		// -> end point entry in vertices
@@ -126,19 +121,13 @@ PNLTRI.PolygonData.prototype = {
 	},
 	
 
-	addVertexChain: function ( inRawPointList, inIsHole ) {			// private
+	addVertexChain: function ( inRawPointList ) {			// private
 		
 		function verts_equal( inVert1, inVert2 ) {
 			return ( ( Math.abs(inVert1.x - inVert2.x) < PNLTRI.Math.EPSILON_P ) &&
 					 ( Math.abs(inVert1.y - inVert2.y) < PNLTRI.Math.EPSILON_P ) );
 		}
 		
-		var reverse = false;
-		if ( inIsHole != null ) {		// adapt segment direction to polygon chain type ?
-			var orientation = ( this.polygon_area( inRawPointList ) < 0 );		// CW ?
-			reverse = ( inIsHole != orientation );
-		}
-		//
 		var newVertices = [];
 		var newVertex, acceptVertex, prevIdx;
 		for ( var i=0; i < inRawPointList.length; i++ ) {
@@ -158,19 +147,15 @@ PNLTRI.PolygonData.prototype = {
 			 verts_equal( newVertices[newVertices.length-1], newVertices[0] ) ) {
 			newVertices.pop();
 		}
-		if ( reverse ) {
-			// console.log( "Polygon chain reversed! " + newVertices[0].x + "/" + newVertices[0].y );
-			newVertices = newVertices.reverse();		// vertex-index preserving reversal !!!
-		}
 		
 		return	newVertices;
 	},
 	
 
-	addPolygonChain: function ( inRawPointList, inIsHole ) {			// <<<<<< public
+	addPolygonChain: function ( inRawPointList ) {			// <<<<<< public
 		
 		// vertices
-		var newVertices = this.addVertexChain( inRawPointList, inIsHole );
+		var newVertices = this.addVertexChain( inRawPointList );
 		if ( newVertices.length < 3 ) {
 			console.log( "Polygon has < 3 vertices!", newVertices );
 			return	0;
@@ -199,6 +184,7 @@ PNLTRI.PolygonData.prototype = {
 		firstSeg.sprev = segment;
 		segment.snext = firstSeg;
 		
+		this.idNextPolyChain++;
 		return	this.segments.length - saveSegListLength;
 	},
 	

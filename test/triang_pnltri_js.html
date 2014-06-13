@@ -43,7 +43,8 @@
 				triangList = myTriangulator.triangulate_polygon( example_data );
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
-
+				
+//				alert("Vertices: " + example_data.length + "/" + example_data[0].length + "/" + myTriangulator.lastPolyData.vertices.length );
 				resultStr += '<p/><p/>' + dataName + ':<br/>';
 				resultStr += ( triangList ) ?
 					triangList.map( function(tri) { return "[ "+tri.join(", ")+" ]" } ).join(", ") :

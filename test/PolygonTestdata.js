@@ -1232,9 +1232,9 @@ PolygonTestdata.prototype = {
 
 		var i, j, dumpStr = '';
 		for (i=0;i<inPolygons.length;i++) {
-			dumpStr += " [ ";
+			dumpStr += " [";
 			for (j=0;j<inPolygons[i].length;j++) {
-				dumpStr += " { x:" + inPolygons[i][j].x + ", y:" + inPolygons[i][j].y + " }, ";
+				dumpStr += " { x:" + inPolygons[i][j].x + ", y:" + inPolygons[i][j].y + " },";
 			}
 			dumpStr += " ]," + lineBreak;
 		}
