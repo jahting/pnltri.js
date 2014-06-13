@@ -33,22 +33,25 @@
 
 			var myTriangulator = new PNLTRI.Triangulator();
 
-			var startTS = new Date();
+			var durationTriang, startSection = new Date();
 			var resultStr='', dataName, example_data, triangList;
 			for ( var dataIdx in polyDataNames ) {
 				dataName = polyDataNames[dataIdx];
 				example_data = testData.get_polygon_with_holes( dataName );
+				durationTriang  = new Date().getTime();
 //				console.profile();
 				triangList = myTriangulator.triangulate_polygon( example_data );
 //				console.profileEnd();
+				durationTriang -= new Date().getTime();
 
 				resultStr += '<p/><p/>' + dataName + ':<br/>';
 				resultStr += ( triangList ) ?
 					triangList.map( function(tri) { return "[ "+tri.join(", ")+" ]" } ).join(", ") :
 					'NO Triangle-List!';
-				var endTS = new Date();
-				resultStr += '<p/>&nbsp;&nbsp;&nbsp;milliseconds: ' + ( endTS.getTime()-startTS.getTime() );
-				startTS = endTS;
+				var endSection = new Date();
+				resultStr += '<p/>&nbsp;&nbsp;&nbsp;Number of Triangles: ' + triangList.length;
+				resultStr += '&nbsp;&nbsp;&nbsp;milliseconds: ' + -durationTriang + '/' + ( endSection.getTime()-startSection.getTime() );
+				startSection = endSection;
 			}
 
 			inResultTarget = document.getElementById( "simple polygon with holes" );

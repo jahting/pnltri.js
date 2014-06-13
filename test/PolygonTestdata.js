@@ -1143,10 +1143,11 @@ PolygonTestdata.prototype = {
 			 ( inDataName == "squares_perftest_mid" ) ||
 			 ( inDataName == "squares_perftest_max" ) ) {
 			// for Performance-Test with 40x40 holes
-			var	anzSquare = ( inDataName == "squares_perftest_max" ) ? 40 : 		// 160: 3-3.2 seconds
+			var upperLimit = 40; 		// 160: ~3 seconds
+			var	anzSquare = ( inDataName == "squares_perftest_max" ) ? upperLimit :
 								( ( inDataName == "squares_perftest_mid" ) ? 15 : 3 );
-			var scale = Math.floor( 40.0/anzSquare );
-			var shape = [ { x:40, y:40 }, { x: 0, y:40 }, { x: 0, y: 0 }, { x:40, y: 0 } ];
+			var scale = Math.floor( upperLimit/anzSquare );
+			var shape = [ { x:upperLimit, y:upperLimit }, { x: 0, y:upperLimit }, { x: 0, y: 0 }, { x:upperLimit, y: 0 } ];
 			var holeTemplate = [ { x:0.2, y:0.2 }, { x:0.2, y:0.8 }, { x:0.8, y:0.8 }, { x:0.8, y:0.2 } ];
 			var polys = [ shape ];
 			for (var i=0; i<anzSquare; i++) {

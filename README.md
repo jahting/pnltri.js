@@ -3,18 +3,34 @@ pnltri.js
 
 #### (Simple) Polygon Near-Linear Triangulation in JavaScript ####
 
-This project implements an algorithm by Raimund Seidel [Sei91] for the triangulation of simple polygons in expected near-linear time with several improvements and extensions. It includes extensive unit and functional tests.
+This project implements an algorithm by Raimund Seidel [Sei91] for the triangulation of simple polygons in expected near-linear time with several improvements and extensions.
 
 At present the algorithm handles simple polygons (no crossing edges) with holes. The contour and the holes are specified as vertex sequences.
-The input can contain several polygons and or holes in any order. There is no need for a specific winding order clockwise (CW) or counterclockwise (CCW) as usual.
+The input can contain several polygons and or holes in any order. There is no need for a specific winding order clockwise (CW) or counter-clockwise (CCW) as usual.
 But repeating points (zero-length edges) and crossing edges are not allowed.
 
 The output is a list of triangles. Each triangle is a triple of vertex indices. These refer to the order of the vertices in the input sequences, as if those had all been concatenated (numbering starts at 0). No Steiner points are added.
-The output triangles for a specific polygon (with holes) are always the same, but since there is a random part in the algorithm and output is not sorted, their order changes.
+The output triangles for a specific polygon (with holes) are always the same, but their order changes since there is a random part in the algorithm and output is not sorted. Sorting would take longer than the triangulation itself.
 
 At present this implementation handles some cases of co-linear segments gracefully, but no effort for completeness has been made yet.
 
 In the future it shall handle crossing edges too - along the lines presented by Sigbjorn Vik in [Vik01].
+
+### Testing ###
+
+The project includes unit and functional tests (~1500 assertions) with QUnit: [TestSuite](https://github.com/jahting/pnltri.js/blob/master/test/test_pnltri_js.html)
+
+It has been tested with the data available from Three.js examples and issues concerning triangulation, but more test data would be welcome.
+
+### Performance ###
+
+The algorithm handles the polygon edges in a randomised order to reach an expected near-linear running time ( n * log*(n) ). As a consequence the running time varies and a regular nature of polygons is of no "advantage".
+
+This implementation seems reasonably fast for Javascript. Measurements confirm the near-linear expected running time of the algorithm.
+
+Measured on an old Laptop ( Core 2 Duo T7200, 2 GHz ) with Firefox 30.0 ([measured with](https://github.com/jahting/pnltri.js/blob/master/test/triang_pnltri_js.html)):
+A square with  1600 square holes (~ 6400 vertices ->  ~10k triangles) takes about 180 milliseconds.
+A square with 25000 square holes (~ 100k vertices -> ~150k triangles) takes less than 3 seconds.
 
 
 ### Usage ###
