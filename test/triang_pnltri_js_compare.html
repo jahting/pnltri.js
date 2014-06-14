@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset='utf-8'/>
+		<title>Triangulation Compare between Three.js Extract and Seidel [Sei91]</title>
+
+		<script type="text/javascript" src="PolygonTestdata.js"></script>
+
+		<!-- script type="text/javascript" src="../build/pnltri.min.js"></script -->
+		<script type="text/javascript" src="../src/Pnltri.js"></script>
+		<script type="text/javascript" src="../src/PnltriMath.js"></script>
+		<script type="text/javascript" src="../src/PolygonData.js"></script>
+		<script type="text/javascript" src="../src/BasicTriangulator.js"></script>
+		<script type="text/javascript" src="../src/Trapezoider.js"></script>
+		<script type="text/javascript" src="../src/MonoSplitter.js"></script>
+		<script type="text/javascript" src="../src/MonoTriangulator.js"></script>
+		<script type="text/javascript" src="../src/Triangulator.js"></script>
+
+		<!-- just to display results graphically - ->
+		<script type="text/javascript" src="PolygonDataTest.js"></script>
+		<script type="text/javascript" src="TestHelpers.js"></script -->
+	</head>
+
+	<body>
+		<h4>Triangulator: Compare Three.js and Seidel</h4>
+		<div id="simple polygon with holes"></div>
+
+		<script type="text/javascript">
+		
+			function measure_seidel( inData ) {
+				durationTriang  = new Date().getTime();
+//				console.profile();
+				triangList = myTriangulator.triangulate_polygon( inData );
+//				console.profileEnd();
+				durationTriang -= new Date().getTime();
+				
+				return { triangs: triangList, duration: durationTriang };
+			}
+			
+			function measure_threejs( inData ) {
+				durationTriang  = new Date().getTime();
+//				console.profile();
+				var myPolygonData = new PNLTRI.PolygonData( inData );
+				var myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
+				myTriangulator.triangulate_single_polygon( inData[0] );
+				var triangList = myPolygonData.triangles;
+//				console.profileEnd();
+				durationTriang -= new Date().getTime();
+				
+				return { triangs: triangList, duration: durationTriang };
+			}
+			
+			var	testData = new PolygonTestdata();
+			var polyDataNames = [ "one_poly_chain" ];
+
+			var myTriangulator = new PNLTRI.Triangulator();
+
+			var durationTriang, startSection = new Date();
+			var resultStr='', dataName, example_data, triangList;
+			for ( var dataIdx in polyDataNames ) {
+				dataName = polyDataNames[dataIdx];
+//				example_data = testData.get_polygon_with_holes( dataName );
+				example_data = [ [
+					{x:103.181,y:220.799},{x:104.364,y:190.337},{x:99.849,y:182.369},{x:104.803,y:183.405},{x:105.069,y:164.693},
+					{x:101.856,y:144.889},{x:96.602,y:131.47},{x:94.137,y:128.41},{x:87.938,y:126.121},{x:68.853,y:124.712},{x:55.191,y:137.809},
+					{x:54.012,y:135.274},{x:57.142,y:133.283},{x:55.261,y:131.519},{x:49.807,y:133.03},{x:48.27,y:137.16},{x:48.762,y:142.672},
+					{x:47.331,y:146.85},{x:44.672,y:148.789},{x:45.573,y:135.814},{x:43.345,y:140.126},{x:42.719,y:137.016},{x:36.671,y:141.24},
+					{x:33.291,y:130.355},{x:37.363,y:127.208},{x:36.772,y:122.604},{x:39.952,y:125.467},{x:42.663,y:124.482},{x:44.19,y:120.736},
+					{x:43.192,y:117.816},{x:36.355,y:119.368},{x:34.878,y:115.119},{x:38.146,y:113.954},{x:35.52,y:109.941},{x:36.896,y:107.535},
+					{x:40.517,y:109.3},{x:48.975,y:99.851},{x:54.198,y:97.87},{x:55.123,y:96.323},{x:53.293,y:92.238},{x:47.891,y:91.602},
+					{x:44.017,y:97.261},{x:43.072,y:95.066},{x:44.522,y:90.935},{x:44.008,y:88.647},{x:40.073,y:88.1},{x:43.185,y:74.685},
+					{x:45.661,y:77.401},{x:52.455,y:76.115},{x:52.093,y:71.941},{x:48.26,y:65.59},{x:52.041,y:62.795},{x:54.785,y:62.356},
+					{x:60.725,y:53.764},{x:64.398,y:54.837},{x:61.601,y:44.213},{x:62.183,y:42.429},{x:68.685,y:38.57},{x:70.857,y:43.864},
+					{x:75.301,y:36.658},{x:79.74,y:34.903},{x:81.903,y:30.601},{x:86.186,y:30.127},{x:96.983,y:24.682},{x:99.042,y:24.701},
+					{x:102.3,y:28.63},{x:103.329,y:25.855},{x:118.837,y:26.405},{x:120.026,y:29.068},{x:121.061,y:27.36},{x:125.084,y:25.838},
+					{x:126.883,y:26.514},{x:127.849,y:38.57},{x:128.615,y:33.388},{x:130.273,y:31.36},{x:131.323,y:33.438},{x:132.884,y:29.553},
+					{x:134.28,y:32.955},{x:133.89,y:37.482},{x:135.186,y:37.093},{x:138.311,y:30.826},{x:140.772,y:37.436},{x:141.693,y:35.85},
+					{x:144.879,y:37.805},{x:142.882,y:42.808},{x:148.072,y:39.964},{x:157.87,y:48.073},{x:158.349,y:54.987},{x:159.992,y:53.247},
+					{x:165.235,y:59.029},{x:168.358,y:68.004},{x:166.742,y:72.543},{x:165.338,y:71.529},{x:160.255,y:72.686},{x:158.431,y:75.073},
+					{x:161.396,y:76.487},{x:168.524,y:74.919},{x:169.529,y:78.059},{x:168.336,y:85.228},{x:173.242,y:81.367},{x:174.67,y:82.369},
+					{x:173.259,y:76.874},{x:174.359,y:75.745},{x:178.357,y:80.253},{x:179.604,y:88.167},{x:182.692,y:88.307},{x:183.609,y:92.202},
+					{x:182.202,y:94.947},{x:180.434,y:95.677},{x:181.412,y:98.679},{x:183.225,y:97.639},{x:185.774,y:116.788},{x:184.176,y:122.163},
+					{x:185.003,y:125.744},{x:178.737,y:137.703},{x:176.195,y:132.677},{x:178.874,y:144.616},{x:176.53,y:145.613},{x:171.927,y:132.208},
+					{x:159.229,y:117.148},{x:154.959,y:115.578},{x:154.223,y:118.482},{x:151.973,y:119.361},{x:153.848,y:123.672},{x:152.992,y:125.585},
+					{x:151.361,y:125.072},{x:151.736,y:135.538},{x:152.862,y:136.284},{x:153.905,y:134.54},{x:153.711,y:137.53},{x:151.96,y:137.511},
+					{x:146.422,y:122.475},{x:143.737,y:118.367},{x:132.696,y:126.829},{x:117.466,y:150.083},{x:112.725,y:162.23},{x:112.52,y:196.304},
+					{x:115.346,y:220.799}
+								] ];
+//				drawPolygonLayers( { "poly": example_data }, 0.22 );
+				
+				// Seidel
+				var result = measure_seidel( example_data );
+				triangList = result.triangs;
+				durationTriang = result.duration;
+
+				resultStr += '<p/><p/>' + dataName + ' (Seidel):<br/>';
+				resultStr += ( triangList ) ?
+					triangList.map( function(tri) { return "[ "+tri.join(", ")+" ]" } ).join(", ") :
+					'NO Triangle-List!';
+				var endSection = new Date();
+				resultStr += '<p/>&nbsp;&nbsp;&nbsp;Number of Triangles: ' + triangList.length;
+				resultStr += '&nbsp;&nbsp;&nbsp;milliseconds: ' + -durationTriang + '/' + ( endSection.getTime()-startSection.getTime() );
+				startSection = endSection;
+				
+				// Three.js Extract
+				var result = measure_threejs( example_data );
+				triangList = result.triangs;
+				durationTriang = result.duration;
+
+				resultStr += '<p/><p/>' + dataName + ' (Three.js):<br/>';
+				resultStr += ( triangList ) ?
+					triangList.map( function(tri) { return "[ "+tri.join(", ")+" ]" } ).join(", ") :
+					'NO Triangle-List!';
+				var endSection = new Date();
+				resultStr += '<p/>&nbsp;&nbsp;&nbsp;Number of Triangles: ' + triangList.length;
+				resultStr += '&nbsp;&nbsp;&nbsp;milliseconds: ' + -durationTriang + '/' + ( endSection.getTime()-startSection.getTime() );
+				startSection = endSection;
+			}
+
+			inResultTarget = document.getElementById( "simple polygon with holes" );
+			inResultTarget.innerHTML = resultStr;
+			
+			// display last result
+//			drawPolygonLayers( { "poly": example_data, "triang": myTriangulator.lastPolyData.triangles_2_polygons() }, 2 );
+		</script>
+	</body>
+
+</html>
