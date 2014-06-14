@@ -1417,6 +1417,30 @@ function test_Trapezoider() {
 	}
 
 
+	function test_optimise_randomlist() {
+		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
+		//
+		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "square_3triangholes" ) );
+		var myTrapezoider = new PNLTRI.Trapezoider( myPolygonData );
+		//
+		// Main Test
+		//
+		var myQs = myTrapezoider.queryStructure;				// TODO
+		var randSegListArray = myQs.segListArray.slice(0);
+		PNLTRI.Math.array_shuffle( randSegListArray );				// "10, 4, 3, 11, 8, 5, 12, 1, 7, 2, 0, 9, 6"
+//		console.log( "Old Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
+		myTrapezoider.optimise_randomlist( randSegListArray );		// "10, 4, 3, 8, 11, 5, 12, 1, 7, 2, 0, 9, 6"
+//		console.log( "New Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
+		var expectedSequence = [10, 4, 3, 8, 11, 5, 12, 1, 7, 2, 0, 9, 6];
+		equal( randSegListArray.length, expectedSequence.length, "optimise_randomlist: new sequence length" );
+		var	expectedSequenceOK = true;
+		for (var i=0; i<expectedSequence.length; i++) {
+			expectedSequenceOK &= ( randSegListArray[i].vFrom.id == expectedSequence[i] );
+		}
+		ok( expectedSequenceOK, "optimise_randomlist: new sequence elements" );
+	}
+
+
 	function test_trapezoide_polygon( inDataName, inExpectedSegs, inExpectedTraps, inExpectedStartTrap, inExpectedMaxDepth, inDebug ) {
 		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
 		//
@@ -1520,6 +1544,7 @@ function test_Trapezoider() {
 	test( "Trapezoider for (Simple) Polygons", function() {
 		test_math_logstar_n();
 		test_math_NH();
+		test_optimise_randomlist();
 		//
 		test_trapezoide_polygon( "article_poly", 20, 41, 1, 1, 0 );			// 1.5: from article [Sei91]
 		test_trapezoide_polygon( "square_3triangholes", 13, 27, 19, 2, 0 );	// 5; from	"Narkhede A. and Manocha D.", data_1

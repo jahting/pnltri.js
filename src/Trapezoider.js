@@ -919,6 +919,25 @@ PNLTRI.Trapezoider.prototype = {
 	},
 
 	
+	optimise_randomlist: function ( inOutSegListArray ) {
+		// makes sure that the first N segments are one from each of the N polygon chains
+		var mainIdx = 0;
+		var helpIdx = this.polyData.nbPolyChains();
+		if ( helpIdx == 1 )		return;
+		var chainMarker = new Array(helpIdx);
+		var oldSegListArray = inOutSegListArray.concat();
+		for (var i=0; i<oldSegListArray.length; i++) {
+			var chainId = oldSegListArray[i].chainId;
+			if ( chainMarker[chainId] ) {
+				inOutSegListArray[helpIdx++] = oldSegListArray[i];
+			} else {
+				inOutSegListArray[mainIdx++] = oldSegListArray[i];
+				chainMarker[chainId] = true;
+			}
+		}
+	},
+
+	
 	/*
 	 * main methods
 	 */
@@ -945,9 +964,10 @@ PNLTRI.Trapezoider.prototype = {
 	trapezoide_polygon: function () {							// <<<< public
 		var myQs = this.queryStructure;
 		
-		var randSegListArray = myQs.segListArray.slice(0);
+		var randSegListArray = myQs.segListArray.concat();
 //		console.log( "Polygon Chains: ", dumpSegmentList( randSegListArray ) );
 		PNLTRI.Math.array_shuffle( randSegListArray );
+		this.optimise_randomlist( randSegListArray );
 //		console.log( "Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
 		
 		var i, h;
