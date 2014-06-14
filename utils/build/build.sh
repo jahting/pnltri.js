@@ -2,7 +2,7 @@
 
 LICENSE="// pnltri.js / raw.github.com/jahting/pnltri.js/master/LICENSE"
 
-SRCFILES="../../src/Pnltri.js ../../src/PnltriMath.js ../../src/PolygonData.js ..\..\src\BasicTriangulator.js ../../src/Trapezoider.js ../../src/MonoSplitter.js ../../src/MonoTriangulator.js ../../src/Triangulator.js"
+SRCFILES="../../src/Pnltri.js ../../src/PnltriMath.js ../../src/PolygonData.js ../../src/BasicTriangulator.js ../../src/Trapezoider.js ../../src/MonoSplitter.js ../../src/MonoTriangulator.js ../../src/Triangulator.js"
 
 DESTPLAIN="../../build/pnltri.js"
 DESTMINI="../../build/pnltri.min.js"
