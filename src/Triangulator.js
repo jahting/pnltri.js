@@ -49,16 +49,24 @@ PNLTRI.Triangulator.prototype = {
 		// initializes general polygon data structure
 		//
 		var myPolygonData = new PNLTRI.PolygonData( inPolygonChains );
-		//
-		// splits polygon into uni-y-monotone sub-polygons
-		//
-		var	myMonoSplitter = new PNLTRI.MonoSplitter( myPolygonData );
-		myMonoSplitter.monotonate_trapezoids();
-		//
-		// triangulates all uni-y-monotone sub-polygons
-		//
-		var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
-		myTriangulator.triangulate_all_polygons();
+		if ( myPolygonData.nbPolyChains() == 1 ) {
+			//
+			// triangulates single polygon without holes
+			//
+			var	myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
+			var result = myTriangulator.triangulate_single_polygon( myPolygonData.getSegments()[0] );
+		} else {
+			//
+			// splits polygon into uni-y-monotone sub-polygons
+			//
+			var	myMonoSplitter = new PNLTRI.MonoSplitter( myPolygonData );
+			myMonoSplitter.monotonate_trapezoids();
+			//
+			// triangulates all uni-y-monotone sub-polygons
+			//
+			var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
+			myTriangulator.triangulate_all_polygons();
+		}
 		//
 		this.lastPolyData = myPolygonData;
 		return	myPolygonData.getTriangles();	// copy of triangle list

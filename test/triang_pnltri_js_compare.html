@@ -31,7 +31,8 @@
 			function measure_seidel( inData ) {
 				durationTriang  = new Date().getTime();
 //				console.profile();
-				triangList = myTriangulator.triangulate_polygon( inData );
+				var myTriangulator = new PNLTRI.Triangulator();
+				var triangList = myTriangulator.triangulate_polygon( inData );
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
 				
@@ -54,10 +55,9 @@
 			var	testData = new PolygonTestdata();
 			var polyDataNames = [ "one_poly_chain" ];
 
-			var myTriangulator = new PNLTRI.Triangulator();
 
-			var durationTriang, startSection = new Date();
-			var resultStr='', dataName, example_data, triangList;
+			var durationTriang, startSection = new Date(), endSection;
+			var resultStr='', result, dataName, example_data, triangList;
 			for ( var dataIdx in polyDataNames ) {
 				dataName = polyDataNames[dataIdx];
 //				example_data = testData.get_polygon_with_holes( dataName );
@@ -89,8 +89,12 @@
 								] ];
 //				drawPolygonLayers( { "poly": example_data }, 0.22 );
 				
+				measure_seidel( example_data );				// Seidel
+				measure_threejs( example_data );			// Three.js Extract
+				startSection = new Date();
+				
 				// Seidel
-				var result = measure_seidel( example_data );
+				result = measure_seidel( example_data );
 				triangList = result.triangs;
 				durationTriang = result.duration;
 
@@ -98,13 +102,13 @@
 				resultStr += ( triangList ) ?
 					triangList.map( function(tri) { return "[ "+tri.join(", ")+" ]" } ).join(", ") :
 					'NO Triangle-List!';
-				var endSection = new Date();
+				endSection = new Date();
 				resultStr += '<p/>&nbsp;&nbsp;&nbsp;Number of Triangles: ' + triangList.length;
 				resultStr += '&nbsp;&nbsp;&nbsp;milliseconds: ' + -durationTriang + '/' + ( endSection.getTime()-startSection.getTime() );
 				startSection = endSection;
 				
 				// Three.js Extract
-				var result = measure_threejs( example_data );
+				result = measure_threejs( example_data );
 				triangList = result.triangs;
 				durationTriang = result.duration;
 
@@ -112,7 +116,7 @@
 				resultStr += ( triangList ) ?
 					triangList.map( function(tri) { return "[ "+tri.join(", ")+" ]" } ).join(", ") :
 					'NO Triangle-List!';
-				var endSection = new Date();
+				endSection = new Date();
 				resultStr += '<p/>&nbsp;&nbsp;&nbsp;Number of Triangles: ' + triangList.length;
 				resultStr += '&nbsp;&nbsp;&nbsp;milliseconds: ' + -durationTriang + '/' + ( endSection.getTime()-startSection.getTime() );
 				startSection = endSection;

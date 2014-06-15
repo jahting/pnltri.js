@@ -87,13 +87,12 @@ PNLTRI.BasicTriangulator.prototype = {
 				px = verts[ p ].x
 				py = verts[ p ].y
 
-				if ( ( ( px === ax ) && ( py === ay ) ) ||
-					 ( ( px === bx ) && ( py === by ) ) ||
-					 ( ( px === cx ) && ( py === cy ) ) )	continue;
-
 				apx = px - ax;  apy = py - ay;
+					if ( ( apx == 0 ) && ( apy == 0 ) )		continue;
 				bpx = px - bx;  bpy = py - by;
+					if ( ( bpx == 0 ) && ( bpy == 0 ) )		continue;
 				cpx = px - cx;  cpy = py - cy;
+					if ( ( cpx == 0 ) && ( cpy == 0 ) )		continue;
 
 				// see if p is inside triangle abc
 
