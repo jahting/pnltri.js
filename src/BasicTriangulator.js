@@ -34,54 +34,58 @@ PNLTRI.BasicTriangulator.prototype = {
 	//	algorithm to triangulate a polygon in O(n^3) time.		// TODO (n^2) ?
 
 
-	// takes in an contour array and returns
+	// takes one element of a double linked segment list
 
-	triangulate_single_polygon: function ( contour, indices ) {
+	triangulate_single_polygon: function ( inStartSeg ) {
 
-		function area( contour ) {
-
-			var n = contour.length;
-			var a = 0.0;
-
-			for ( var p = n - 1, q = 0; q < n; p = q ++ ) {
-
-				a += contour[ p ].x * contour[ q ].y - contour[ q ].x * contour[ p ].y;
-
+		function vertList( inStartSeg ) {		// TODO: prevent endless loop ?
+			var verts = [];
+			/* we want a counter-clockwise polygon in verts */
+			var doubleArea = 0.0;
+			var cursor = inStartSeg;
+			var p,q;
+			var idx = 0;
+			do {
+				p = cursor.sprev.vFrom;
+				q = cursor.vFrom;
+				doubleArea += p.x * q.y - q.x * p.y;
+				verts[idx++] = q;
+				cursor = cursor.snext;
+			} while ( cursor != inStartSeg );
+			if ( doubleArea < 0.0 ) {
+				verts = verts.reverse();
 			}
+			return	verts;
+		}
 
-			return a * 0.5;
+		function snip( verts, u, v, w, n ) {
 
-		};
+			var ax = verts[ u ].x;
+			var ay = verts[ u ].y;
 
-		function snip( contour, u, v, w, n, verts ) {
+			var bx = verts[ v ].x;
+			var by = verts[ v ].y;
 
-			var p;
-			var ax, ay, bx, by;
-			var cx, cy, px, py;
+			var cx = verts[ w ].x;
+			var cy = verts[ w ].y;
 
-			ax = contour[ verts[ u ] ].x;
-			ay = contour[ verts[ u ] ].y;
-
-			bx = contour[ verts[ v ] ].x;
-			by = contour[ verts[ v ] ].y;
-
-			cx = contour[ verts[ w ] ].x;
-			cy = contour[ verts[ w ] ].y;
-
-			if ( PNLTRI.Math.EPSILON_P > ( ( ( bx - ax ) * ( cy - ay ) ) - ( ( by - ay ) * ( cx - ax ) ) ) ) return false;
+			if ( PNLTRI.Math.EPSILON_P > ( ( bx - ax ) * ( cy - ay ) - ( by - ay ) * ( cx - ax ) ) ) return false;
 
 			var aX, aY, bX, bY, cX, cY;
-			var apx, apy, bpx, bpy, cpx, cpy;
-			var cCROSSap, bCROSScp, aCROSSbp;
 
 			aX = cx - bx;  aY = cy - by;
 			bX = ax - cx;  bY = ay - cy;
 			cX = bx - ax;  cY = by - ay;
 
+			var p, px, py;
+
+			var apx, apy, bpx, bpy, cpx, cpy;
+			var cCROSSap, bCROSScp, aCROSSbp;
+
 			for ( p = 0; p < n; p ++ ) {
 
-				px = contour[ verts[ p ] ].x
-				py = contour[ verts[ p ] ].y
+				px = verts[ p ].x
+				py = verts[ p ].y
 
 				if ( ( ( px === ax ) && ( py === ay ) ) ||
 					 ( ( px === bx ) && ( py === by ) ) ||
@@ -97,7 +101,9 @@ PNLTRI.BasicTriangulator.prototype = {
 				cCROSSap = cX * apy - cY * apx;
 				bCROSScp = bX * cpy - bY * cpx;
 
-				if ( ( aCROSSbp >= PNLTRI.Math.EPSILON_N ) && ( bCROSScp >= PNLTRI.Math.EPSILON_N ) && ( cCROSSap >= PNLTRI.Math.EPSILON_N ) ) return false;
+				if ( ( aCROSSbp >= PNLTRI.Math.EPSILON_N ) &&
+					 ( bCROSScp >= PNLTRI.Math.EPSILON_N ) &&
+					 ( cCROSSap >= PNLTRI.Math.EPSILON_N ) ) return false;
 
 			}
 
@@ -105,27 +111,14 @@ PNLTRI.BasicTriangulator.prototype = {
 
 		};
 
-		var n = contour.length;
+		var result = [];
 
-		var result = [],
-			verts = [],
-			vertIndices = [];
+		var	verts = vertList( inStartSeg );		/* we want a counter-clockwise polygon in verts */
 
-		/* we want a counter-clockwise polygon in verts */
+		var n = verts.length;
+		var nv = n;
 
 		var u, v, w;
-
-		if ( area( contour ) > 0.0 ) {
-
-			for ( v = 0; v < n; v ++ ) verts[ v ] = v;
-
-		} else {
-
-			for ( v = 0; v < n; v ++ ) verts[ v ] = ( n - 1 ) - v;
-
-		}
-
-		var nv = n;
 
 		/*  remove nv - 2 vertices, creating 1 triangle every time */
 
@@ -135,19 +128,7 @@ PNLTRI.BasicTriangulator.prototype = {
 
 			/* if we loop, it is probably a non-simple polygon */
 
-			if ( ( count -- ) <= 0 ) {
-
-				//** Triangulate: ERROR - probable bad polygon!
-
-				//throw ( "Warning, unable to triangulate polygon!" );
-				//return null;
-				// Sometimes warning is fine, especially polygons are triangulated in reverse.
-				console.log( 'Warning, unable to triangulate polygon!' );
-
-				if ( indices ) return vertIndices;
-				return result;
-
-			}
+			if ( ( count -- ) <= 0 )	return false;
 
 			/* three consecutive vertices in current polygon, <u,v,w> */
 
@@ -155,24 +136,16 @@ PNLTRI.BasicTriangulator.prototype = {
 			v = u + 1;  if ( nv <= v ) v = 0;     /* new v    */
 			w = v + 1;  if ( nv <= w ) w = 0;     /* next     */
 
-			if ( snip( contour, u, v, w, nv, verts ) ) {
-
-				var a, b, c, s, t;
-
-				/* true names of the vertices */
-
-				a = verts[ u ];
-				b = verts[ v ];
-				c = verts[ w ];
+			if ( snip( verts, u, v, w, nv ) ) {
 
 				/* output Triangle */
 
-				result.push( [	contour[ a ], contour[ b ], contour[ c ] ] );
-
-//				this.polyData.addTriangle( a, b, c );
-				this.polyData.triangles.push( [ a, b, c ] );
+//				this.polyData.addTriangle( verts[ u ].id, verts[ v ].id, verts[ w ].id );
+				this.polyData.triangles.push( [ verts[ u ].id, verts[ v ].id, verts[ w ].id ] );
 
 				/* remove v from the remaining polygon */
+
+				var s, t;
 
 				for ( s = v, t = v + 1; t < nv; s++, t++ ) {
 
@@ -190,8 +163,7 @@ PNLTRI.BasicTriangulator.prototype = {
 
 		}
 
-		if ( indices ) return vertIndices;
-		return result;
+		return true;
 
 	},
 

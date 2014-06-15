@@ -43,7 +43,7 @@
 //				console.profile();
 				var myPolygonData = new PNLTRI.PolygonData( inData );
 				var myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
-				myTriangulator.triangulate_single_polygon( inData[0] );
+				myTriangulator.triangulate_single_polygon( myPolygonData.segments[0] );
 				var triangList = myPolygonData.triangles;
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
