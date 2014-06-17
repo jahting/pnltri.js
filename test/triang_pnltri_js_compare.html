@@ -31,8 +31,7 @@
 			function measure_seidel( inData ) {
 				durationTriang  = new Date().getTime();
 //				console.profile();
-				var myTriangulator = new PNLTRI.Triangulator();
-				var triangList = myTriangulator.triangulate_polygon( inData );
+				var triangList = myTriangulator.triangulate_polygon( inData, true );	// force trapezoidation
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
 				
@@ -42,10 +41,7 @@
 			function measure_threejs( inData ) {
 				durationTriang  = new Date().getTime();
 //				console.profile();
-				var myPolygonData = new PNLTRI.PolygonData( inData );
-				var myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
-				myTriangulator.triangulate_single_polygon( myPolygonData.segments[0] );
-				var triangList = myPolygonData.triangles;
+				var triangList = myTriangulator.triangulate_polygon( inData, false );	// autom. switches to BasicTriangulator
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
 				
@@ -55,6 +51,7 @@
 			var	testData = new PolygonTestdata();
 			var polyDataNames = [ "one_poly_chain" ];
 
+			var myTriangulator = new PNLTRI.Triangulator();
 
 			var durationTriang, startSection = new Date(), endSection;
 			var resultStr='', result, dataName, example_data, triangList;

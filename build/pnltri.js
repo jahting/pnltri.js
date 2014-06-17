@@ -471,7 +471,8 @@ PNLTRI.BasicTriangulator.prototype = {
 
 	// takes one element of a double linked segment list
 
-	triangulate_single_polygon: function ( inStartSeg ) {
+	triangulate_polygon_no_holes: function () {
+		var startSeg = this.polyData.getSegments()[0];
 
 		function vertList( inStartSeg ) {		// TODO: prevent endless loop ?
 			var verts = [];
@@ -547,7 +548,7 @@ PNLTRI.BasicTriangulator.prototype = {
 
 		var result = [];
 
-		var	verts = vertList( inStartSeg );		/* we want a counter-clockwise polygon in verts */
+		var	verts = vertList( startSeg );		/* we want a counter-clockwise polygon in verts */
 
 		var n = verts.length;
 		var nv = n;
@@ -1819,14 +1820,14 @@ PNLTRI.MonoTriangulator.prototype = {
 			if ( nextMono.mnext == prevMono ) {		// already a triangle
 				this.polyData.addTriangle( monoPosmax.vFrom, nextMono.vFrom, prevMono.vFrom );
 			} else {								// triangulate the polygon
-				this.triangulate_single_polygon( monoPosmax );
+				this.triangulate_monotone_polygon( monoPosmax );
 			}
 		}
 	},
 
 	//	algorithm to triangulate an uni-y-monotone polygon in O(n) time.[FoM84]
 	 
-	triangulate_single_polygon: function ( monoPosmax ) {
+	triangulate_monotone_polygon: function ( monoPosmax ) {
 		var scope = this;
 		
 		function error_cleanup() {
@@ -1938,20 +1939,31 @@ PNLTRI.Triangulator.prototype = {
 
 	constructor: PNLTRI.Triangulator,
 
-	
-	triangulate_polygon: function ( inPolygonChains ) {
+
+	triangulate_polygon: function ( inPolygonChains, inForceTrapezoidation ) {
+
+		// collected conditions for selecting BasicTriangulator over Seidel's algorithm
+		function is_basic_polygon() {
+			if (inForceTrapezoidation)	return	false;
+			return	( myPolygonData.nbPolyChains() == 1 );
+		}
+
+
 		if ( ( !inPolygonChains ) || ( inPolygonChains.length == 0 ) )		return	[];
 		//
 		// initializes general polygon data structure
 		//
 		var myPolygonData = new PNLTRI.PolygonData( inPolygonChains );
-		if ( myPolygonData.nbPolyChains() == 1 ) {
+		//
+		var basicPolygon = is_basic_polygon();
+		if ( basicPolygon ) {
 			//
 			// triangulates single polygon without holes
 			//
 			var	myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
-			var result = myTriangulator.triangulate_single_polygon( myPolygonData.getSegments()[0] );
-		} else {
+			basicPolygon = myTriangulator.triangulate_polygon_no_holes();
+		}
+		if ( !basicPolygon ) {
 			//
 			// splits polygon into uni-y-monotone sub-polygons
 			//

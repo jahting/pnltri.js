@@ -35,14 +35,14 @@ PNLTRI.MonoTriangulator.prototype = {
 			if ( nextMono.mnext == prevMono ) {		// already a triangle
 				this.polyData.addTriangle( monoPosmax.vFrom, nextMono.vFrom, prevMono.vFrom );
 			} else {								// triangulate the polygon
-				this.triangulate_single_polygon( monoPosmax );
+				this.triangulate_monotone_polygon( monoPosmax );
 			}
 		}
 	},
 
 	//	algorithm to triangulate an uni-y-monotone polygon in O(n) time.[FoM84]
 	 
-	triangulate_single_polygon: function ( monoPosmax ) {
+	triangulate_monotone_polygon: function ( monoPosmax ) {
 		var scope = this;
 		
 		function error_cleanup() {

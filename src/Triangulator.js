@@ -42,20 +42,31 @@ PNLTRI.Triangulator.prototype = {
 
 	constructor: PNLTRI.Triangulator,
 
-	
-	triangulate_polygon: function ( inPolygonChains ) {
+
+	triangulate_polygon: function ( inPolygonChains, inForceTrapezoidation ) {
+
+		// collected conditions for selecting BasicTriangulator over Seidel's algorithm
+		function is_basic_polygon() {
+			if (inForceTrapezoidation)	return	false;
+			return	( myPolygonData.nbPolyChains() == 1 );
+		}
+
+
 		if ( ( !inPolygonChains ) || ( inPolygonChains.length == 0 ) )		return	[];
 		//
 		// initializes general polygon data structure
 		//
 		var myPolygonData = new PNLTRI.PolygonData( inPolygonChains );
-		if ( myPolygonData.nbPolyChains() == 1 ) {
+		//
+		var basicPolygon = is_basic_polygon();
+		if ( basicPolygon ) {
 			//
 			// triangulates single polygon without holes
 			//
 			var	myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
-			var result = myTriangulator.triangulate_single_polygon( myPolygonData.getSegments()[0] );
-		} else {
+			basicPolygon = myTriangulator.triangulate_polygon_no_holes();
+		}
+		if ( !basicPolygon ) {
 			//
 			// splits polygon into uni-y-monotone sub-polygons
 			//

@@ -36,7 +36,8 @@ PNLTRI.BasicTriangulator.prototype = {
 
 	// takes one element of a double linked segment list
 
-	triangulate_single_polygon: function ( inStartSeg ) {
+	triangulate_polygon_no_holes: function () {
+		var startSeg = this.polyData.getSegments()[0];
 
 		function vertList( inStartSeg ) {		// TODO: prevent endless loop ?
 			var verts = [];
@@ -112,7 +113,7 @@ PNLTRI.BasicTriangulator.prototype = {
 
 		var result = [];
 
-		var	verts = vertList( inStartSeg );		/* we want a counter-clockwise polygon in verts */
+		var	verts = vertList( startSeg );		/* we want a counter-clockwise polygon in verts */
 
 		var n = verts.length;
 		var nv = n;

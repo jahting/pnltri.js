@@ -53,7 +53,7 @@ function test_MonoTriangulator() {
 	}
 
 
-	function test_triangulate_single_polygon() {
+	function test_triangulate_monotone_polygon() {
 
 		var myPolygonData, myMonoTriang, myMonoChain, triangList;
 		
@@ -64,7 +64,7 @@ function test_MonoTriangulator() {
 			myMonoTriang = new PNLTRI.MonoTriangulator( myPolygonData );
 			//
 			myMonoChain = myPolygonData.getSegments();
-			triangList = myPolygonData.getTriangleList();
+			triangList = myPolygonData.getTriangleList();		// unsorted results !!
 		}
 
 		var myVertices;
@@ -72,7 +72,7 @@ function test_MonoTriangulator() {
 		// Triangle: RightHandSide is the single segment chain
 		myVertices = [ { x:8,y:14 }, { x:9,y:20 }, { x:6,y:18 } ];
 		initSeglistMonoChain( myVertices );
-		myMonoTriang.triangulate_single_polygon( myMonoChain[1] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[1] );
 		equal( triangList.length, 1, "RHS Triangle: number" );
 //		deepEqual(	triangList[0], [ 1, 2, 0 ], "RHS Triangle: Triangle, CCW: start at posmax" );
 		deepEqual(	triangList[0], [ 2, 0, 1 ], "RHS Triangle (changed to LHS): Triangle, CCW: start at posmax" );
@@ -80,7 +80,7 @@ function test_MonoTriangulator() {
 		// Triangle: LeftHandSide is the single segment chain
 		myVertices = [ { x:1,y: 3 }, { x:4,y: 7 }, { x:8,y:14 } ];
 		initSeglistMonoChain( myVertices );
-		myMonoTriang.triangulate_single_polygon( myMonoChain[2] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[2] );
 		equal( triangList.length, 1, "LHS Triangle: number" );
 		deepEqual(	triangList[0], [ 0, 1, 2 ], "LHS Triangle: Triangle, CCW: start at posmax.mnext, that is posmin" );
 		//
@@ -88,7 +88,7 @@ function test_MonoTriangulator() {
 		// 4-Vert: RightHandSide is the single segment chain
 		myVertices = [ { x: 8,y:14 }, { x:11,y:23 }, { x: 9,y:20 }, { x: 6,y:18 } ];		// 9,20: concave angle
 		initSeglistMonoChain( myVertices );
-		myMonoTriang.triangulate_single_polygon( myMonoChain[1] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[1] );
 		equal( triangList.length, 2, "RHS 4-vert: number" );
 //		deepEqual(	triangList, [	[ 2, 3, 0 ], [ 1, 2, 0 ],
 //									], "RHS 4-vert: Triangles, CCW: start at posmax" );
@@ -98,7 +98,7 @@ function test_MonoTriangulator() {
 		// 4-Vert: LeftHandSide is the single segment chain
 		myVertices = [ { x:1,y: 3 }, { x:6,y:18 },{ x:3,y:19 }, { x:1,y:22 } ];			// 3,19: concave angle
 		initSeglistMonoChain( myVertices );
-		myMonoTriang.triangulate_single_polygon( myMonoChain[3] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[3] );
 		equal( triangList.length, 2, "LHS 4-vert: number" );
 		deepEqual(	triangList, [	[ 0, 1, 2 ], [ 0, 2, 3 ],
 									], "LHS 4-vert: Triangles, CCW: start at posmax.mnext, that is posmin" );
@@ -107,7 +107,7 @@ function test_MonoTriangulator() {
 		// n-Vert: RightHandSide is the single segment chain
 		myVertices = [ { x:9,y:20 }, { x:6,y:18 }, { x:8,y:14 }, { x:17,y:28 }, { x:14,y:25 }, { x:11,y:23 } ];		// 9,20 & 14,25: concave angle
 		initSeglistMonoChain( myVertices );
-		myMonoTriang.triangulate_single_polygon( myMonoChain[3] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[3] );
 		equal( triangList.length, 4, "RHS n-vert: number" );
 //		deepEqual(	triangList, [	[ 4, 5, 0 ], [ 0, 1, 2 ], [ 4, 0, 2 ], [ 3, 4, 2 ],
 //									], "RHS n-vert: Triangles, CCW: start at posmax" );
@@ -118,7 +118,7 @@ function test_MonoTriangulator() {
 		// n-Vert: LeftHandSide is the single segment chain
 		myVertices = [ { x:3,y: 7 }, { x:8,y:14 }, { x:6,y:18 }, { x:3,y:19 }, { x:1,y:22 }, { x:1,y: 3 } ];		// 3,7 & 3,19: concave angle
 		initSeglistMonoChain( myVertices );
-		myMonoTriang.triangulate_single_polygon( myMonoChain[4] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[4] );
 		equal( triangList.length, 4, "LHS n-vert: number" );
 		deepEqual(	triangList, [	[ 0, 1, 2 ], [ 5, 0, 2 ], [ 5, 2, 3 ], [ 5, 3, 4 ],
 									], "LHS n-vert: Triangles, CCW: start at posmax.mnext, that is posmin" );
@@ -131,7 +131,7 @@ function test_MonoTriangulator() {
 		myMonoChain[1].mnext.mnext = myMonoChain[1];
 		myMonoChain[1].mnext.mprev = myMonoChain[1];
 		myMonoChain[1].mprev = myMonoChain[1].mnext;
-		myMonoTriang.triangulate_single_polygon( myMonoChain[1] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[1] );
 		equal( triangList.length, 0, "No Triangle from 2 vertices" );
 		//
 		// 1-Vert MonoChain: Robustness, Error Case
@@ -141,7 +141,7 @@ function test_MonoTriangulator() {
 		myMonoChain[1].mnext = myMonoChain[1];
 		myMonoChain[1].mprev = myMonoChain[1];
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
-		myMonoTriang.triangulate_single_polygon( myMonoChain[1] );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[1] );
 		equal( triangList.length, 0, "No Triangle from 1 vertex" );
 	}
 
@@ -149,7 +149,7 @@ function test_MonoTriangulator() {
 	test( "Triangulator for uni-Y-monotone Polygons", function() {
 		test_triangulate_all_polygons( "square_3triangholes", 5 );
 		test_triangulate_all_polygons( "pt_3_diag_max", 4 );
-		test_triangulate_single_polygon();
+		test_triangulate_monotone_polygon();
 	});
 }
 

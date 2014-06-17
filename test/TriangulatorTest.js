@@ -6,7 +6,7 @@ function test_Triangulator() {
 	
 	var	testData = new PolygonTestdata();
 
-	function test_triangulate_polygon( inDataName, inExpectedMonoChains, inDebug ) {
+	function test_triangulate_polygon_details( inDataName, inExpectedMonoChains, inDebug ) {
 		var example_data = testData.get_polygon_with_holes( inDataName );
 		var	sollTriangList = testData.get_triangles( inDataName );
 		//
@@ -16,7 +16,7 @@ function test_Triangulator() {
 		//
 		// Main Test
 		//
-		equal( myMono.monotonate_trapezoids(), inExpectedMonoChains, "triangulate_polygon ("+inDataName+"): Number of MonoChains" );
+		equal( myMono.monotonate_trapezoids(), inExpectedMonoChains, "triangulate_polygon_details ("+inDataName+"): Number of MonoChains" );
 		if ( inDebug > 0 ) {
 //			showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //			showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
@@ -26,9 +26,9 @@ function test_Triangulator() {
 		}
 		//
 		myTriangulator.triangulate_all_polygons();
-		var triangList = myPolygonData.getTriangles();
-		equal( triangList.length, sollTriangList.length, "triangulate_polygon ("+inDataName+"): Number of Triangles" );
-		deepEqual(	triangList, sollTriangList, "triangulate_polygon ("+inDataName+"): Triangle list" );
+		var triangList = myPolygonData.getTriangles();		// sorted results !!
+		equal( triangList.length, sollTriangList.length, "triangulate_polygon_details ("+inDataName+"): Number of Triangles" );
+		deepEqual(	triangList, sollTriangList, "triangulate_polygon_details ("+inDataName+"): Triangle list" );
 		if ( inDebug > 0 ) {
 			drawPolygonLayers( { "poly": example_data, "triang": myPolygonData.triangles_2_polygons() }, inDebug );
 			//
@@ -39,17 +39,17 @@ function test_Triangulator() {
 	}
 
 	
-	function test_triangulate_polygon2( inDataName, inBasicAlgorithm, inDebug ) {
+	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inDebug ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
 		var	sollTriangList = testData.get_triangles( inDataName, inBasicAlgorithm );
 		//
 		var myTriangulator = new PNLTRI.Triangulator();
-		var triangList = myTriangulator.triangulate_polygon( polygonChains );
+		var triangList = myTriangulator.triangulate_polygon( polygonChains, inForceTrapezoidation );		// sorted results !!
 		//
 		// Main Test
 		//
-		equal( triangList.length, sollTriangList.length, "triangulate_polygon2 ("+inDataName+"): Number of Triangles" );
-		deepEqual(	triangList, sollTriangList, "triangulate_polygon2 ("+inDataName+"): Triangle list" );
+		equal( triangList.length, sollTriangList.length, "triangulate_polygon ("+inDataName+"): Number of Triangles" );
+		deepEqual(	triangList, sollTriangList, "triangulate_polygon ("+inDataName+"): Triangle list" );
 		//
 		if ( inDebug > 0 ) {
 			var myPolygonData = new PNLTRI.PolygonData( polygonChains );
@@ -59,68 +59,44 @@ function test_Triangulator() {
 
 	
 	test( "Triangulator for Simple Polygons with Holes", function() {
-		test_triangulate_polygon( "article_poly", 12, 0 );				// 1.5; from article [Sei91]
-		test_triangulate_polygon( "square_3triangholes", 2, 0 );		// 5; from	"Narkhede A. and Manocha D.", data_1
-		test_triangulate_polygon( "trap_2up_2down", 2, 0 );				// 4; trapezoid with 2 upper and 2 lower neighbors
-		test_triangulate_polygon( "pt_3_diag_max", 4, 0 );				// 4; vertex (6,6) with 3 additional diagonals (max)
-		test_triangulate_polygon( "many_ears", 11, 0 );					// 2; from slides3.pdf
-		test_triangulate_polygon( "y_monotone", 13, 0 );				// 2.5; from slides3.pdf
-		test_triangulate_polygon( "for_sweep1", 9, 0 );					// 2; from slides3.pdf
-		test_triangulate_polygon( "for_sweep2", 8, 0 );					// 2; from slides3.pdf
-		test_triangulate_polygon( "for_sweep3", 19, 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon( "xy_bad_saw", 11, 0 );				// 2; from handout6.pdf
+		test_triangulate_polygon_details( "article_poly", 12, 0 );				// 1.5; from article [Sei91]
+		test_triangulate_polygon_details( "square_3triangholes", 2, 0 );		// 5; from	"Narkhede A. and Manocha D.", data_1
+		test_triangulate_polygon_details( "trap_2up_2down", 2, 0 );				// 4; trapezoid with 2 upper and 2 lower neighbors
+		test_triangulate_polygon_details( "pt_3_diag_max", 4, 0 );				// 4; vertex (6,6) with 3 additional diagonals (max)
+		test_triangulate_polygon_details( "many_ears", 11, 0 );					// 2; from slides3.pdf
+		test_triangulate_polygon_details( "y_monotone", 13, 0 );				// 2.5; from slides3.pdf
+		test_triangulate_polygon_details( "for_sweep1", 9, 0 );					// 2; from slides3.pdf
+		test_triangulate_polygon_details( "for_sweep2", 8, 0 );					// 2; from slides3.pdf
+		test_triangulate_polygon_details( "for_sweep3", 19, 0 );				// 2; from slides3.pdf
+		test_triangulate_polygon_details( "xy_bad_saw", 11, 0 );				// 2; from handout6.pdf
 		//
-		test_triangulate_polygon( "hole_short_path", 4, 0 );			// 0.8; shortest path to hole is outside polygon
-		test_triangulate_polygon( "star_eight", 8, 0 );					// 10; symmetric 8-pointed star
-		test_triangulate_polygon( "unregular_hole", 6, 0 );				// 10; unregular hole
-		test_triangulate_polygon( "with_unregular_hole", 2, 0 );		// 0.7; square with unregular hole
-		test_triangulate_polygon( "with_unreg_and_star_hole", 9, 0 );	// 0.7; square with unregular and star hole
-		test_triangulate_polygon( "tree_error#1", 4, 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
-		test_triangulate_polygon( "tree_full", 183, 0 );				// 0.22; from	Triangulation Error of Tree (TODO: Source)
+		test_triangulate_polygon_details( "hole_short_path", 4, 0 );			// 0.8; shortest path to hole is outside polygon
+		test_triangulate_polygon_details( "star_eight", 8, 0 );					// 10; symmetric 8-pointed star
+		test_triangulate_polygon_details( "unregular_hole", 6, 0 );				// 10; unregular hole
+		test_triangulate_polygon_details( "with_unregular_hole", 2, 0 );		// 0.7; square with unregular hole
+		test_triangulate_polygon_details( "with_unreg_and_star_hole", 9, 0 );	// 0.7; square with unregular and star hole
+		test_triangulate_polygon_details( "tree_error#1", 4, 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
+		test_triangulate_polygon_details( "tree_full", 183, 0 );				// 0.22; from	Triangulation Error of Tree (TODO: Source)
 		//
-		test_triangulate_polygon( "three_error#1", 18, 0 );				// 1; 1.Error, integrating into Three.js (letter "t")
-		test_triangulate_polygon( "three_error#2", 12, 0 );				// 0.7; 2.Error, integrating into Three.js (letter "1")
-		test_triangulate_polygon( "three_error#3", 28, 0 );				// 3000; 3.Error, integrating into Three.js (logbuffer)
-		test_triangulate_polygon( "three_error#4", 32, 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
-		test_triangulate_polygon( "three_error#4b", 32, 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
-		test_triangulate_polygon( "hole_first", 7, 0 );					// 0.5; 5.Error, integrating into Three.js ("R")
-		test_triangulate_polygon( "two_polygons#1", 14, 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
-		test_triangulate_polygon( "two_polygons#2", 2, 0 );				// 1; my#6: two trivial polygons
-		test_triangulate_polygon( "polygons_inside_hole", 5, 0 );		// 0.7; my#7: square with unregular hole with two polygons inside
+		test_triangulate_polygon_details( "three_error#1", 18, 0 );				// 1; 1.Error, integrating into Three.js (letter "t")
+		test_triangulate_polygon_details( "three_error#2", 12, 0 );				// 0.7; 2.Error, integrating into Three.js (letter "1")
+		test_triangulate_polygon_details( "three_error#3", 28, 0 );				// 3000; 3.Error, integrating into Three.js (logbuffer)
+		test_triangulate_polygon_details( "three_error#4", 32, 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
+		test_triangulate_polygon_details( "three_error#4b", 32, 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_triangulate_polygon_details( "hole_first", 7, 0 );					// 0.5; 5.Error, integrating into Three.js ("R")
+		test_triangulate_polygon_details( "two_polygons#1", 14, 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
+		test_triangulate_polygon_details( "two_polygons#2", 2, 0 );				// 1; my#6: two trivial polygons
+		test_triangulate_polygon_details( "polygons_inside_hole", 5, 0 );		// 0.7; my#7: square with unregular hole with two polygons inside
 		//
-		test_triangulate_polygon( "squares_perftest_min", 14, 0 );		// 1: 3x3 squares in square, performance test
-//		test_triangulate_polygon( "squares_perftest_mid", 422, 1 );		// 1: 15x15 squares in square, performance test
-//		test_triangulate_polygon( "squares_perftest_max", 3122, 1 );	// 1: 40x40 squares in square, performance test
+		test_triangulate_polygon_details( "squares_perftest_min", 14, 0 );		// 1: 3x3 squares in square, performance test
+//		test_triangulate_polygon_details( "squares_perftest_mid", 422, 1 );		// 1: 15x15 squares in square, performance test
+//		test_triangulate_polygon_details( "squares_perftest_max", 3122, 1 );	// 1: 40x40 squares in square, performance test
 		//
 		//
-		test_triangulate_polygon2( "article_poly", true, 0 );			// 1.5; from article [Sei91]
-		test_triangulate_polygon2( "square_3triangholes", false, 0 );	// 5; from	"Narkhede A. and Manocha D.", data_1
-		test_triangulate_polygon2( "trap_2up_2down", true, 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors
-		test_triangulate_polygon2( "pt_3_diag_max", true, 0 );			// 4; vertex (6,6) with 3 additional diagonals (max)
-		test_triangulate_polygon2( "many_ears", true, 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon2( "y_monotone", true, 0 );				// 2.5; from slides3.pdf
-		test_triangulate_polygon2( "for_sweep1", true, 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon2( "for_sweep2", true, 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon2( "for_sweep3", true, 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon2( "xy_bad_saw", true, 0 );				// 2; from handout6.pdf
-		//
-		test_triangulate_polygon2( "hole_short_path", false, 0 );		// 0.8; shortest path to hole is outside polygon
-		test_triangulate_polygon2( "star_eight", true, 0 );				// 10; symmetric 8-pointed star
-		test_triangulate_polygon2( "unregular_hole", true, 0 );			// 10; unregular hole
-		test_triangulate_polygon2( "with_unregular_hole", false, 0 );		// 0.7; square with unregular hole
-		test_triangulate_polygon2( "with_unreg_and_star_hole", false, 0 );	// 0.7; square with unregular and star hole
-		test_triangulate_polygon2( "tree_error#1", false, 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
-		test_triangulate_polygon2( "tree_full", false, 0 );				// 0.22; from	Triangulation Error of Tree (TODO: Source)
-		//
-		test_triangulate_polygon2( "three_error#1", true, 0 );			// 1; 1.Error, integrating into Three.js (letter "t")
-		test_triangulate_polygon2( "three_error#2", true, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
-		test_triangulate_polygon2( "three_error#3", true, 0 );			// 3000; 3.Error, integrating into Three.js (logbuffer)
-		test_triangulate_polygon2( "three_error#4", true, 0 );			// 1; 4.Error, integrating into Three.js (USA Maine)
-		test_triangulate_polygon2( "three_error#4b", true, 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
-		test_triangulate_polygon2( "hole_first", false, 0 );			// 0.5; 5.Error, integrating into Three.js ("R")
-		test_triangulate_polygon2( "two_polygons#1", false, 0 );		// 0.5; 6.Error, integrating into Three.js ("i")
-		test_triangulate_polygon2( "two_polygons#2", false, 0 );		// 1; my#6: two trivial polygons
-		test_triangulate_polygon2( "polygons_inside_hole", false, 0 );	// 0.7; my#7: square with unregular hole with two polygons inside
+		test_triangulate_polygon( "article_poly", false, true, 1.5 );				// 1.5; autom. switches to BasicTriangulator
+		test_triangulate_polygon( "article_poly", true, false, 1.5 );				// 1.5; forced not to switch to BasicTriangulator
+		test_triangulate_polygon( "square_3triangholes", false, false, 0 );		// 5; holes => uses Trapezoidation in any case
+		test_triangulate_polygon( "square_3triangholes", true, false, 0 );		// 5; holes => uses Trapezoidation in any case
 	});
 }
 
