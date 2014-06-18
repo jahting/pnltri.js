@@ -97,9 +97,18 @@ function test_BasicTriangulator() {
 		equal( triangList.length, 4, "triangulate_polygon_no_holes_basic, LHS n-vert B: number" );
 		deepEqual(	triangList, [ [ 5, 0, 1 ], [ 2, 3, 4 ], [ 4, 5, 1 ], [ 1, 2, 4 ] ], "triangulate_polygon_no_holes_basic, LHS n-vert B: vertices" );
 //		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
+		//
+		//	ERROR Cases
+		//
+		// line intersections
+		myVertices = [ { x:6, y:3 }, { x:1, y:1 }, { x:3, y:1 }, { x:3, y:3 } ];
+		initSeglistMonoChain( myVertices );
+		ok( !myTriangulator.triangulate_polygon_no_holes(), "triangulate_polygon_no_holes_basic, self intersection: NOT OK");
+		equal( triangList.length, 1, "triangulate_polygon_no_holes_basic, self intersection: number" );
+		deepEqual(	triangList, [ [ 0, 3, 2 ] ], "triangulate_polygon_no_holes_basic, self intersection: vertices" );
+//		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() }, 10 );
 	}
 
-	
 	function test_triangulate_polygon_no_holes_full( inDataName, inDebug ) {
 		var	testData = new PolygonTestdata();
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
