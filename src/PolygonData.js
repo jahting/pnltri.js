@@ -49,6 +49,9 @@ PNLTRI.PolygonData.prototype = {
 	getSegments: function () {
 		return	this.segments;
 	},
+	getFirstSegment: function () {
+		return	this.segments[0];
+	},
 	getMonoSubPolys: function () {
 		return	this.monoSubPolyChains;
 	},
@@ -83,6 +86,16 @@ PNLTRI.PolygonData.prototype = {
 		}
 	},
 
+	// checks winding order by calculating the area of the polygon
+	isClockWise: function ( inStartSeg ) {
+		var cursor = inStartSeg, doubleArea = 0;
+		do {
+			doubleArea += ( cursor.vFrom.x - cursor.vTo.x ) * ( cursor.vFrom.y + cursor.vTo.y );
+			cursor = cursor.snext;
+		} while ( cursor != inStartSeg );
+		return	( doubleArea < 0 );
+	},
+
 	
 	/*	Operations  */
 	
@@ -106,7 +119,7 @@ PNLTRI.PolygonData.prototype = {
 			vTo: inVertexTo,		// -> end point entry in vertices
 			// upward segment? (i.e. vTo > vFrom)
 			upward: ( this.compare_pts_yx(inVertexTo, inVertexFrom) == 1 ),
-			// double linked list of original polygon chains (not the monoChains !)
+			// doubly linked list of original polygon chains (not the monoChains !)
 			sprev: null,			// previous segment
 			snext: null,			// next segment
 		};
@@ -196,7 +209,7 @@ PNLTRI.PolygonData.prototype = {
 		for (var i = 0; i < this.segments.length; i++) {
 			// already visited during unique monoChain creation ?
 			this.segments[i].marked = false;
-			// double linked list for monotone chains (sub-polygons)
+			// doubly linked list for monotone chains (sub-polygons)
 			this.segments[i].mprev = this.segments[i].sprev;
 			this.segments[i].mnext = this.segments[i].snext;
 			// out-going segments of a vertex (max: 4)
@@ -247,8 +260,8 @@ PNLTRI.PolygonData.prototype = {
 					// CROSS_SINE: sin(theta) * len(v0) * len(v1)
 					return	( v0.x * v1.y - v1.x * v0.y );
 					// == 0: colinear (theta == 0 or 180 deg == PI rad)
-					// > 0:  v lies left of u
-					// < 0:  v lies right of u
+					// > 0:  v1 lies left of v0, CCW angle from v0 to v1 is convex ( < 180 deg )
+					// < 0:  v1 lies right of v0, CW angle from v0 to v1 is convex ( < 180 deg )
 				}
 				
 				var v0 = {	x: inPtFrom.x - inPtVertex.x,			// Vector inPtVertex->inPtFrom

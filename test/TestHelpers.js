@@ -292,7 +292,7 @@ function showDataStructure( inObject, inTempKeys ) {
  *
  * ===========================================================================*/
  
-function drawPolygonLayers( inPolygonLayers, inScale ) {
+function drawPolygonLayers( inPolygonLayers, inScale, inXoff, inYoff ) {
  	 
 	// GLOBALS ======================================================
 
@@ -303,6 +303,8 @@ function drawPolygonLayers( inPolygonLayers, inScale ) {
 	var canvas, context;
 
 	var scale = inScale ? inScale : 1;
+	var xOffset = inXoff ? inXoff : 0;
+	var yOffset = inYoff ? inYoff : 0;
 	var type;
 
 	//
@@ -357,11 +359,11 @@ function drawPolygonLayers( inPolygonLayers, inScale ) {
 		if ( inPolygon.length == 0 )	return;
 		//
 		context.beginPath();
-		myMoveTo( inPolygon[0].x, inPolygon[0].y );
+		myMoveTo( inPolygon[0].x - xOffset, inPolygon[0].y - yOffset );
 		for (var i=1; i<inPolygon.length; i++) {
-			myLineTo( inPolygon[i].x, inPolygon[i].y );
+			myLineTo( inPolygon[i].x - xOffset, inPolygon[i].y - yOffset );
 		}
-		myLineTo( inPolygon[0].x, inPolygon[0].y );
+		myLineTo( inPolygon[0].x - xOffset, inPolygon[0].y - yOffset );
 		context.stroke();
 	}
 	

@@ -283,6 +283,14 @@ function test_PolygonData() {
 		equal( result, -13, "poly_area = -13" );
 	}
 
+	function test_isClockWise() {
+		var myPolygonData = new PNLTRI.PolygonData( [ { x:1, y:3 }, { x:3, y:6 }, { x:6, y:4 }, { x:4, y:1 } ] );
+		ok( myPolygonData.isClockWise( myPolygonData.getFirstSegment() ), "poly_area: CW" );
+		//
+		var myPolygonData = new PNLTRI.PolygonData( [ { x:1, y:3 }, { x:4, y:1 }, { x:6, y:4 }, { x:3, y:6 } ] );
+		ok( !myPolygonData.isClockWise( myPolygonData.getFirstSegment() ), "poly_area: CCW" );
+	}
+
 	function test_addPolygonChain_errors() {
 		var myPolygonData = new PNLTRI.PolygonData();
 		//
