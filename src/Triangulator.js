@@ -45,7 +45,7 @@ PNLTRI.Triangulator.prototype = {
 
 	triangulate_polygon: function ( inPolygonChains, inForceTrapezoidation ) {
 
-		// collected conditions for selecting BasicTriangulator over Seidel's algorithm
+		// collected conditions for selecting EarClipTriangulator over Seidel's algorithm
 		function is_basic_polygon() {
 			if (inForceTrapezoidation)	return	false;
 			return	( myPolygonData.nbPolyChains() == 1 );
@@ -63,7 +63,7 @@ PNLTRI.Triangulator.prototype = {
 			//
 			// triangulates single polygon without holes
 			//
-			var	myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
+			var	myTriangulator = new PNLTRI.EarClipTriangulator( myPolygonData );
 			basicPolygon = myTriangulator.triangulate_polygon_no_holes();
 		}
 		if ( !basicPolygon ) {

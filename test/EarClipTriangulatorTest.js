@@ -2,7 +2,7 @@
  * @author jahting / http://www.ameco.tv/
  */
 
-function test_BasicTriangulator() {
+function test_EarClipTriangulator() {
 
 	function test_triangulate_polygon_no_holes_basic() {
 
@@ -11,7 +11,7 @@ function test_BasicTriangulator() {
 		// Helper function
 		function initSeglistMonoChain( inPtList ) {
 			myPolygonData = new PNLTRI.PolygonData( [ inPtList ] );
-			myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
+			myTriangulator = new PNLTRI.EarClipTriangulator( myPolygonData );
 			//
 			myMonoChain = myPolygonData.getSegments();
 			triangList = myPolygonData.getTriangleList();		// unsorted results !!
@@ -117,7 +117,7 @@ function test_BasicTriangulator() {
 		// Main Test
 		//
 		var myPolygonData = new PNLTRI.PolygonData( polygonChains );
-		var myTriangulator = new PNLTRI.BasicTriangulator( myPolygonData );
+		var myTriangulator = new PNLTRI.EarClipTriangulator( myPolygonData );
 		ok( myTriangulator.triangulate_polygon_no_holes(), "triangulate_polygon_no_holes_full ("+inDataName+"): OK");
 		//
 		var triangList = myPolygonData.getTriangles();		// sorted results !!
@@ -130,7 +130,7 @@ function test_BasicTriangulator() {
 	}
 
 	
-	test( "Basic Triangulator for Polygons without Holes", function() {
+	test( "Ear-Clipping Triangulator for Polygons without Holes", function() {
 		test_triangulate_polygon_no_holes_basic();
 		//
 		test_triangulate_polygon_no_holes_full( "article_poly", 0 );			// 1.5; from article [Sei91]

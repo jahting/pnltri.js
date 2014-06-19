@@ -15,20 +15,22 @@
  * ported to javascript by Joshua Koo
  *	http://www.lab4games.net/zz85/blog
  *
+ * adapted to doubly linked list by Juergen Ahting
+ *	http://www.ameco.tv
+ *
  */
 
 /** @constructor */
-PNLTRI.BasicTriangulator = function ( inPolygonData ) {
+PNLTRI.EarClipTriangulator = function ( inPolygonData ) {
 
 	this.polyData	= inPolygonData;
 
 };
 
 
+PNLTRI.EarClipTriangulator.prototype = {
 
-PNLTRI.BasicTriangulator.prototype = {
-
-	constructor: PNLTRI.BasicTriangulator,
+	constructor: PNLTRI.EarClipTriangulator,
 
 
 	// triangulates first doubly linked segment list in this.polyData

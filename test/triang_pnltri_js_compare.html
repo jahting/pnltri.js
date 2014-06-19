@@ -9,7 +9,7 @@
 		<script type="text/javascript" src="../src/Pnltri.js"></script>
 		<script type="text/javascript" src="../src/PnltriMath.js"></script>
 		<script type="text/javascript" src="../src/PolygonData.js"></script>
-		<script type="text/javascript" src="../src/BasicTriangulator.js"></script>
+		<script type="text/javascript" src="../src/EarClipTriangulator.js"></script>
 		<script type="text/javascript" src="../src/Trapezoider.js"></script>
 		<script type="text/javascript" src="../src/MonoSplitter.js"></script>
 		<script type="text/javascript" src="../src/MonoTriangulator.js"></script>
@@ -35,7 +35,7 @@
 			function measure_threejs( inData ) {
 				durationTriang  = new Date().getTime();
 //				console.profile();
-				triangList = myTriangulator.triangulate_polygon( inData, false );	// autom. switches to BasicTriangulator
+				triangList = myTriangulator.triangulate_polygon( inData, false );	// autom. switches to EarClipTriangulator
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
 			}

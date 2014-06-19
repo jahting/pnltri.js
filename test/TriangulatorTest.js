@@ -94,7 +94,7 @@ function test_Triangulator() {
 		//
 		//
 		test_triangulate_polygon( "article_poly", false, true, 0 );				// 1.5; autom. switches to BasicTriangulator
-		test_triangulate_polygon( "article_poly", true, false, 0 );				// 1.5; forced not to switch to BasicTriangulator
+		test_triangulate_polygon( "article_poly", true, false, 0 );				// 1.5; forced not to switch to EarClipTriangulator
 		test_triangulate_polygon( "square_3triangholes", false, false, 0 );		// 5; holes => uses Trapezoidation in any case
 		test_triangulate_polygon( "square_3triangholes", true, false, 0 );		// 5; holes => uses Trapezoidation in any case
 	});
