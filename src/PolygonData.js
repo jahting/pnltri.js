@@ -17,7 +17,10 @@ PNLTRI.PolygonData = function ( inPolygonChainList ) {
 	//  during the subdivision into uni-y-monotone polygons (s. this.monoSubPolyChains)
 	// doubly linked by: snext, sprev
 	this.segments = [];
+	
+	// for the original polygon chains
 	this.idNextPolyChain = 0;
+	this.chainOrderOK = [];			// for each chain: is the winding order ok?
 	
 	// indices into this.segments: at least one for each monoton chain for the polygon
 	//  these subdivide the polygon into uni-y-monotone polygons, that is
@@ -61,6 +64,16 @@ PNLTRI.PolygonData.prototype = {
 
 	nbPolyChains: function () {
 		return	this.idNextPolyChain;
+	},
+	
+	// for the polygon data AFTER triangulation
+	//	returns an Array of flags,
+	//	one flag for each polygon chain: is the winding order ok?
+	get_chainOrder: function () {
+		return	this.chainOrderOK;
+	},
+	set_chainOrder_wrong: function ( inChainId ) {
+		this.chainOrderOK[inChainId] = false;
 	},
 
 		
@@ -197,8 +210,28 @@ PNLTRI.PolygonData.prototype = {
 		firstSeg.sprev = segment;
 		segment.snext = firstSeg;
 		
-		this.idNextPolyChain++;
+		this.chainOrderOK[this.idNextPolyChain++] = true;
 		return	this.segments.length - saveSegListLength;
+	},
+
+	
+	// reverse winding order of a polygon chain
+	reverse_polygon_chain: function ( inSomeSegment ) {
+		this.set_chainOrder_wrong( inSomeSegment.chainId );
+		var tmp, frontSeg = inSomeSegment;
+		do {
+			// change link direction
+			tmp = frontSeg.snext;
+			frontSeg.snext = frontSeg.sprev;
+			frontSeg.sprev = tmp;
+			// exchange vertices
+			tmp = frontSeg.vTo;
+			frontSeg.vTo = frontSeg.vFrom;
+			frontSeg.vFrom = tmp;
+			frontSeg.upward = !frontSeg.upward;
+			// continue with old snext
+			frontSeg = frontSeg.sprev;
+		} while ( frontSeg != inSomeSegment );
 	},
 	
 

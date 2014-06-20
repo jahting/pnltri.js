@@ -94,7 +94,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TL_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BL_2" );
@@ -138,7 +138,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TR_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BR_2" );
@@ -178,7 +178,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TL_BLR_1" );
 		myQs.add_segment_consistently( segListArray[1], "TL_BLR_2" );
@@ -216,7 +216,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TR_BLR_1" );
 		myQs.add_segment_consistently( segListArray[1], "TR_BLR_2" );
@@ -254,7 +254,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TLR_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TLR_BL_2" );
@@ -292,7 +292,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TLR_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TLR_BR_2" );
@@ -331,7 +331,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TL_BR_1" );
 		myQs.add_segment_consistently( segListArray[2], "TL_BR_2" );
@@ -375,7 +375,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TR_BL_1" );
 		myQs.add_segment_consistently( segListArray[2], "TR_BL_2" );
@@ -420,7 +420,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TL_BM_1" );
 		myQs.add_segment_consistently( segListArray[3], "TL_BM_2" );
@@ -474,7 +474,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[0], "TR_BM_1" );
 		myQs.add_segment_consistently( segListArray[3], "TR_BM_2" );
@@ -528,7 +528,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[4], "TM_BL_1" );
 		myQs.add_segment_consistently( segListArray[3], "TM_BL_2" );
@@ -582,7 +582,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[4], "TM_BR_1" );
 		myQs.add_segment_consistently( segListArray[3], "TM_BR_2" );
@@ -637,7 +637,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[4], "TM_BM_1" );
 		myQs.add_segment_consistently( segListArray[3], "TM_BM_2" );
@@ -703,7 +703,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[3], "TLR_BM_1" );
 		myQs.add_segment_consistently( segListArray[0], "TLR_BM_2" );
@@ -752,7 +752,7 @@ function test_MonoSplitter() {
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var segListArray = myQs.getSegListArray();
+		var segListArray = myPolygonData.getSegments();
 		//
 		myQs.add_segment_consistently( segListArray[3], "TM_BLR_1" );
 		myQs.add_segment_consistently( segListArray[0], "TM_BLR_2" );

@@ -121,9 +121,8 @@ PNLTRI.QueryStructure = function ( inPolygonData ) {
 
 	this.trapArray = [ initialTrap ];
 
-	this.segListArray = null;
 	if ( inPolygonData ) {
-		this.segListArray = inPolygonData.getSegments();
+		var segListArray = inPolygonData.getSegments();
 		/*
 		 * adds and initializes specific attributes for all segments
 		 *	// -> QueryStructure: roots of partial tree where vertex is located
@@ -131,14 +130,12 @@ PNLTRI.QueryStructure = function ( inPolygonData ) {
 		 *	// marker
 		 *	is_inserted:	already inserted into QueryStructure ?
 		 */
-		for ( var i = 0; i < this.segListArray.length; i++ ) {
-			this.segListArray[i].rootFrom = this.segListArray[i].rootTo = this.root;
-			this.segListArray[i].is_inserted = false;
+		for ( var i = 0; i < segListArray.length; i++ ) {
+			segListArray[i].rootFrom = segListArray[i].rootTo = this.root;
+			segListArray[i].is_inserted = false;
 		}
 		this.compare_pts_yx = inPolygonData.compare_pts_yx;
 	} else {
-//		var myPolygonData = new PNLTRI.PolygonData( null );
-//		this.compare_pts_yx = myPolygonData.compare_pts_yx;
 		this.compare_pts_yx = PNLTRI.PolygonData.prototype.compare_pts_yx;
 	}
 };
@@ -149,9 +146,6 @@ PNLTRI.QueryStructure.prototype = {
 
 	getRoot: function () {
 		return this.root;
-	},
-	getSegListArray: function () {
-		return this.segListArray;
 	},
 		
 	
@@ -826,40 +820,6 @@ PNLTRI.QueryStructure.prototype = {
 	},
 	
 
-	// reverse winding order of a polygon chain
-	reverse_polygon_chain: function ( inSomeSegment ) {
-		var tmp, frontSeg = inSomeSegment;
-		do {
-			// change link direction
-			tmp = frontSeg.snext;
-			frontSeg.snext = frontSeg.sprev;
-			frontSeg.sprev = tmp;
-			// exchange vertices
-			tmp = frontSeg.vTo;
-			frontSeg.vTo = frontSeg.vFrom;
-			frontSeg.vFrom = tmp;
-			frontSeg.upward = !frontSeg.upward;
-			// continue with old snext
-			frontSeg = frontSeg.sprev;
-		} while ( frontSeg != inSomeSegment );
-	},
-
-
-	// Check segment orientation and reverse polyChain winding order if necessary
-	//	=> contour: CCW, holes: CW
-	//	=> all trapezoids lseg/rseg have opposing directions,
-	//		assumed, the missing outer segments have CW orientation !
-	
-	normalize_segment_orientation: function () {
-		var thisSeg;
-		for ( var i = 0; i < this.segListArray.length; i++ ) {
-			thisSeg = this.segListArray[i];
-			if ( thisSeg.upward == ( ( thisSeg.trLeft.depth % 2 ) == 0 ) )
-				this.reverse_polygon_chain( thisSeg );
-		}
-	},
-
-
 	// Find one triangular trapezoid which lies inside the polygon
 	// !! does NOT depend on the orientation of segments CCW/CW !!
 	
@@ -937,7 +897,22 @@ PNLTRI.Trapezoider.prototype = {
 		}
 	},
 
+
+	// Check segment orientation and reverse polyChain winding order if necessary
+	//	=> contour: CCW, holes: CW
+	//	=> all trapezoids lseg/rseg have opposing directions,
+	//		assumed, the missing outer segments have CW orientation !
 	
+	normalize_segment_orientation: function () {
+		var segListArray = this.polyData.getSegments();
+		for ( var i = 0; i < segListArray.length; i++ ) {
+			var thisSeg = segListArray[i];
+			if ( thisSeg.upward == ( ( thisSeg.trLeft.depth % 2 ) == 0 ) )
+				this.polyData.reverse_polygon_chain( thisSeg );
+		}
+	},
+
+
 	/*
 	 * main methods
 	 */
@@ -962,16 +937,15 @@ PNLTRI.Trapezoider.prototype = {
 	//	neighbor links.
 	
 	trapezoide_polygon: function () {							// <<<< public
-		var myQs = this.queryStructure;
-		
-		var randSegListArray = myQs.segListArray.concat();
+		var randSegListArray = this.polyData.getSegments().concat();
 //		console.log( "Polygon Chains: ", dumpSegmentList( randSegListArray ) );
 		PNLTRI.Math.array_shuffle( randSegListArray );
 		this.optimise_randomlist( randSegListArray );
 //		console.log( "Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
 		
-		var i, h;
 		var anzSegs = randSegListArray.length;
+		var myQs = this.queryStructure;
+		var i, h;
 
 		var logStarN = this.math_logstar_n(anzSegs);
 		for (h = 1; h <= logStarN; h++) {
@@ -991,7 +965,7 @@ PNLTRI.Trapezoider.prototype = {
 		}
 		
 		myQs.assignDepths();
-		myQs.normalize_segment_orientation();
+		this.normalize_segment_orientation();
 	},
 
 };

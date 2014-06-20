@@ -43,6 +43,19 @@ PNLTRI.Triangulator.prototype = {
 	constructor: PNLTRI.Triangulator,
 
 
+	clear_lastData: function () {	// save memory after Debug
+		this.lastPolyData = null;
+	},
+	
+	// for the polygon data AFTER triangulation
+	//	returns an Array of flags,
+	//	one flag for each polygon chain: is the winding order ok?
+	get_chainOrder: function () {
+		if ( this.lastPolyData )	return this.lastPolyData.get_chainOrder();
+		return	null;
+	},
+
+
 	triangulate_polygon: function ( inPolygonChains, inForceTrapezoidation ) {
 
 		// collected conditions for selecting EarClipTriangulator over Seidel's algorithm

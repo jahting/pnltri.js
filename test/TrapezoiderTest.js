@@ -770,10 +770,10 @@ function test_QueryStructure() {
 		var testPolygon = [ { x: 5, y: 5 }, { x: 45, y: 20 }, { x: 15, y: 40 } ];
 
 		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray();
 		//
 		myQs.add_segment_consistently( segListArray[0], 'assign_depths #0' );
 		myQs.add_segment_consistently( segListArray[1], 'assign_depths #1' );
@@ -796,9 +796,11 @@ function test_QueryStructure() {
 //		drawTrapezoids( myQsRoot, false, 1 );
 		//
 		//
-		var myQs = new PNLTRI.QueryStructure( new PNLTRI.PolygonData( [ testPolygon ] ) );
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
+		//
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray();
 		//	not closed !!
 		myQs.add_segment_consistently( segListArray[0], 'assign_depths #0' );
 		myQs.add_segment_consistently( segListArray[1], 'assign_depths #1' );
@@ -999,12 +1001,12 @@ function test_QueryStructure() {
 				{ x:1, y:1 }, { x:4, y:3 }, { x:6, y:2 }, { x:7, y:5 },
 				{ x:5, y:6 }, { x:2, y:4 }, { x:1, y:7 }, 
 			] ] );
+		var segListArray = myPolygonData.getSegments();
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray();
 		//
 		myQs.add_segment_consistently( segListArray[0], 'Spec_1 #1' );
 		myQs.add_segment_consistently( segListArray[2], 'Spec_1 #2' );
@@ -1022,12 +1024,12 @@ function test_QueryStructure() {
 			{ x:1, y:1 }, { x:5, y:5.1 }, { x:6, y:8 }, { x:4, y:6 },
 			{ x:2, y:3 }, { x:1, y:5 },
 			] ] );
+		var segListArray = myPolygonData.getSegments();
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray();
 		//
 		myQs.add_segment_consistently( segListArray[0], 'Spec_2 #1' );
 		myQs.add_segment_consistently( segListArray[1], 'Spec_2 #2' );
@@ -1048,12 +1050,12 @@ function test_QueryStructure() {
 			{ x: 19.3395, y: 7.15 }, { x: 19.228, y: 7.150000000000001 },
 			{ x: 5.03, y: 6.9715 }, { x: 5.17, y: 6.046 },
 			] ] );
+		var segListArray = myPolygonData.getSegments();
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray();
 		//
 		myQs.add_segment_consistently( segListArray[2], 'Spec_3 #1' );
 		// complex case: 3.Segment goes upwards and downwards => always use EPSILON
@@ -1082,7 +1084,7 @@ function test_QueryStructure() {
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray().concat();
+		var segListArray = myPolygonData.getSegments().concat();
 		//
 		myQs.add_segment_consistently( segListArray[0], 'Spec_4a #1' );
 		myQs.add_segment_consistently( segListArray[1], 'Spec_4a #2' );
@@ -1102,7 +1104,7 @@ function test_QueryStructure() {
 		myPolygonData = new PNLTRI.PolygonData( testPolygon );
 		myQs = new PNLTRI.QueryStructure( myPolygonData );
 		myQsRoot = myQs.getRoot();
-		segListArray = myQs.getSegListArray().concat();
+		segListArray = myPolygonData.getSegments().concat();
 		//
 		myQs.add_segment_consistently( segListArray[2], 'Spec_4b #1' );
 		myQs.add_segment_consistently( segListArray[1], 'Spec_4b #2' );
@@ -1128,12 +1130,12 @@ function test_QueryStructure() {
 			{ x: 102, y: 100.4 },
 			{ x: 101, y: 100.40000000000002 },
 			] ] );
+		var segListArray = myPolygonData.getSegments();
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray();
 		//
 		myQs.add_segment_consistently( segListArray[0], 'Spec_5 #1' );
 		myQs.add_segment_consistently( segListArray[1], 'Spec_5 #2' );
@@ -1296,7 +1298,7 @@ function test_QueryStructure() {
 		//
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
-		var segListArray = myQs.getSegListArray().concat();
+		var segListArray = myPolygonData.getSegments().concat();
 		//
 /*		PNLTRI.Math.myRandom( 1 );			// set specific random seed for finding random errors
 		PNLTRI.Math.random = PNLTRI.Math.myRandom;	*/
@@ -1426,7 +1428,7 @@ function test_Trapezoider() {
 		// Main Test
 		//
 		var myQs = myTrapezoider.queryStructure;				// TODO
-		var randSegListArray = myQs.segListArray.slice(0);
+		var randSegListArray = myPolygonData.getSegments().concat();
 		PNLTRI.Math.array_shuffle( randSegListArray );				// "10, 4, 3, 11, 8, 5, 12, 1, 7, 2, 0, 9, 6"
 //		console.log( "Old Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
 		myTrapezoider.optimise_randomlist( randSegListArray );		// "10, 4, 3, 8, 11, 5, 12, 1, 7, 2, 0, 9, 6"

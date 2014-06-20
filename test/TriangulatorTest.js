@@ -39,7 +39,7 @@ function test_Triangulator() {
 	}
 
 	
-	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inDebug ) {
+	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inChainOrder, inDebug ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
 		var	sollTriangList = testData.get_triangles( inDataName, inBasicAlgorithm );
 		//
@@ -50,6 +50,8 @@ function test_Triangulator() {
 		//
 		equal( triangList.length, sollTriangList.length, "triangulate_polygon ("+inDataName+"): Number of Triangles" );
 		deepEqual(	triangList, sollTriangList, "triangulate_polygon ("+inDataName+"): Triangle list" );
+		//
+		deepEqual( myTriangulator.get_chainOrder(), inChainOrder, "triangulate_polygon ("+inDataName+"): Chain order OK?" );
 		//
 		if ( inDebug > 0 ) {
 			var myPolygonData = new PNLTRI.PolygonData( polygonChains );
@@ -93,10 +95,14 @@ function test_Triangulator() {
 //		test_triangulate_polygon_details( "squares_perftest_max", 3122, 1 );	// 1: 40x40 squares in square, performance test
 		//
 		//
-		test_triangulate_polygon( "article_poly", false, true, 0 );				// 1.5; autom. switches to BasicTriangulator
-		test_triangulate_polygon( "article_poly", true, false, 0 );				// 1.5; forced not to switch to EarClipTriangulator
-		test_triangulate_polygon( "square_3triangholes", false, false, 0 );		// 5; holes => uses Trapezoidation in any case
-		test_triangulate_polygon( "square_3triangholes", true, false, 0 );		// 5; holes => uses Trapezoidation in any case
+		test_triangulate_polygon( "article_poly", false, true, [ true ], 0 );				// 1.5; autom. switches to EarClipTriangulator
+		test_triangulate_polygon( "article_poly", true, false, [ true ], 0 );				// 1.5; forced not to switch to EarClipTriangulator
+		test_triangulate_polygon( "square_3triangholes", false, false, [ true, true, true, true ], 0 );		// 5; holes => uses Trapezoidation in any case
+		test_triangulate_polygon( "square_3triangholes", true, false, [ true, true, true, true ], 0 );		// 5; holes => uses Trapezoidation in any case
+		test_triangulate_polygon( "three_error#1", false, true, [ false ], 0 );				// 1; autom. switches to EarClipTriangulator
+		test_triangulate_polygon( "three_error#1", true, false, [ false ], 0 );				// 1; forced not to switch to EarClipTriangulator
+		test_triangulate_polygon( "hole_short_path", false, false, [ false, false ], 0 );	// 0.8; holes => uses Trapezoidation in any case
+		test_triangulate_polygon( "hole_short_path", true, false, [ false, false ], 0 );	// 0.8; holes => uses Trapezoidation in any case
 	});
 }
 
