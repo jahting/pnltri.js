@@ -74,7 +74,7 @@ PNLTRI.PolygonData.prototype = {
 	//		lies the inside of the polygon to the left?
 	//		"true" implies CCW for contours and CW for holes
 	get_PolyLeftArr: function () {
-		return	this.PolyLeftArr;
+		return	this.PolyLeftArr.concat();
 	},
 	set_PolyLeft_wrong: function ( inChainId ) {
 		this.PolyLeftArr[inChainId] = false;
