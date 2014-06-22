@@ -784,7 +784,9 @@ function test_MonoSplitter() {
 	}
 	
 	/**************************************************************************/
-	
+
+	var	testData = new PolygonTestdata();
+
 	function test_monotonate_trapezoids( inDataName, inExpectedMonoChains, inDebug ) {
 		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
 		// for random-error detection - default seed: 73
@@ -792,7 +794,6 @@ function test_MonoSplitter() {
 //		PNLTRI.Math.random = PNLTRI.Math.myRandom;
 //		PNLTRI.Math.random = Math.random;
 		//
-		var	testData = new PolygonTestdata();
 		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( inDataName ) );
 		//
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );

@@ -93,7 +93,7 @@ PNLTRI.EarClipTriangulator.prototype = {
 				cursor.mnext = cursor.sprev;
 				cursor = cursor.sprev;
 			} while ( cursor != startSeg );
-			myPolyData.set_chainOrder_wrong(0);
+			myPolyData.set_PolyLeft_wrong(0);
 		} else {
 			do {
 				cursor.mprev = cursor.sprev;

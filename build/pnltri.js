@@ -82,9 +82,12 @@ PNLTRI.PolygonData = function ( inPolygonChainList ) {
 	// doubly linked by: snext, sprev
 	this.segments = [];
 	
-	// for the original polygon chains
+	// for the ORIGINAL polygon chains
 	this.idNextPolyChain = 0;
-	this.chainOrderOK = [];			// for each chain: is the winding order ok?
+	//	for each original chain: lies the polygon inside to the left?
+	//	"true": winding order is CCW for a contour or CW for a hole
+	//	"false": winding order is CW for a contour or CCW for a hole
+	this.PolyLeftArr = [];
 	
 	// indices into this.segments: at least one for each monoton chain for the polygon
 	//  these subdivide the polygon into uni-y-monotone polygons, that is
@@ -131,13 +134,14 @@ PNLTRI.PolygonData.prototype = {
 	},
 	
 	// for the polygon data AFTER triangulation
-	//	returns an Array of flags,
-	//	one flag for each polygon chain: is the winding order ok?
-	get_chainOrder: function () {
-		return	this.chainOrderOK;
+	//	returns an Array of flags, one flag for each polygon chain:
+	//		lies the inside of the polygon to the left?
+	//		"true" implies CCW for contours and CW for holes
+	get_PolyLeftArr: function () {
+		return	this.PolyLeftArr;
 	},
-	set_chainOrder_wrong: function ( inChainId ) {
-		this.chainOrderOK[inChainId] = false;
+	set_PolyLeft_wrong: function ( inChainId ) {
+		this.PolyLeftArr[inChainId] = false;
 	},
 
 		
@@ -274,14 +278,14 @@ PNLTRI.PolygonData.prototype = {
 		firstSeg.sprev = segment;
 		segment.snext = firstSeg;
 		
-		this.chainOrderOK[this.idNextPolyChain++] = true;
+		this.PolyLeftArr[this.idNextPolyChain++] = true;
 		return	this.segments.length - saveSegListLength;
 	},
 
 	
 	// reverse winding order of a polygon chain
 	reverse_polygon_chain: function ( inSomeSegment ) {
-		this.set_chainOrder_wrong( inSomeSegment.chainId );
+		this.set_PolyLeft_wrong( inSomeSegment.chainId );
 		var tmp, frontSeg = inSomeSegment;
 		do {
 			// change link direction
@@ -575,7 +579,7 @@ PNLTRI.EarClipTriangulator.prototype = {
 				cursor.mnext = cursor.sprev;
 				cursor = cursor.sprev;
 			} while ( cursor != startSeg );
-			myPolyData.set_chainOrder_wrong(0);
+			myPolyData.set_PolyLeft_wrong(0);
 		} else {
 			do {
 				cursor.mprev = cursor.sprev;
@@ -2064,10 +2068,11 @@ PNLTRI.Triangulator.prototype = {
 	},
 	
 	// for the polygon data AFTER triangulation
-	//	returns an Array of flags,
-	//	one flag for each polygon chain: is the winding order ok?
-	get_chainOrder: function () {
-		if ( this.lastPolyData )	return this.lastPolyData.get_chainOrder();
+	//	returns an Array of flags, one flag for each polygon chain:
+	//		lies the inside of the polygon to the left?
+	//		"true" implies CCW for contours and CW for holes
+	get_PolyLeftArr: function () {
+		if ( this.lastPolyData )	return this.lastPolyData.get_PolyLeftArr();
 		return	null;
 	},
 

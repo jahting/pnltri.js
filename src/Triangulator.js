@@ -48,10 +48,11 @@ PNLTRI.Triangulator.prototype = {
 	},
 	
 	// for the polygon data AFTER triangulation
-	//	returns an Array of flags,
-	//	one flag for each polygon chain: is the winding order ok?
-	get_chainOrder: function () {
-		if ( this.lastPolyData )	return this.lastPolyData.get_chainOrder();
+	//	returns an Array of flags, one flag for each polygon chain:
+	//		lies the inside of the polygon to the left?
+	//		"true" implies CCW for contours and CW for holes
+	get_PolyLeftArr: function () {
+		if ( this.lastPolyData )	return this.lastPolyData.get_PolyLeftArr();
 		return	null;
 	},
 

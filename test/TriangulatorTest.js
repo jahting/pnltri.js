@@ -39,7 +39,7 @@ function test_Triangulator() {
 	}
 
 	
-	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inChainOrder, inDebug ) {
+	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inPolyLeftArr, inDebug ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
 		var	sollTriangList = testData.get_triangles( inDataName, inBasicAlgorithm );
 		//
@@ -51,7 +51,7 @@ function test_Triangulator() {
 		equal( triangList.length, sollTriangList.length, "triangulate_polygon ("+inDataName+"): Number of Triangles" );
 		deepEqual(	triangList, sollTriangList, "triangulate_polygon ("+inDataName+"): Triangle list" );
 		//
-		deepEqual( myTriangulator.get_chainOrder(), inChainOrder, "triangulate_polygon ("+inDataName+"): Chain order OK?" );
+		deepEqual( myTriangulator.get_PolyLeftArr(), inPolyLeftArr, "triangulate_polygon ("+inDataName+"): PolyLeftArr OK?" );
 		//
 		if ( inDebug > 0 ) {
 			var myPolygonData = new PNLTRI.PolygonData( polygonChains );

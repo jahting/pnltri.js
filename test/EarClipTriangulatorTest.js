@@ -4,6 +4,8 @@
 
 function test_EarClipTriangulator() {
 
+	var	testData = new PolygonTestdata();
+
 	function test_triangulate_polygon_no_holes_basic() {
 
 		var myPolygonData, myTriangulator, myMonoChain, triangList;
@@ -109,8 +111,7 @@ function test_EarClipTriangulator() {
 //		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() }, 10 );
 	}
 
-	function test_triangulate_polygon_no_holes_full( inDataName, inDebug, inXoff, inYoff ) {
-		var	testData = new PolygonTestdata();
+	function test_triangulate_polygon_no_holes_full( inDataName, inPolyLeft, inDebug, inXoff, inYoff ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
 		var	sollTriangList = testData.get_triangles( inDataName, true );
 		//
@@ -124,6 +125,8 @@ function test_EarClipTriangulator() {
 		equal( triangList.length, sollTriangList.length, "triangulate_polygon_no_holes_full ("+inDataName+"): Number of Triangles" );
 		deepEqual(	triangList, sollTriangList, "triangulate_polygon_no_holes_full ("+inDataName+"): Triangle list" );
 		//
+		deepEqual( myPolygonData.get_PolyLeftArr(), [ inPolyLeft ], "triangulate_polygon_no_holes_full ("+inDataName+"): PolyLeft OK?" );
+		//
 		if ( inDebug > 0 ) {
 			drawPolygonLayers( { "poly": polygonChains, "triang": myPolygonData.triangles_2_polygons( triangList ) }, inDebug, inXoff, inYoff );
 		}
@@ -133,24 +136,24 @@ function test_EarClipTriangulator() {
 	test( "Ear-Clipping Triangulator for Polygons without Holes", function() {
 		test_triangulate_polygon_no_holes_basic();
 		//
-		test_triangulate_polygon_no_holes_full( "article_poly", 0 );			// 1.5; from article [Sei91]
-		test_triangulate_polygon_no_holes_full( "trap_2up_2down", 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors
-		test_triangulate_polygon_no_holes_full( "pt_3_diag_max", 0 );			// 4; vertex (6,6) with 3 additional diagonals (max)
-		test_triangulate_polygon_no_holes_full( "many_ears", 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon_no_holes_full( "y_monotone", 0 );				// 2.5; from slides3.pdf
-		test_triangulate_polygon_no_holes_full( "for_sweep1", 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon_no_holes_full( "for_sweep2", 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon_no_holes_full( "for_sweep3", 0 );				// 2; from slides3.pdf
-		test_triangulate_polygon_no_holes_full( "xy_bad_saw", 0 );				// 2; from handout6.pdf
+		test_triangulate_polygon_no_holes_full( "article_poly", true, 0 );				// 1.5; from article [Sei91]
+		test_triangulate_polygon_no_holes_full( "trap_2up_2down", true, 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors
+		test_triangulate_polygon_no_holes_full( "pt_3_diag_max", true, 0 );				// 4; vertex (6,6) with 3 additional diagonals (max)
+		test_triangulate_polygon_no_holes_full( "many_ears", true, 0 );					// 2; from slides3.pdf
+		test_triangulate_polygon_no_holes_full( "y_monotone", true, 0 );				// 2.5; from slides3.pdf
+		test_triangulate_polygon_no_holes_full( "for_sweep1", true, 0 );				// 2; from slides3.pdf
+		test_triangulate_polygon_no_holes_full( "for_sweep2", true, 0 );				// 2; from slides3.pdf
+		test_triangulate_polygon_no_holes_full( "for_sweep3", true, 0 );				// 2; from slides3.pdf
+		test_triangulate_polygon_no_holes_full( "xy_bad_saw", true, 0 );				// 2; from handout6.pdf
 		//
-		test_triangulate_polygon_no_holes_full( "star_eight", 0 );				// 10; symmetric 8-pointed star
-		test_triangulate_polygon_no_holes_full( "unregular_hole", 0 );			// 10; unregular hole
+		test_triangulate_polygon_no_holes_full( "star_eight", true, 0 );				// 10; symmetric 8-pointed star
+		test_triangulate_polygon_no_holes_full( "unregular_hole", true, 0 );			// 10; unregular hole
 		//
-		test_triangulate_polygon_no_holes_full( "three_error#1", 0 );			// 1; 1.Error, integrating into Three.js (letter "t")
-		test_triangulate_polygon_no_holes_full( "three_error#2", 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
-		test_triangulate_polygon_no_holes_full( "three_error#3", 0, 0.01, -0.007 );		// 3000; 3.Error, integrating into Three.js (logbuffer)
-		test_triangulate_polygon_no_holes_full( "three_error#4", 0 );			// 1; 4.Error, integrating into Three.js (USA Maine)
-		test_triangulate_polygon_no_holes_full( "three_error#4b", 0, 850, 35 );	// 0.4; 4.Error, integrating into Three.js (USA Maine)
+		test_triangulate_polygon_no_holes_full( "three_error#1", false, 0 );			// 1; 1.Error, integrating into Three.js (letter "t")
+		test_triangulate_polygon_no_holes_full( "three_error#2", false, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
+		test_triangulate_polygon_no_holes_full( "three_error#3", false, 0, 0.01, -0.007 );		// 3000; 3.Error, integrating into Three.js (logbuffer)
+		test_triangulate_polygon_no_holes_full( "three_error#4", true, 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
+		test_triangulate_polygon_no_holes_full( "three_error#4b", false, 0, 850, 35 );	// 0.4; 4.Error, integrating into Three.js (USA Maine)
 	});
 }
 
