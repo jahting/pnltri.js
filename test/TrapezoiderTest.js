@@ -116,7 +116,7 @@ PNLTRI.QueryStructure.prototype.check_trapezoids_segment_orientation = function 
 	return	( bugList.length == 0 ) ? null : bugList;
 };
 // check if trapezoid has specific neighbors
-PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId, inSollUL, inSollUR, inSollDL, inSollDR, inTestName ) {
+PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId, inChkUL, inChkUR, inChkDL, inChkDR, inTestName ) {
 	var trapezoid = this.getTrapByIdx(inTrapId);
 	if ( trapezoid ) {
 		var uL_ID = trapezoid.uL ? trapezoid.uL.trapID : null;
@@ -124,10 +124,10 @@ PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId,
 		var dL_ID = trapezoid.dL ? trapezoid.dL.trapID : null;
 		var dR_ID = trapezoid.dR ? trapezoid.dR.trapID : null;
 		//
-		equal( uL_ID, inSollUL, inTestName + ": uL == " + inSollUL );
-		equal( uR_ID, inSollUR, inTestName + ": uR == " + inSollUR );
-		equal( dL_ID, inSollDL, inTestName + ": dL == " + inSollDL );
-		equal( dR_ID, inSollDR, inTestName + ": dR == " + inSollDR );
+		equal( uL_ID, inChkUL, inTestName + ": uL == " + inChkUL );
+		equal( uR_ID, inChkUR, inTestName + ": uR == " + inChkUR );
+		equal( dL_ID, inChkDL, inTestName + ": dL == " + inChkDL );
+		equal( dR_ID, inChkDR, inTestName + ": dR == " + inChkDR );
 	} else {
 		ok( trapezoid, inTestName + ": trapezoid exists" );
 	}
@@ -1383,8 +1383,8 @@ PNLTRI.Trapezoider.prototype.maxDepth = function () {
 PNLTRI.Trapezoider.prototype.check_trapezoids_segment_orientation = function () {
 	return	this.queryStructure.check_trapezoids_segment_orientation();
 };
-PNLTRI.Trapezoider.prototype.check_trapezoid_neighbors = function ( inTrapId, inSollU0, inSollU1, inSollD0, inSollD1, inTestName ) {
-	return	this.queryStructure.check_trapezoid_neighbors( inTrapId, inSollU0, inSollU1, inSollD0, inSollD1, inTestName );
+PNLTRI.Trapezoider.prototype.check_trapezoid_neighbors = function ( inTrapId, inChkU0, inChkU1, inChkD0, inChkD1, inTestName ) {
+	return	this.queryStructure.check_trapezoid_neighbors( inTrapId, inChkU0, inChkU1, inChkD0, inChkD1, inTestName );
 }
 
 

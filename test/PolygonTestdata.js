@@ -530,7 +530,7 @@ PolygonTestdata = function () {
 						],
 					};
 
-	this.sollTriangs = {
+	this.resultTriangs = {
 		"article_poly": [
 			[ 0, 1, 3 ], [ 0, 3, 17 ], [ 0, 17, 18 ], [ 0, 18, 19 ],
 			[ 1, 2, 3 ], [ 3, 4, 6 ], [ 3, 6, 8 ], [ 3, 8, 17 ],
@@ -1114,7 +1114,7 @@ PolygonTestdata = function () {
 						],
 		};
 
-	this.sollTriangs_earclip = {
+	this.resultTriangs_earclip = {
 		"article_poly": [
 			[ 0, 1, 19 ], [ 1, 2, 19 ], [ 2, 3, 18 ], [ 2, 18, 19 ],
 			[ 3, 4, 6 ], [ 3, 6, 10 ], [ 3, 10, 12 ], [ 3, 12, 17 ],
@@ -1386,8 +1386,8 @@ PolygonTestdata.prototype = {
 	//##########################################################################
 	
 	get_triangles: function ( inDataName, inBasicAlgorithm ) {
-		if ( inBasicAlgorithm )	return	this.sollTriangs_earclip[inDataName];
-		return	this.sollTriangs[inDataName];
+		if ( inBasicAlgorithm )	return	this.resultTriangs_earclip[inDataName];
+		return	this.resultTriangs[inDataName];
 	},
 	
 	//###################################

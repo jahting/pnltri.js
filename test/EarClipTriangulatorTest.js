@@ -113,7 +113,7 @@ function test_EarClipTriangulator() {
 
 	function test_triangulate_polygon_no_holes_full( inDataName, inPolyLeft, inDebug, inXoff, inYoff ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
-		var	sollTriangList = testData.get_triangles( inDataName, true );
+		var	expectedTriangList = testData.get_triangles( inDataName, true );
 		//
 		// Main Test
 		//
@@ -122,8 +122,8 @@ function test_EarClipTriangulator() {
 		ok( myTriangulator.triangulate_polygon_no_holes(), "triangulate_polygon_no_holes_full ("+inDataName+"): OK");
 		//
 		var triangList = myPolygonData.getTriangles();		// sorted results !!
-		equal( triangList.length, sollTriangList.length, "triangulate_polygon_no_holes_full ("+inDataName+"): Number of Triangles" );
-		deepEqual(	triangList, sollTriangList, "triangulate_polygon_no_holes_full ("+inDataName+"): Triangle list" );
+		equal( triangList.length, expectedTriangList.length, "triangulate_polygon_no_holes_full ("+inDataName+"): Number of Triangles" );
+		deepEqual(	triangList, expectedTriangList, "triangulate_polygon_no_holes_full ("+inDataName+"): Triangle list" );
 		//
 		deepEqual( myPolygonData.get_PolyLeftArr(), [ inPolyLeft ], "triangulate_polygon_no_holes_full ("+inDataName+"): PolyLeft OK?" );
 		//

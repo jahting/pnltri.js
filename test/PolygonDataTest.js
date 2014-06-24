@@ -619,7 +619,7 @@ function test_PolygonData() {
 	
 	function test_unique_monotone_chains_max() {
 		var myPolygonData, polyChains, myMonoChain;
-		var sollMonoStartIdxs, uniqueMonoChainsMax;
+		var expectedMonoStartIdxs, uniqueMonoChainsMax;
 		var i;
 		//
 		//		1st Test
@@ -631,10 +631,10 @@ function test_PolygonData() {
 		// Main Test
 		//
 		myMonoChain = myPolygonData.getSegments();
-		sollMonoStartIdxs = [ 2, 5, 8, 10 ].map( function (val) { return myMonoChain[val] } );
+		expectedMonoStartIdxs = [ 2, 5, 8, 10 ].map( function (val) { return myMonoChain[val] } );
 		//
 		uniqueMonoChainsMax = myPolygonData.unique_monotone_chains_max();
-		deepEqual( uniqueMonoChainsMax, sollMonoStartIdxs, "test_unique_monotone_chains: pt_3_diag_max" );
+		deepEqual( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains: pt_3_diag_max" );
 		//
 		//		2nd Test
 		//
@@ -650,10 +650,10 @@ function test_PolygonData() {
 		// Main Test
 		//
 		myMonoChain = myPolygonData.getSegments();
-		sollMonoStartIdxs = [ 1, 11 ].map( function (val) { return myMonoChain[val] } );
+		expectedMonoStartIdxs = [ 1, 11 ].map( function (val) { return myMonoChain[val] } );
 		//
 		uniqueMonoChainsMax = myPolygonData.unique_monotone_chains_max();
-		deepEqual( uniqueMonoChainsMax, sollMonoStartIdxs, "test_unique_monotone_chains: square_3triangholes" );
+		deepEqual( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains: square_3triangholes" );
 	}
 	
 	
