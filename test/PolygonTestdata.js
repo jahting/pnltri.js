@@ -84,7 +84,7 @@ PolygonTestdata = function () {
 		//				
 		"hole_short_path": [				// my#1: shortest path to hole is outside polygon
 			// Contour: CW !! -> needs to be reversed
-			[ { x:25, y:45 }, { x:27, y:43 }, { x: 5, y:39 }, { x:45, y:35 },
+			[ { x:25, y:45 }, { x:27, y:43 }, { x: 7, y:40 }, { x:45, y:36 },
 			  { x:25, y: 5 }, { x: 1, y:39 } ],
 			// Hole: CCW !! -> needs to be reversed
 			[ { x:25, y:35 }, { x:23, y:33 }, { x:25, y:31 }, { x:27, y:33 } ],
@@ -600,7 +600,7 @@ PolygonTestdata = function () {
 			[ 33, 34, 35 ], [ 33, 35, 37 ], [ 35, 36, 37 ]
 						],
 		"hole_short_path": [
-			[ 0, 5, 1 ], [ 1, 5, 2 ], [ 2, 5, 3 ], [ 3, 5, 6 ],
+			[ 0, 2, 1 ], [ 0, 5, 2 ], [ 2, 5, 3 ], [ 3, 5, 6 ],
 			[ 3, 6, 9 ], [ 3, 9, 4 ], [ 4, 7, 5 ], [ 4, 8, 7 ],
 			[ 4, 9, 8 ], [ 5, 7, 6 ]
 						],

@@ -467,24 +467,24 @@ function test_PolygonData() {
 		//
 		var mcur = 0, mnew;
 		//
-		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[1], myVertices[4] );
-		ok( ( monoSubPolys[mcur] == myMonoChain[4] ), "splitPolygonChain1 #1a segOutFromVert1" );
-		ok( ( monoSubPolys[mnew] == myMonoChain[1] ), "splitPolygonChain1 #1b segOutFromVert0" );
+		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[1], myVertices[4], true );
+		ok( ( monoSubPolys[mcur] == myMonoChain[4].mprev ), "splitPolygonChain1 #1a newSegVert0to1" );
+		ok( ( monoSubPolys[mnew] == myMonoChain[1].mprev ), "splitPolygonChain1 #1b newSegVert1to0" );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
-		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[5], myVertices[12] );
-		ok( ( monoSubPolys[mcur] == myMonoChain[12] ), "splitPolygonChain1 #2a segOutFromVert1" );
-		ok( ( monoSubPolys[mnew] == myMonoChain[5] ), "splitPolygonChain1 #2b segOutFromVert0" );
+		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[5], myVertices[12], true );
+		ok( ( monoSubPolys[mcur] == myMonoChain[12].mprev ), "splitPolygonChain1 #2a newSegVert0to1" );
+		ok( ( monoSubPolys[mnew] == myMonoChain[5].mprev ), "splitPolygonChain1 #2b newSegVert1to0" );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
-		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[11], myVertices[7] );
-		ok( ( monoSubPolys[mcur] == myMonoChain[7] ), "splitPolygonChain1 #3a segOutFromVert1" );
-		ok( ( monoSubPolys[mnew] == myMonoChain[11] ), "splitPolygonChain1 #3b segOutFromVert0" );
+		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[11], myVertices[7], true );
+		ok( ( monoSubPolys[mcur] == myMonoChain[7].mprev ), "splitPolygonChain1 #3a newSegVert0to1" );
+		ok( ( monoSubPolys[mnew] == myMonoChain[11].mprev ), "splitPolygonChain1 #3b newSegVert1to0" );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
-		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[8], myVertices[3] );
-		ok( ( monoSubPolys[mcur] == myMonoChain[3] ), "splitPolygonChain1 #4a segOutFromVert1" );
-		ok( ( monoSubPolys[mnew] == myMonoChain[8] ), "splitPolygonChain1 #4b segOutFromVert0" );
+		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[8], myVertices[3], true );
+		ok( ( monoSubPolys[mcur] == myMonoChain[3].mprev ), "splitPolygonChain1 #4a newSegVert0to1" );
+		ok( ( monoSubPolys[mnew] == myMonoChain[8].mprev ), "splitPolygonChain1 #4b newSegVert1to0" );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 //		showDataStructure( monoSubPolys[4], [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
@@ -493,16 +493,16 @@ function test_PolygonData() {
 //		showDataStructure( myVertices, [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var checkResult;
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 0, [ 3, 0, 1, 4, 5, 12, 10, 11, 7, 8 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 0, [ 8, 3, 0, 1, 4, 5, 12, 10, 11, 7 ] ) )
 			ok( false, "splitPolygonChain1: "+checkResult );
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 1, [ 1, 2, 3, 8, 9, 7, 11, 12, 5, 6, 4 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 1, [ 4, 1, 2, 3, 8, 9, 7, 11, 12, 5, 6 ] ) )
 			ok( false, "splitPolygonChain1: "+checkResult );
 		// all == chain#1
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 2, [ 5, 6, 4, 1, 2, 3, 8, 9, 7, 11, 12 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 2, [ 12, 5, 6, 4, 1, 2, 3, 8, 9, 7, 11 ] ) )
 			ok( false, "splitPolygonChain1: "+checkResult );
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 3, [ 11, 12, 5, 6, 4, 1, 2, 3, 8, 9, 7 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 3, [ 7, 11, 12, 5, 6, 4, 1, 2, 3, 8, 9 ] ) )
 			ok( false, "splitPolygonChain1: "+checkResult );
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 4, [ 8, 9, 7, 11, 12, 5, 6, 4, 1, 2, 3 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 4, [ 3, 8, 9, 7, 11, 12, 5, 6, 4, 1, 2 ] ) )
 			ok( false, "splitPolygonChain1: "+checkResult );
 //		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, 6 );
 	}
@@ -518,7 +518,7 @@ function test_PolygonData() {
 		//
 		equal( myVertices.length, 6, "splitPolygonChain3: vertices.length == 6" );
 		equal( myMonoChain.length, 6, "splitPolygonChain3: monoChain.length == 6" );
-		check_vertexChain_monoChainDoubleLinks( "trap_2up_2down#1", myVertices[0], myMonoChain[0], 6 );
+		check_vertexChain_monoChainDoubleLinks( "splitPolygonChain3: Chains#1", myVertices[0], myMonoChain[0], 6 );
 //		showDataStructure( myVertices, [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
@@ -526,14 +526,14 @@ function test_PolygonData() {
 		//
 														
 		var mcur = 0;
-		var mnew = myPolygonData.splitPolygonChain( mcur, myVertices[4], myVertices[1] );		// (4,6) -> (3,3)
+		var mnew = myPolygonData.splitPolygonChain( mcur, myVertices[4], myVertices[1], true );		// (4,6) -> (3,3)
 		equal( mnew, 1, "splitPolygonChain3: new monoChain#1" );
 		var segPolyOrg = monoSubPolys[0];
 		var segPolyNew = monoSubPolys[1];
 		//
 		equal( myVertices.length, 6, "splitPolygonChain3: vertices.length == 6" );
 		equal( myMonoChain.length, 8, "splitPolygonChain3: monoChain 2 segments added" );
-		check_vertexChain_monoChainDoubleLinks( "trap_2up_2down#2", myVertices[0], null, 6 );
+		check_vertexChain_monoChainDoubleLinks( "splitPolygonChain3: Chains#2", myVertices[0], null, 6 );
 		//
 		var monoPrev, monoNext;
 		monoPrev = segPolyOrg;
@@ -584,20 +584,20 @@ function test_PolygonData() {
 		//
 		var mcur = 0, mnew;
 		//
-		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[6], myVertices[2] );
-		ok( ( monoSubPolys[mcur] == myMonoChain[2] ), "splitPolygonChain4 #1a segOutFromVert1" );
-		ok( ( monoSubPolys[mnew] == myMonoChain[6] ), "splitPolygonChain4 #1b segOutFromVert0" );
+		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[6], myVertices[2], true );
+		ok( ( monoSubPolys[mcur] == myMonoChain[2].mprev ), "splitPolygonChain4 #1a newSegVert0to1" );
+		ok( ( monoSubPolys[mnew] == myMonoChain[6].mprev ), "splitPolygonChain4 #1b newSegVert1to0" );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
-		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[2], myVertices[4] );
-		ok( ( monoSubPolys[mcur] == myMonoChain[4] ), "splitPolygonChain4 #2a segOutFromVert1" );
-		ok( ( monoSubPolys[mnew] == myMonoChain[2] ), "splitPolygonChain4 #2b segOutFromVert0" );
+		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[2], myVertices[4], true );
+		ok( ( monoSubPolys[mcur] == myMonoChain[4].mprev ), "splitPolygonChain4 #2a newSegVert0to1" );
+		ok( ( monoSubPolys[mnew] == myMonoChain[2].mprev ), "splitPolygonChain4 #2b newSegVert1to0" );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
 		mcur = 1;
-		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[0], myVertices[2] );
-		ok( ( monoSubPolys[mcur] == myMonoChain[8] ), "splitPolygonChain4 #3a segOutFromVert1" );
-		ok( ( monoSubPolys[mnew] == myMonoChain[0] ), "splitPolygonChain4 #3b segOutFromVert0" );
+		mnew = myPolygonData.splitPolygonChain( mcur, myVertices[0], myVertices[2], true );
+		ok( ( monoSubPolys[mcur] == myMonoChain[8].mprev ), "splitPolygonChain4 #3a newSegVert0to1" );
+		ok( ( monoSubPolys[mnew] == myMonoChain[0].mprev ), "splitPolygonChain4 #3b newSegVert1to0" );
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 //		showDataStructure( monoSubPolys[2], [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
@@ -606,13 +606,13 @@ function test_PolygonData() {
 //		showDataStructure( myVertices, [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 		//
 		var checkResult;
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 0, [ 4, 5, 6, 2 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 0, [ 2, 4, 5, 6 ] ) )
 			ok( false, "splitPolygonChain4: "+checkResult );
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 1, [ 2, 6, 0 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 1, [ 0, 2, 6 ] ) )
 			ok( false, "splitPolygonChain4: "+checkResult );
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 2, [ 2, 3, 4 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 2, [ 4, 2, 3 ] ) )
 			ok( false, "splitPolygonChain4: "+checkResult );
-		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 3, [ 0, 1, 2 ] ) )
+		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 3, [ 2, 0, 1 ] ) )
 			ok( false, "splitPolygonChain4: "+checkResult );
 //		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, 4 );
 	}

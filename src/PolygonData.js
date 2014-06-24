@@ -273,8 +273,8 @@ PNLTRI.PolygonData.prototype = {
 	//
 	// returns an index to the new polygon chain.
 
-	splitPolygonChain: function ( currPoly, vert0, vert1 ) {			// <<<<<< public
-
+	splitPolygonChain: function ( currPoly, vert0, vert1, currPolyVert0to1 ) {			// <<<<<< public
+		
 		function get_out_segment_next_right_of(vert0, vert1) {
 
 			// monotone mapping of the CCW angle between the wo vectors:
@@ -341,28 +341,34 @@ PNLTRI.PolygonData.prototype = {
 		var segOutFromVert1 = vert1outSeg.segOut;
 		
 		// modify linked lists
-		var upward = ( this.compare_pts_yx(vert0, vert1) == 1 );
-		var newSegPolyOrg = this.appendSegmentEntry( { vFrom: vert0, vTo: vert1, upward: !upward,
+		var upward = ( this.compare_pts_yx(vert0, vert1) == -1 );
+		var newSegVert0to1 = this.appendSegmentEntry( { vFrom: vert0, vTo: vert1, upward: upward,
 							mprev: segOutFromVert0.mprev, mnext: segOutFromVert1 } );
-		var newSegPolyNew = this.appendSegmentEntry( { vFrom: vert1, vTo: vert0, upward: upward,
+		var newSegVert1to0 = this.appendSegmentEntry( { vFrom: vert1, vTo: vert0, upward: !upward,
 							mprev: segOutFromVert1.mprev, mnext: segOutFromVert0 } );
 		
-		segOutFromVert0.mprev.mnext = newSegPolyOrg;
-		segOutFromVert1.mprev.mnext = newSegPolyNew;
+		segOutFromVert0.mprev.mnext = newSegVert0to1;
+		segOutFromVert1.mprev.mnext = newSegVert1to0;
 		
-		segOutFromVert0.mprev = newSegPolyNew;
-		segOutFromVert1.mprev = newSegPolyOrg;
+		segOutFromVert0.mprev = newSegVert1to0;
+		segOutFromVert1.mprev = newSegVert0to1;
 		
 		// populate "outgoing segment" from vertices
-		this.appendVertexOutsegEntry( vert0, { segOut: newSegPolyOrg, vertTo: vert1 } );
-		this.appendVertexOutsegEntry( vert1, { segOut: newSegPolyNew, vertTo: vert0 } );
+		this.appendVertexOutsegEntry( vert0, { segOut: newSegVert0to1, vertTo: vert1 } );
+		this.appendVertexOutsegEntry( vert1, { segOut: newSegVert1to0, vertTo: vert0 } );
 
-		this.monoSubPolyChains[currPoly] = segOutFromVert1;		// initially creates [0] on empty list !!
-		this.monoSubPolyChains.push(segOutFromVert0);
+		var newPoly = this.monoSubPolyChains.length;
+		if ( currPolyVert0to1 ) {
+			this.monoSubPolyChains[currPoly] = newSegVert0to1;
+			this.monoSubPolyChains[newPoly]  = newSegVert1to0;
+		} else {
+			this.monoSubPolyChains[currPoly] = newSegVert1to0;
+			this.monoSubPolyChains[newPoly]  = newSegVert0to1;
+		}
 		
-		return	this.monoSubPolyChains.length - 1;				// index -> new monoSubPoly
+		return	newPoly;
 	},
-	
+
 	// For each monotone polygon, find the ymax (to determine the two
 	// y-monotone chains) and skip duplicate monotone polygons
 	
