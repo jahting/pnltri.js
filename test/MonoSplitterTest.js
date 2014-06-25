@@ -785,6 +785,122 @@ function test_MonoSplitter() {
 	
 	/**************************************************************************/
 
+	/*    
+	 *	 \
+	 *	  \------------------*----
+	 *	   \      			/
+	 *		\    		   /
+	 *		 \------*-----/
+	 *		  \	   / \	 /
+	 */
+	 function test_TR_BM__c_CCW_h_CW() {
+		var myPolygonData = new PNLTRI.PolygonData( [
+				[	// contour: CCW
+			{ x:10, y:35 },		// left segment
+			{ x:20, y:10 },		// bottom point
+			{ x:35, y:30 },		// right segment
+				],
+				[	// hole: CW
+			{ x:20, y:25 },		// top point
+			{ x:25, y:22 }, { x:18, y:20 },
+				] ] );
+		var myVertices = myPolygonData.getVertices();
+//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
+		//
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[5], "TR_BM_1" );
+		myQs.add_segment_consistently( segListArray[1], "TR_BM_2" );
+		myQs.add_segment_consistently( segListArray[3], "TR_BM_3" );
+		myQs.add_segment_consistently( segListArray[0], "TR_BM_4" );
+		myQs.add_segment_consistently( segListArray[2], "TR_BM_5" );
+		myQs.add_segment_consistently( segListArray[4], "TR_BM_6" );
+		equal( myQs.nbTrapezoids(), 13, "TR_BM__c_CCW_h_CW: nb. of trapezoids");
+//		drawTrapezoids( myQs.getRoot(), false, 1 );
+		//
+		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
+		myMono.mockSetup();		// Mock Setup: Dependency Injection of Mock-Checks
+		//
+		// Main Test
+		//
+		var myTrap = myQs.getTrapByIdx(4);
+		ok( !myTrap.uR, "TR_BM__c_CCW_h_CW: uR null" );
+//		drawTrapezoids( myTrap.sink, false, 1 );
+			// from uL
+		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], true ],		// (20,25)->(35,30)
+								[ myTrap.dL, true, true, 0 ],
+								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true, "TR_BM__c_CCW_h_CW: from uL, diag: vLow(middle)->vHigh(right)" );
+			// from dL
+		myTrap.monoDiag = null;			// => not yet visited
+		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], true ],		// (20,25)->(35,30)
+								[ myTrap.uL, false, true, 0 ],
+								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, true, "TR_BM__c_CCW_h_CW: from dL, diag: vLow(middle)->vHigh(right)" );
+			// from dR
+		myTrap.monoDiag = null;			// => not yet visited
+		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], false ],		// (35,30)->(20,25)
+								[ myTrap.dL, true, true, 7 ],
+								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, false, "TR_BM__c_CCW_h_CW: from dR, diag: vHigh(right)->vLow(middle)" );
+	}
+	
+	 function test_TR_BM__c_CW_h_CCW() {
+		var myPolygonData = new PNLTRI.PolygonData( [
+				[	// contour: CW
+			{ x:20, y:10 },		// left segment
+			{ x:10, y:35 },		// top segment
+			{ x:35, y:30 },		// right segment
+				],
+				[	// hole: CCW
+			{ x:20, y:25 },		// top point
+			{ x:18, y:20 }, { x:25, y:22 },
+				] ] );
+		var myVertices = myPolygonData.getVertices();
+//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
+		//
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], "TR_BM_1" );
+		myQs.add_segment_consistently( segListArray[2], "TR_BM_2" );
+		myQs.add_segment_consistently( segListArray[5], "TR_BM_3" );
+		myQs.add_segment_consistently( segListArray[0], "TR_BM_4" );
+		myQs.add_segment_consistently( segListArray[1], "TR_BM_5" );
+		myQs.add_segment_consistently( segListArray[4], "TR_BM_6" );
+		equal( myQs.nbTrapezoids(), 13, "TR_BM__c_CW_h_CCW: nb. of trapezoids");
+//		drawTrapezoids( myQs.getRoot(), false, 1 );
+		//
+		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
+		myMono.mockSetup();		// Mock Setup: Dependency Injection of Mock-Checks
+		//
+		// Main Test
+		//
+		var myTrap = myQs.getTrapByIdx(4);
+		ok( !myTrap.uR, "TR_BM__c_CW_h_CCW: uR null" );
+//		drawTrapezoids( myTrap.sink, false, 1 );
+			// from uL
+		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], true ],		// (20,25)->(35,30)
+								[ myTrap.dL, true, true, 0 ],
+								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, true, true, "TR_BM__c_CW_h_CCW: from uL, diag: vLow(middle)->vHigh(right)" );
+			// from dL
+		myTrap.monoDiag = null;			// => not yet visited
+		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], true ],		// (20,25)->(35,30)
+								[ myTrap.uL, false, true, 0 ],
+								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, true, "TR_BM__c_CW_h_CCW: from dL, diag: vLow(middle)->vHigh(right)" );
+			// from dR
+		myTrap.monoDiag = null;			// => not yet visited
+		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], false ],		// (35,30)->(20,25)
+								[ myTrap.dL, true, true, 7 ],
+								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
+		myMono.alyTrap_check( myTrap, false, false, "TR_BM__c_CW_h_CCW: from dR, diag: vHigh(right)->vLow(middle)" );
+	}
+	
+	/**************************************************************************/
+
 	var	testData = new PolygonTestdata();
 
 	function test_monotonate_trapezoids( inDataName, inExpectedMonoChains, inDebug ) {
@@ -818,14 +934,15 @@ function test_MonoSplitter() {
 
 		
 	test( "Polygon Monotone Splitter", function() {
-		// no diagonal
+		// contour: CCW; no hole
+		//	no diagonal
 		test_TL_BL();		// top-left, bottom-left
 		test_TR_BR();		// top-right, bottom-right
 		test_TL_BLR();		// top-left, bottom-cusp
 		test_TR_BLR();		// top-right, bottom-cusp
 		test_TLR_BL();		// top-cusp, bottom-left
 		test_TLR_BR();		// top-cusp, bottom-right
-		// diagonal split
+		//	diagonal split
 		test_TL_BR();		// top-left, bottom-right
 		test_TR_BL();		// top-right, bottom-left
 		test_TL_BM();		// top-left, bottom-middle
@@ -835,6 +952,12 @@ function test_MonoSplitter() {
 		test_TM_BM();		// top-middle, bottom-middle
 		test_TLR_BM();		// top-cusp, bottom-middle
 		test_TM_BLR();		// top-middle, bottom-cusp
+		//
+		// contour & hole
+		//	diagonal split
+		test_TR_BM__c_CCW_h_CW();	// top-right, bottom-middle; contour: CCW; hole: CW
+		test_TR_BM__c_CW_h_CCW();	// top-right, bottom-middle; contour: CW; hole: CCW
+		//
 		//
 		test_monotonate_trapezoids( "article_poly", 12, 0 );			// 1.5; from article Sei91
 		test_monotonate_trapezoids( "trap_2up_2down", 2, 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors

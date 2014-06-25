@@ -273,9 +273,9 @@ PNLTRI.PolygonData.prototype = {
 	//
 	// returns an index to the new polygon chain.
 
-	splitPolygonChain: function ( currPoly, vert0, vert1, currPolyVert0to1 ) {			// <<<<<< public
+	splitPolygonChain: function ( currPoly, vert0, vert1, currPolyVert0to1, lookLeft ) {			// <<<<<< public
 		
-		function get_out_segment_next_right_of(vert0, vert1) {
+		function get_out_segment_next_right_of(vert0, vert1, lookLeft) {
 
 			// monotone mapping of the CCW angle between the wo vectors:
 			//	inPtVertex->inPtFrom and inPtVertex->inPtTo
@@ -319,12 +319,24 @@ PNLTRI.PolygonData.prototype = {
 			//	=> vert0->segRight.vertTo is the next to the right of vert0->vert1
 
 			var segRight = null;
-			var minAngle = 4.0;			// <=> 360 degrees
-			for (var i = 0; i < vert0.outSegs.length; i++) {
-				tmpSeg = vert0.outSegs[i]
-				if ( ( tmpAngle = mapAngle( vert0, tmpSeg.vertTo, vert1 ) ) < minAngle ) {
-					minAngle = tmpAngle;
-					segRight = tmpSeg;
+			
+			if ( lookLeft ) {
+				var minAngle = 0.0;			// <=> 0 degrees
+				for (var i = 0; i < vert0.outSegs.length; i++) {
+					tmpSeg = vert0.outSegs[i]
+					if ( ( tmpAngle = mapAngle( vert0, tmpSeg.vertTo, vert1 ) ) > minAngle ) {
+						minAngle = tmpAngle;
+						segRight = tmpSeg;
+					}
+				}
+			} else {
+				var minAngle = 4.0;			// <=> 360 degrees
+				for (var i = 0; i < vert0.outSegs.length; i++) {
+					tmpSeg = vert0.outSegs[i]
+					if ( ( tmpAngle = mapAngle( vert0, tmpSeg.vertTo, vert1 ) ) < minAngle ) {
+						minAngle = tmpAngle;
+						segRight = tmpSeg;
+					}
 				}
 			}
 			return	segRight;
@@ -334,8 +346,8 @@ PNLTRI.PolygonData.prototype = {
 		// (vert0, vert1) is the new diagonal to be added to the polygon.
 
 		// find chains and outSegs to use for vert0 and vert1
-		var vert0outSeg = get_out_segment_next_right_of(vert0, vert1);
-		var vert1outSeg = get_out_segment_next_right_of(vert1, vert0);
+		var vert0outSeg = get_out_segment_next_right_of( vert0, vert1, lookLeft );
+		var vert1outSeg = get_out_segment_next_right_of( vert1, vert0, lookLeft );
 		
 		var segOutFromVert0 = vert0outSeg.segOut;
 		var segOutFromVert1 = vert1outSeg.segOut;

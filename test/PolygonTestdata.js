@@ -87,7 +87,7 @@ PolygonTestdata = function () {
 			[ { x:25, y:45 }, { x:27, y:43 }, { x: 7, y:40 }, { x:45, y:36 },
 			  { x:25, y: 5 }, { x: 1, y:39 } ],
 			// Hole: CCW !! -> needs to be reversed
-			[ { x:25, y:35 }, { x:23, y:33 }, { x:25, y:31 }, { x:27, y:33 } ],
+			[ { x:25, y:35 }, { x:23, y:32 }, { x:26, y:30 }, { x:27, y:33 } ],
 						],
 		"star_eight": [						// my#2: symmetric 8-pointed star
 			[	// CCW
