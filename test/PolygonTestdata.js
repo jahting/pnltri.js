@@ -501,7 +501,7 @@ PolygonTestdata = function () {
 				{ x:46, y:29.84 }, ],
 							],
 		"two_polygons#1": [			// 6.Error, integrating into Three.js ("i")
-			// Contour#1: CCW ?
+			// Contour#1: CCW
 			[	{ x:8.04, y:62.98 }, { x:11.52, y:62.32 },
 				{ x:15.3, y:62.98 }, { x:18.32, y:64.96 },
 				{ x:20.24, y:67.94 }, { x:20.88, y:71.6 },
@@ -510,12 +510,12 @@ PolygonTestdata = function () {
 				{ x:7.98, y:80.14 }, { x:5.04, y:78.16 },
 				{ x:3.12, y:75.2 }, { x:2.48, y:71.6 },
 				{ x:3.14, y:67.98 }, { x:5.12, y:64.96 } ], 
-			// Contour#2: CCW ?
+			// Contour#2: CW !! -> needs to be reversed
 			[	{ x:4.16, y:57.6 }, { x:19.52, y:57.6 }, { x:19.52, y:0 }, { x:4.16, y:0 } ],
 							],
 		"two_polygons#2": [			// my#6: two trivial polygons
 			[ { x:30, y:29 }, { x:32, y:36 }, { x:16, y:34 } ],		// CCW
-			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW
+			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW !! -> needs to be reversed
 							],
 		"polygons_inside_hole": [	// my#7: square with unregular hole with two polygons inside
 			// Contour: CCW
@@ -526,7 +526,7 @@ PolygonTestdata = function () {
 			],
 			// Polygons inside hole: CCW
 			[ { x:21, y:27 }, { x:30, y:29 }, { x:32, y:36 }, { x:16, y:34 } ],
-			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW
+			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW !! -> needs to be reversed
 						],
 					};
 

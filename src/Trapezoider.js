@@ -804,6 +804,7 @@ PNLTRI.QueryStructure.prototype = {
 		
 		var thisTrap, otherSide, curDepth = 0;
 		do {
+			// rseg should exactely go upward on trapezoids inside the polygon (odd depth)
 			var expectedRsegUpward = ( ( curDepth % 2 ) == 1 );
 			while ( thisTrap = thisDepth.pop() ) {
 				if ( thisTrap.depth != -1 )	continue;

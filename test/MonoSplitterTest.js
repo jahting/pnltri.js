@@ -960,6 +960,7 @@ function test_MonoSplitter() {
 		//
 		//
 		test_monotonate_trapezoids( "article_poly", 12, 0 );			// 1.5; from article Sei91
+		test_monotonate_trapezoids( "square_3triangholes", 2, 0 );		// 5; from	"Narkhede A. and Manocha D.", data_1
 		test_monotonate_trapezoids( "trap_2up_2down", 2, 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors
 		test_monotonate_trapezoids( "hole_short_path", 4, 0 );			// 0.8; shortest path to hole is outside polygon
 		test_monotonate_trapezoids( "three_error#1", 18, 0 );			// 1; 1.Error, integrating into Three.js
