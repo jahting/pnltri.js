@@ -8,7 +8,7 @@ function test_Triangulator() {
 
 	function test_triangulate_polygon_details( inDataName, inExpectedMonoChains, inDebug ) {
 		var example_data = testData.get_polygon_with_holes( inDataName );
-		var	sollTriangList = testData.get_triangles( inDataName );
+		var	expectedTriangList = testData.get_triangles( inDataName );
 		//
 		var myPolygonData = new PNLTRI.PolygonData( example_data );
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );			// implicitly creates trapezoids
@@ -27,8 +27,8 @@ function test_Triangulator() {
 		//
 		myTriangulator.triangulate_all_polygons();
 		var triangList = myPolygonData.getTriangles();		// sorted results !!
-		equal( triangList.length, sollTriangList.length, "triangulate_polygon_details ("+inDataName+"): Number of Triangles" );
-		deepEqual(	triangList, sollTriangList, "triangulate_polygon_details ("+inDataName+"): Triangle list" );
+		equal( triangList.length, expectedTriangList.length, "triangulate_polygon_details ("+inDataName+"): Number of Triangles" );
+		deepEqual(	triangList, expectedTriangList, "triangulate_polygon_details ("+inDataName+"): Triangle list" );
 		if ( inDebug > 0 ) {
 			drawPolygonLayers( { "poly": example_data, "triang": myPolygonData.triangles_2_polygons() }, inDebug );
 			//
@@ -41,15 +41,15 @@ function test_Triangulator() {
 	
 	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inPolyLeftArr, inDebug ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
-		var	sollTriangList = testData.get_triangles( inDataName, inBasicAlgorithm );
+		var	expectedTriangList = testData.get_triangles( inDataName, inBasicAlgorithm );
 		//
 		var myTriangulator = new PNLTRI.Triangulator();
 		var triangList = myTriangulator.triangulate_polygon( polygonChains, inForceTrapezoidation );		// sorted results !!
 		//
 		// Main Test
 		//
-		equal( triangList.length, sollTriangList.length, "triangulate_polygon ("+inDataName+"): Number of Triangles" );
-		deepEqual(	triangList, sollTriangList, "triangulate_polygon ("+inDataName+"): Triangle list" );
+		equal( triangList.length, expectedTriangList.length, "triangulate_polygon ("+inDataName+"): Number of Triangles" );
+		deepEqual(	triangList, expectedTriangList, "triangulate_polygon ("+inDataName+"): Triangle list" );
 		//
 		deepEqual( myTriangulator.get_PolyLeftArr(), inPolyLeftArr, "triangulate_polygon ("+inDataName+"): PolyLeftArr OK?" );
 		//

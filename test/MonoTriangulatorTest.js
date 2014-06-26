@@ -13,7 +13,7 @@ function test_MonoTriangulator() {
 	
 	function test_triangulate_all_polygons( inDataName, inDrawScale ) {
 		var baseData = testData.get_polygon_with_holes( inDataName );
-		var sollTriangList	= testData.get_triangles( inDataName );
+		var expectedTriangList	= testData.get_triangles( inDataName );
 		//
 		var myPolygonData = new PNLTRI.PolygonData( baseData );
 		var	myMonoTriang = new PNLTRI.MonoTriangulator( myPolygonData );
@@ -40,14 +40,14 @@ function test_MonoTriangulator() {
 		myPolygonData.replaceMonoChains( testMonoPolygonsIdx, testMonoStartIdxs );
 		//
 //		drawPolygonLayers( { "poly": baseData, "mono": myPolygonData.monotone_chains_2_polygons(),
-//							 "triang": myPolygonData.triangles_2_polygons( sollTriangList ) }, inDrawScale );
+//							 "triang": myPolygonData.triangles_2_polygons( expectedTriangList ) }, inDrawScale );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 		//
 		myMonoTriang.triangulate_all_polygons();
 		//
 		var triangList = myPolygonData.getTriangles();
-		equal( triangList.length, sollTriangList.length, "Triangulation: Number of triangles ("+inDataName+")" );
-		deepEqual( triangList, sollTriangList, "Triangulation: Triangle list ("+inDataName+")" );
+		equal( triangList.length, expectedTriangList.length, "Triangulation: Number of triangles ("+inDataName+")" );
+		deepEqual( triangList, expectedTriangList, "Triangulation: Triangle list ("+inDataName+")" );
 		//
 //		drawPolygonLayers( { "poly": baseData, "triang": myPolygonData.triangles_2_polygons() }, inDrawScale );
 	}

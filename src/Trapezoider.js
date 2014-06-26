@@ -792,14 +792,20 @@ PNLTRI.QueryStructure.prototype = {
 	},
 
 	
-	// Assign a depth to the trapezoids;
+	// Assigns a depth to all trapezoids;
 	//	0: outside, 1: main polygon, 2: holes, 3:polygons in holes, ...
-	assignDepths: function () {
+	// Checks segment orientation and reverses polyChain winding order if necessary
+	//	=> Goal: contour in CCW, holes in CW
+	//	=> all trapezoids lseg/rseg have opposing directions,
+	//		assumed, the missing outer segments have CW orientation !
+	assignDepths: function ( inPolyData ) {
 		var thisDepth = [ this.trapArray[0] ];
 		var nextDepth = [];
 		
 		var thisTrap, otherSide, curDepth = 0;
 		do {
+			// rseg should exactely go upward on trapezoids inside the polygon (odd depth)
+			var expectedRsegUpward = ( ( curDepth % 2 ) == 1 );
 			while ( thisTrap = thisDepth.pop() ) {
 				if ( thisTrap.depth != -1 )	continue;
 				thisTrap.depth = curDepth;
@@ -811,8 +817,13 @@ PNLTRI.QueryStructure.prototype = {
 				//
 				if ( ( otherSide = thisTrap.lseg ) && ( otherSide.trLeft.depth == -1 ) )
 					nextDepth.push( otherSide.trLeft );
-				if ( ( otherSide = thisTrap.rseg ) && ( otherSide.trRight.depth == -1 ) )
+				if ( ( otherSide = thisTrap.rseg ) && ( otherSide.trRight.depth == -1 ) ) {
 					nextDepth.push( otherSide.trRight );
+					if ( otherSide.upward != expectedRsegUpward ) {
+						inPolyData.reverse_polygon_chain( otherSide );
+//						inPolyData.set_PolyLeft_wrong( otherSide.chainId );
+					}
+				}
 			}
 			thisDepth = nextDepth; nextDepth = [];
 			curDepth++;
@@ -898,21 +909,6 @@ PNLTRI.Trapezoider.prototype = {
 	},
 
 
-	// Check segment orientation and reverse polyChain winding order if necessary
-	//	=> contour: CCW, holes: CW
-	//	=> all trapezoids lseg/rseg have opposing directions,
-	//		assumed, the missing outer segments have CW orientation !
-	
-	normalize_segment_orientation: function () {
-		var segListArray = this.polyData.getSegments();
-		for ( var i = 0; i < segListArray.length; i++ ) {
-			var thisSeg = segListArray[i];
-			if ( thisSeg.upward == ( ( thisSeg.trLeft.depth % 2 ) == 0 ) )
-				this.polyData.reverse_polygon_chain( thisSeg );
-		}
-	},
-
-
 	/*
 	 * main methods
 	 */
@@ -964,8 +960,7 @@ PNLTRI.Trapezoider.prototype = {
 //			myQs.add_segment_consistently( randSegListArray[i-1], 'RandomB#'+(i-1) );
 		}
 		
-		myQs.assignDepths();
-		this.normalize_segment_orientation();
+		myQs.assignDepths( this.polyData );
 	},
 
 };

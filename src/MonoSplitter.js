@@ -59,17 +59,13 @@ PNLTRI.MonoSplitter.prototype = {
 
 	
 	// Splits the current polygon (index: inCurrPoly) into two sub-polygons
-	//	using the diagonal (inVertLow, inVertHigh) either from low to high or high to low
+	//	using the diagonal (inVertLow, inVertHigh) either from low to high or high to low		// TODO: new explanation
 	// returns an index to the new sub-polygon
 	//
 	//	!! public for Mock-Tests only !!
 
 	doSplit: function ( inChain, inVertLow, inVertHigh, inLow2High ) {
-		if ( inLow2High ) {
-			return this.polyData.splitPolygonChain( inChain, inVertLow, inVertHigh );
-		} else {
-			return this.polyData.splitPolygonChain( inChain, inVertHigh, inVertLow );
-		}
+		return this.polyData.splitPolygonChain( inChain, inVertLow, inVertHigh, inLow2High );
 	},
 
 	// In a loop analyses all connected trapezoids for possible splitting diagonals
@@ -159,9 +155,9 @@ PNLTRI.MonoSplitter.prototype = {
 				// console.log( "1 neighbor on in-Side, 1 on same L/R-side or none on the other => no split possible" );
 			}
 
-			trapList_addItem( neighAcross, fromUp, !fromLeft, newChain );
+			trapList_addItem( neighAcross,  fromUp, !fromLeft, newChain );
 			trapList_addItem( neighSameUD, !fromUp, !fromLeft, newChain );
-			trapList_addItem( neighSameLR, fromUp, fromLeft, curChain );
+			trapList_addItem( neighSameLR,  fromUp,  fromLeft, curChain );
 
 			if ( !neighSameLR && !neighAcross ) {
 				// TLR_BL, TLR_BR; TL_BLR, TR_BLR,    TLR_BM, TM_BLR

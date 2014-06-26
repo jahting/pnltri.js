@@ -84,10 +84,10 @@ PolygonTestdata = function () {
 		//				
 		"hole_short_path": [				// my#1: shortest path to hole is outside polygon
 			// Contour: CW !! -> needs to be reversed
-			[ { x:25, y:45 }, { x:27, y:43 }, { x: 5, y:39 }, { x:45, y:35 },
+			[ { x:25, y:45 }, { x:27, y:43 }, { x: 7, y:40 }, { x:45, y:36 },
 			  { x:25, y: 5 }, { x: 1, y:39 } ],
 			// Hole: CCW !! -> needs to be reversed
-			[ { x:25, y:35 }, { x:23, y:33 }, { x:25, y:31 }, { x:27, y:33 } ],
+			[ { x:25, y:35 }, { x:23, y:32 }, { x:26, y:30 }, { x:27, y:33 } ],
 						],
 		"star_eight": [						// my#2: symmetric 8-pointed star
 			[	// CCW
@@ -501,7 +501,7 @@ PolygonTestdata = function () {
 				{ x:46, y:29.84 }, ],
 							],
 		"two_polygons#1": [			// 6.Error, integrating into Three.js ("i")
-			// Contour#1: CCW ?
+			// Contour#1: CCW
 			[	{ x:8.04, y:62.98 }, { x:11.52, y:62.32 },
 				{ x:15.3, y:62.98 }, { x:18.32, y:64.96 },
 				{ x:20.24, y:67.94 }, { x:20.88, y:71.6 },
@@ -510,12 +510,12 @@ PolygonTestdata = function () {
 				{ x:7.98, y:80.14 }, { x:5.04, y:78.16 },
 				{ x:3.12, y:75.2 }, { x:2.48, y:71.6 },
 				{ x:3.14, y:67.98 }, { x:5.12, y:64.96 } ], 
-			// Contour#2: CCW ?
+			// Contour#2: CW !! -> needs to be reversed
 			[	{ x:4.16, y:57.6 }, { x:19.52, y:57.6 }, { x:19.52, y:0 }, { x:4.16, y:0 } ],
 							],
 		"two_polygons#2": [			// my#6: two trivial polygons
 			[ { x:30, y:29 }, { x:32, y:36 }, { x:16, y:34 } ],		// CCW
-			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW
+			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW !! -> needs to be reversed
 							],
 		"polygons_inside_hole": [	// my#7: square with unregular hole with two polygons inside
 			// Contour: CCW
@@ -526,11 +526,11 @@ PolygonTestdata = function () {
 			],
 			// Polygons inside hole: CCW
 			[ { x:21, y:27 }, { x:30, y:29 }, { x:32, y:36 }, { x:16, y:34 } ],
-			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW
+			[ { x:19, y:24 }, { x:32, y:21 }, { x:30, y:10 } ],		// CW !! -> needs to be reversed
 						],
 					};
 
-	this.sollTriangs = {
+	this.resultTriangs = {
 		"article_poly": [
 			[ 0, 1, 3 ], [ 0, 3, 17 ], [ 0, 17, 18 ], [ 0, 18, 19 ],
 			[ 1, 2, 3 ], [ 3, 4, 6 ], [ 3, 6, 8 ], [ 3, 8, 17 ],
@@ -600,7 +600,7 @@ PolygonTestdata = function () {
 			[ 33, 34, 35 ], [ 33, 35, 37 ], [ 35, 36, 37 ]
 						],
 		"hole_short_path": [
-			[ 0, 5, 1 ], [ 1, 5, 2 ], [ 2, 5, 3 ], [ 3, 5, 6 ],
+			[ 0, 2, 1 ], [ 0, 5, 2 ], [ 2, 5, 3 ], [ 3, 5, 6 ],
 			[ 3, 6, 9 ], [ 3, 9, 4 ], [ 4, 7, 5 ], [ 4, 8, 7 ],
 			[ 4, 9, 8 ], [ 5, 7, 6 ]
 						],
@@ -1114,7 +1114,7 @@ PolygonTestdata = function () {
 						],
 		};
 
-	this.sollTriangs_earclip = {
+	this.resultTriangs_earclip = {
 		"article_poly": [
 			[ 0, 1, 19 ], [ 1, 2, 19 ], [ 2, 3, 18 ], [ 2, 18, 19 ],
 			[ 3, 4, 6 ], [ 3, 6, 10 ], [ 3, 10, 12 ], [ 3, 12, 17 ],
@@ -1386,8 +1386,8 @@ PolygonTestdata.prototype = {
 	//##########################################################################
 	
 	get_triangles: function ( inDataName, inBasicAlgorithm ) {
-		if ( inBasicAlgorithm )	return	this.sollTriangs_earclip[inDataName];
-		return	this.sollTriangs[inDataName];
+		if ( inBasicAlgorithm )	return	this.resultTriangs_earclip[inDataName];
+		return	this.resultTriangs[inDataName];
 	},
 	
 	//###################################
