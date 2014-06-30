@@ -62,11 +62,6 @@ var tempIDflags = [];
 
 function replaceObjByID( key, val ) {
 	if ( val == null )		return;
-	if ( key == "nodetype" ) {
-		if ( val == PNLTRI.T_Y )		return	"T_Y";
-		if ( val == PNLTRI.T_X )		return	"T_X";
-		return	"T_SINK";
-	}
 //	if ( key == "trap" ) {		// shows only ID of Trapezoids
 //		return	val.trapID;
 //	}
@@ -268,10 +263,14 @@ function showDataStructure( inObject, inTempKeys ) {
 		}
 	}
 
+	var doneList = [];
+	
 	function drawQueryStruct( inQsNode ) {
 		if ( !inQsNode )	return;
-		if ( inQsNode.nodetype == PNLTRI.T_SINK ) {
+		if ( inQsNode.trap ) {
+			if ( doneList[inQsNode.trap.trapID] )	return;
 			drawTrapezoid( inQsNode.trap );
+			doneList[inQsNode.trap.trapID] = true;
 		}
 		drawQueryStruct( inQsNode.right );
 		drawQueryStruct( inQsNode.left );
@@ -282,6 +281,7 @@ function showDataStructure( inObject, inTempKeys ) {
 	setupCanvas();
 	setupWorld();
 	
+	doneList = [];
 	drawQueryStruct( inQsRoot );
 	drawAddLines();
 }

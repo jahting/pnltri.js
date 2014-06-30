@@ -112,6 +112,7 @@ PNLTRI.MonoSplitter.prototype = {
 		
 		while ( trapList_getItem() ) {
 			if ( thisTrap.monoDiag )	continue;
+			thisTrap.monoDiag = true;
 		
 			if ( !thisTrap.lseg || !thisTrap.rseg ) {
 				console.log("ERR alyTrap: lseg/rseg missing", thisTrap);
@@ -165,8 +166,6 @@ PNLTRI.MonoSplitter.prototype = {
 				//	could be start triangle -> visit IN-neighbor in any case !
 				trapList_addItem( neighIn, !fromUp, fromLeft, curChain );
 			}
-			
-			thisTrap.monoDiag = true;
 
 			if ( inOneStep )	return trapQueue;
 		}

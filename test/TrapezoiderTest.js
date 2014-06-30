@@ -243,50 +243,57 @@ function test_QueryStructure() {
 //		showDataStructure( myQsRoot );
 		ok( base_segment.is_inserted, "init_query_structure_up: Segment inserted" );
 		// segMax(vTo): root-Node
-		equal( myQsRoot.nodetype, PNLTRI.T_Y, "init_query_structure_up: root: Y-Node" );
 		equal( myQsRoot.yval, base_segment.vTo, "init_query_structure_up: root: yval = vTo" );
+		ok( !myQsRoot.trap, "init_query_structure_up: root: no trapezoid" );
+		ok( !myQsRoot.seg, "init_query_structure_up: root: no segment" );
 		// top(tr0): above root
-		var qsNode2 = myQsRoot.right;
-		equal( qsNode2.nodetype, PNLTRI.T_SINK, "init_query_structure_up: root.above: SINK (top: tr0)" );
+		var tr0, qsNode2 = myQsRoot.right;
+		ok( ( tr0 = qsNode2.trap ), "init_query_structure_up: root.above: has trapezoid" );
+		ok( !qsNode2.yval, "init_query_structure_up: root.above: no horizontal line" );
+		ok( !qsNode2.seg, "init_query_structure_up: root.above: no segment" );
 			// tr0
-		var tr0 = qsNode2.trap;
 		equal( tr0.sink, qsNode2, "init_query_structure_up: root.above->tr.sink: this qsNode" );
 		equal( tr0.vHigh.y, Number.POSITIVE_INFINITY, "init_query_structure_up: root.above->tr.vHigh.y: +INFINITY" );
 		equal( tr0.vLow, base_segment.vTo, "init_query_structure_up: root.above->tr.vLow: vTo" );
 		// segMin(vFrom): below root
 		var qsNode3 = myQsRoot.left;
-		equal( qsNode3.nodetype, PNLTRI.T_Y, "init_query_structure_up: root.below: Y-Node" );
 		equal( qsNode3.yval, base_segment.vFrom, "init_query_structure_up: root.below: yval = vFrom" );
+		ok( !qsNode3.trap, "init_query_structure_up: root.below: no trapezoid" );
+		ok( !qsNode3.seg, "init_query_structure_up: root.below: no segment" );
 		//
 		// bottom(tr2): below segMin(qsNode3)
-		var qsNode4 = qsNode3.left;
-		equal( qsNode4.nodetype, PNLTRI.T_SINK, "init_query_structure_up: segMin.below: SINK (bottom: tr2)" );
+		var tr2, qsNode4 = qsNode3.left;
+		ok( ( tr2 = qsNode4.trap ), "init_query_structure_up: segMin.below: has trapezoid" );
+		ok( !qsNode4.yval, "init_query_structure_up: segMin.below: no horizontal line" );
+		ok( !qsNode4.seg, "init_query_structure_up: segMin.below: no segment" );
 			// tr2
-		var tr2 = qsNode4.trap;
 		equal( tr2.sink, qsNode4, "init_query_structure_up: segMin.below->tr.sink: this qsNode" );
 		equal( tr2.vLow.y, Number.NEGATIVE_INFINITY, "init_query_structure_up: segMin.below->tr.vLow.y: -INFINITY" );
 		equal( tr2.vHigh, base_segment.vFrom, "init_query_structure_up: segMin.below->tr.vHigh: vFrom" );
 		//
 		// Segment - below segMax, above segMin
 		var qsNode5 = qsNode3.right;
-		equal( qsNode5.nodetype, PNLTRI.T_X, "init_query_structure_up: segment: X-Node" );
 		equal( qsNode5.seg, base_segment, "init_query_structure_up: segment.seg -> inSegment" );
+		ok( !qsNode5.trap, "init_query_structure_up: segment: no trapezoid" );
+		ok( !qsNode5.yval, "init_query_structure_up: segment: no horizontal line" );
 		//
 		// left(tr1): segment.left(qsNode5)
-		var qsNode6 = qsNode5.left;
-		equal( qsNode6.nodetype, PNLTRI.T_SINK, "init_query_structure_up: segment.left: SINK (left: tr1)" );
+		var tr1, qsNode6 = qsNode5.left;
+		ok( ( tr1 = qsNode6.trap ), "init_query_structure_up: segment.left: has trapezoid" );
+		ok( !qsNode6.yval, "init_query_structure_up: segment.left: no horizontal line" );
+		ok( !qsNode6.seg, "init_query_structure_up: segment.left: no segment" );
 			// tr1
-		var tr1 = qsNode6.trap;
 		equal( tr1.sink, qsNode6, "init_query_structure_up: segment.left->tr.sink: this qsNode" );
 		equal( tr1.rseg, base_segment, "init_query_structure_up: segment.left->tr.rseg: inSegment" );
 		equal( tr1.vHigh, base_segment.vTo, "init_query_structure_up: segment.left->tr.vHigh: vTo" );
 		equal( tr1.vLow, base_segment.vFrom, "init_query_structure_up: segment.left->tr.vLow: vFrom" );
 		//
 		// right(tr3): segment.right(qsNode5)
-		var qsNode7 = qsNode5.right;
-		equal( qsNode7.nodetype, PNLTRI.T_SINK, "init_query_structure_up: segment.right: SINK (right: tr3)" );
+		var tr3, qsNode7 = qsNode5.right;
+		ok( ( tr3 = qsNode7.trap ), "init_query_structure_up: segment.right: has trapezoid" );
+		ok( !qsNode7.yval, "init_query_structure_up: segment.right: no horizontal line" );
+		ok( !qsNode7.seg, "init_query_structure_up: segment.right: no segment" );
 			// tr3
-		var tr3 = qsNode7.trap;
 		equal( tr3.sink, qsNode7, "init_query_structure_up: segment.right->tr.sink: this qsNode" );
 		equal( tr3.lseg, base_segment, "init_query_structure_up: segment.right->tr.lseg: inSegment" );
 		equal( tr3.vHigh, base_segment.vTo, "init_query_structure_up: segment.right->tr.vHigh: vTo" );
@@ -366,46 +373,6 @@ function test_QueryStructure() {
 	 *   -----------------------------------
 	 *                2
 	 */
-	function test_trap_setAbove() {
-		// going DOWNwards
-		var	base_segment = { vFrom: { x: 1, y: 4 }, vTo: { x: 3, y: 1 }, upward: false };
-		// segment chain
-		var thirdVertex = { x: 3, y: 3 };
-		base_segment.snext = { vFrom: base_segment.vTo, vTo: thirdVertex, upward: true };
-		base_segment.sprev = { vFrom: thirdVertex, vTo: base_segment.vFrom, upward: true };
-		base_segment.snext.sprev = base_segment.sprev.snext = base_segment;
-		base_segment.snext.snext = base_segment.sprev;
-		base_segment.sprev.sprev = base_segment.snext;
-		//
-		var myQs = new PNLTRI.QueryStructure();
-		var myQsRoot = myQs.setup_segments( base_segment );
-		ok( base_segment.is_inserted, "trap_setAbove: Segment inserted" );
-		// get existing Trapezoids
-		var tr0 = myQs.getTrapByIdx(0);
-		var tr1 = myQs.getTrapByIdx(1);
-		var tr2 = myQs.getTrapByIdx(2);
-		var tr3 = myQs.getTrapByIdx(3);
-		// test exchangeability
-		ok( ( tr2.uL == tr1 ), "trap_setAbove: tr2.uL -> tr1" );
-		ok( ( tr2.uR == tr3 ), "trap_setAbove: tr2.uR -> tr3" );
-		tr2.setAbove( tr2.uR, tr2.uL );
-		ok( ( tr2.uL == tr3 ), "trap_setAbove: tr2.uL -> tr3" );
-		ok( ( tr2.uR == tr1 ), "trap_setAbove: tr2.uR -> tr1" );
-		//
-		//
-//		showDataStructure( myQsRoot );
-//		drawTrapezoids( myQsRoot );
-	}
-
-	/*    
-	 *                0
-	 *   -----------------------------------
-	 *  		  \
-	 *  	1	   \        3
-	 *  		    \
-	 *   -----------------------------------
-	 *                2
-	 */
 	function test_trap_splitOffLower() {
 		// going DOWNwards
 		var	base_segment = { vFrom: { x: 1, y: 4 }, vTo: { x: 3, y: 1 }, upward: false };
@@ -447,7 +414,7 @@ function test_QueryStructure() {
 		//
 		strictEqual( tr0.sink, tr0b.sink, "trap_splitOffLower: sink equal" );
 		ok( !tr0b.usave, "trap_splitOffLower: tr0b.usave null" );
-		ok( !tr0b.uside, "trap_splitOffLower: tr0b.uside null" );
+		ok( !tr0b.uleft, "trap_splitOffLower: tr0b.uleft null" );
 		//
 		ok( !tr0.uL, "trap_splitOffLower: tr0.uL unchanged" );
 		ok( !tr0.uR, "trap_splitOffLower: tr0.uR unchanged" );
@@ -478,7 +445,7 @@ function test_QueryStructure() {
 		//
 		strictEqual( tr1.sink, tr1b.sink, "trap_splitOffLower: sink equal" );
 		ok( !tr1b.usave, "trap_splitOffLower: tr1b.usave null" );
-		ok( !tr1b.uside, "trap_splitOffLower: tr1b.uside null" );
+		ok( !tr1b.uleft, "trap_splitOffLower: tr1b.uleft null" );
 		//
 		strictEqual( tr1.uL, tr1org_uL, "trap_splitOffLower: tr1.uL unchanged" );
 		ok( !tr1.uR, "trap_splitOffLower: tr1.uR unchanged" );
@@ -512,7 +479,7 @@ function test_QueryStructure() {
 		//
 		strictEqual( tr2.sink, tr2b.sink, "trap_splitOffLower: sink equal" );
 		ok( !tr2b.usave, "trap_splitOffLower: tr2b.usave null" );
-		ok( !tr2b.uside, "trap_splitOffLower: tr2b.uside null" );
+		ok( !tr2b.uleft, "trap_splitOffLower: tr2b.uleft null" );
 		//
 		strictEqual( tr2.uL, tr2org_uL, "trap_splitOffLower: tr2.uL unchanged" );
 		strictEqual( tr2.uR, tr2org_uR, "trap_splitOffLower: tr2.uR unchanged" );
@@ -540,7 +507,7 @@ function test_QueryStructure() {
 		//
 		strictEqual( tr3.sink, tr3b.sink, "trap_splitOffLower: sink equal" );
 		ok( !tr3b.usave, "trap_splitOffLower: tr3b.usave null" );
-		ok( !tr3b.uside, "trap_splitOffLower: tr3b.uside null" );
+		ok( !tr3b.uleft, "trap_splitOffLower: tr3b.uleft null" );
 		//
 		ok( !tr3.uL, "trap_splitOffLower: tr3.uL unchanged" );
 		strictEqual( tr3.uR, tr3org_uR, "trap_splitOffLower: tr3.uR unchanged" );
@@ -584,24 +551,26 @@ function test_QueryStructure() {
 		//	insert higher point into QueryStructure
 		var qs_tr5 = myQs.splitNodeAtPoint( qs_tr1, downward_segment.vTo, false );
 		//
-		equal( qs_tr1.nodetype, PNLTRI.T_Y, "splitNodeAtPoint1: nodetype(tr1) -> T_Y" );
-		equal( qs_tr1.yval.y, 25, "splitNodeAtPoint1: yval = 25" );
-		strictEqual( qs_tr1.right.trap, tr1, "splitNodeAtPoint1: right -> OrigTrap(tr1)" );
-		strictEqual( qs_tr1.right, tr1.sink, "splitNodeAtPoint1: right == sink(OrigTrap(tr1))" );
-		strictEqual( qs_tr1.left, qs_tr5, "splitNodeAtPoint1: left -> NewTrap(tr5)" );
-		strictEqual( qs_tr1.left.trap.uL, tr1, "splitNodeAtPoint1: left -> NewTrap(tr5) [uL==tr1]" );
-		ok( ( qs_tr1.left.trap.dL == tr3 ), "splitNodeAtPoint1: left -> NewTrap(tr5) [dL==tr3]" );
+		equal( qs_tr1.yval.y, 25, "splitNodeAtPoint1: high: yval" );
+		ok( !qs_tr1.trap, "splitNodeAtPoint1: high: no trapezoid" );
+		ok( !qs_tr1.seg, "splitNodeAtPoint1: high: no segment" );
+		strictEqual( qs_tr1.right.trap, tr1, "splitNodeAtPoint1: high.right -> OrigTrap(tr1)" );
+		strictEqual( qs_tr1.right, tr1.sink, "splitNodeAtPoint1: high.right == sink(OrigTrap(tr1))" );
+		strictEqual( qs_tr1.left, qs_tr5, "splitNodeAtPoint1: high.left -> NewTrap(tr5)" );
+		strictEqual( qs_tr1.left.trap.uL, tr1, "splitNodeAtPoint1: high.left -> NewTrap(tr5) [uL==tr1]" );
+		ok( ( qs_tr1.left.trap.dL == tr3 ), "splitNodeAtPoint1: high.left -> NewTrap(tr5) [dL==tr3]" );
 		//
 		//	insert lower point into QueryStructure
 		var qs_trX = myQs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom, true );
 		//
-		equal( qs_tr3.nodetype, PNLTRI.T_Y, "splitNodeAtPoint1: nodetype(tr3) -> T_Y" );
-		equal( qs_tr3.yval.y, 10, "splitNodeAtPoint1: yval = 10" );
-		strictEqual( qs_tr3.right.trap, tr3, "splitNodeAtPoint1: right -> OrigTrap(tr3)" );
-		strictEqual( qs_tr3.right, tr3.sink, "splitNodeAtPoint1: right == sink(OrigTrap(tr3))" );
-		strictEqual( qs_tr3.left.trap.uL, tr3, "splitNodeAtPoint1: left -> NewTrap(tr6) [uL==tr3]" );
-		ok( !qs_tr3.left.trap.dL, "splitNodeAtPoint1: left -> NewTrap(tr6) [dL==null]" );
-		ok( !qs_tr3.left.trap.dR, "splitNodeAtPoint1: left -> NewTrap(tr6) [dR==null]" );
+		equal( qs_tr3.yval.y, 10, "splitNodeAtPoint1: low: yval" );
+		ok( !qs_tr3.trap, "splitNodeAtPoint1: low: no trapezoid" );
+		ok( !qs_tr3.seg, "splitNodeAtPoint1: low: no segment" );
+		strictEqual( qs_tr3.right.trap, tr3, "splitNodeAtPoint1: low.right -> OrigTrap(tr3)" );
+		strictEqual( qs_tr3.right, tr3.sink, "splitNodeAtPoint1: low.right == sink(OrigTrap(tr3))" );
+		strictEqual( qs_tr3.left.trap.uL, tr3, "splitNodeAtPoint1: low.left -> NewTrap(tr6) [uL==tr3]" );
+		ok( !qs_tr3.left.trap.dL, "splitNodeAtPoint1: low.left -> NewTrap(tr6) [dL==null]" );
+		ok( !qs_tr3.left.trap.dR, "splitNodeAtPoint1: low.left -> NewTrap(tr6) [dR==null]" );
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -635,24 +604,26 @@ function test_QueryStructure() {
 		//	insert higher point into QueryStructure
 		var qs_tr5 = myQs.splitNodeAtPoint( qs_tr3, downward_segment.vTo, false );
 		//		TODO: Tests
-/*		equal( qs_tr1.nodetype, PNLTRI.T_Y, "SplitN#2: nodetype(tr1) -> T_Y" );
-		equal( qs_tr1.yval.y, 25, "SplitN#2: yval = 25" );
-		strictEqual( qs_tr1.right.trap, tr1, "SplitN#2: right -> OrigTrap(tr1)" );
-		strictEqual( qs_tr1.right, tr1.sink, "SplitN#2: right == sink(OrigTrap(tr1))" );
-		strictEqual( qs_tr1.left, qs_tr5, "SplitN#2: left -> NewTrap(tr5)" );
-		strictEqual( qs_tr1.left.trap.uL, tr1, "SplitN#2: left -> NewTrap(tr5) [uL==tr1]" );
-		strictEqual( qs_tr1.left.trap.dL, tr3, "SplitN#2: left -> NewTrap(tr5) [dL==tr3]" );		*/
+/*		equal( qs_tr1.yval.y, 25, "SplitN#2: high: yval" );
+		ok( !qs_tr1.trap, "SplitN#2: high: no trapezoid" );
+		ok( !qs_tr1.seg, "SplitN#2: high: no segment" );
+		strictEqual( qs_tr1.right.trap, tr1, "SplitN#2: high.right -> OrigTrap(tr1)" );
+		strictEqual( qs_tr1.right, tr1.sink, "SplitN#2: high.right == sink(OrigTrap(tr1))" );
+		strictEqual( qs_tr1.left, qs_tr5, "SplitN#2: high.left -> NewTrap(tr5)" );
+		strictEqual( qs_tr1.left.trap.uL, tr1, "SplitN#2: high.left -> NewTrap(tr5) [uL==tr1]" );
+		ok( ( qs_tr1.left.trap.dL == tr3 ), "SplitN#2: high.left -> NewTrap(tr5) [dL==tr3]" );			*/
 		//
 		//	insert lower point into QueryStructure
 		var qs_trX = myQs.splitNodeAtPoint( qs_tr3, downward_segment.vFrom, true );
 		//		TODO: Tests
-/*		equal( qs_tr3.nodetype, PNLTRI.T_Y, "SplitN#2: nodetype(tr3) -> T_Y" );
-		equal( qs_tr3.yval.y, 10, "SplitN#2: yval = 10" );
-		strictEqual( qs_tr3.right.trap, tr3, "SplitN#2: right -> OrigTrap(tr3)" );
-		strictEqual( qs_tr3.right, tr3.sink, "SplitN#2: right == sink(OrigTrap(tr3))" );
-		strictEqual( qs_tr3.left.trap.uL, tr3, "SplitN#2: left -> NewTrap(tr6) [uL==tr3]" );
-		ok( !qs_tr3.left.trap.dL, "SplitN#2: left -> NewTrap(tr6) [dL==null]" );
-		ok( !qs_tr3.left.trap.dR, "SplitN#2: left -> NewTrap(tr6) [dR==null]" );			*/
+/*		equal( qs_tr3.yval.y, 10, "SplitN#2: low: yval" );
+		ok( !qs_tr3.trap, "SplitN#2: low: no trapezoid" );
+		ok( !qs_tr3.seg, "SplitN#2: low: no segment" );
+		strictEqual( qs_tr3.right.trap, tr3, "SplitN#2: low.right -> OrigTrap(tr3)" );
+		strictEqual( qs_tr3.right, tr3.sink, "SplitN#2: low.right == sink(OrigTrap(tr3))" );
+		strictEqual( qs_tr3.left.trap.uL, tr3, "SplitN#2: low.left -> NewTrap(tr6) [uL==tr3]" );
+		ok( !qs_tr3.left.trap.dL, "SplitN#2: low.left -> NewTrap(tr6) [dL==null]" );
+		ok( !qs_tr3.left.trap.dR, "SplitN#2: low.left -> NewTrap(tr6) [dR==null]" );		*/
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -678,38 +649,38 @@ function test_QueryStructure() {
 		base_segment.sprev.sprev = base_segment.snext;
 		//
 		var myQs = new PNLTRI.QueryStructure();
-		var myQsRoot = myQs.setup_segments( base_segment );		// T_Y
+		var myQsRoot = myQs.setup_segments( base_segment );		// Y-Node
 		//
 		var qs_tr4 = myQsRoot.right;			// tr4 = myQsRoot.right.trap;			// TODO
-		var qs3 = myQsRoot.left;		// T_Y
+		var qs3 = myQsRoot.left;		// Y-Node
 		var qs_tr3 = qs3.left;					// tr3 = qs3.left.trap;
-		var qs5 = qs3.right;			// T_X: base_segment
+		var qs5 = qs3.right;			// X-Node: base_segment
 		var qs_tr1 = qs5.left;					// tr1 = qs5.left.trap;
 		var qs_tr2 = qs5.right;					// tr2 = qs5.right.trap;
-		//	T_SINK
+		//	SINK-Node
 		ok( ( myQs.ptNode( { x: 2, y: 5 }, { x: 3, y: 6 }, qs3.left ) == qs_tr3 ), "ptNode A: Sink direct -> qs_tr3" );
-		//	T_Y
-		ok( ( myQs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ) == qs_tr4 ), "ptNode A: T_Y(root), above -> qs_tr4" );
-		ok( ( myQs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ) == qs_tr3 ), "ptNode A: T_Y(qs3), below -> qs_tr3" );
-		//		T_Y: 1.end point hit
-		ok( ( myQs.ptNode( firstPoint, { x: 4, y: 0 }, qs3 ) == qs_tr3 ), "ptNode A: T_Y(qs3), =vFrom, below -> qs_tr3" );
-		//		T_Y: 2.end point hit
-		ok( ( myQs.ptNode( secondPoint, { x: 0, y: 5 }, myQsRoot ) == qs_tr4 ), "ptNode A: T_Y(root), =vTo, above -> qs_tr4" );
-		//	T_X
-		ok( ( myQs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5) -> qs_tr1" );
-		ok( ( myQs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5) -> qs_tr2" );
-		//		T_X: 1.end point hit - not horizontal
-		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 0 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vFrom -> qs_tr1" );
-		ok( ( myQs.ptNode( firstPoint, { x: 2, y: 2 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vFrom -> qs_tr2" );
-		//		T_X: 2.end point hit - not horizontal
-		ok( ( myQs.ptNode( secondPoint, { x: 3, y: 5 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vTo -> qs_tr1" );
-		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 5 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vTo -> qs_tr2" );
-		//		T_X: 1.end point hit - horizontal
-		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 1 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vFrom, horiz -> qs_tr1" );
-		ok( ( myQs.ptNode( firstPoint, { x: 2, y: 1 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vFrom, horiz -> qs_tr2" );
-		//		T_X: 2.end point hit - horizontal
-		ok( ( myQs.ptNode( secondPoint, { x: 2.5, y: 4 }, qs5 ) == qs_tr1 ), "ptNode A: T_X(qs5), =vTo, horiz -> qs_tr1" );
-		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 4 }, qs5 ) == qs_tr2 ), "ptNode A: T_X(qs5), =vTo, horiz -> qs_tr2" );
+		//	Y-Node
+		ok( ( myQs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ) == qs_tr4 ), "ptNode A: Y-Node(root), above -> qs_tr4" );
+		ok( ( myQs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ) == qs_tr3 ), "ptNode A: Y-Node(qs3), below -> qs_tr3" );
+		//		Y-Node: 1.end point hit
+		ok( ( myQs.ptNode( firstPoint, { x: 4, y: 0 }, qs3 ) == qs_tr3 ), "ptNode A: Y-Node(qs3), =vFrom, below -> qs_tr3" );
+		//		Y-Node: 2.end point hit
+		ok( ( myQs.ptNode( secondPoint, { x: 0, y: 5 }, myQsRoot ) == qs_tr4 ), "ptNode A: Y-Node(root), =vTo, above -> qs_tr4" );
+		//	X-Node
+		ok( ( myQs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ) == qs_tr1 ), "ptNode A: X-Node(qs5) -> qs_tr1" );
+		ok( ( myQs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ) == qs_tr2 ), "ptNode A: X-Node(qs5) -> qs_tr2" );
+		//		X-Node: 1.end point hit - not horizontal
+		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 0 }, qs5 ) == qs_tr1 ), "ptNode A: X-Node(qs5), =vFrom -> qs_tr1" );
+		ok( ( myQs.ptNode( firstPoint, { x: 2, y: 2 }, qs5 ) == qs_tr2 ), "ptNode A: X-Node(qs5), =vFrom -> qs_tr2" );
+		//		X-Node: 2.end point hit - not horizontal
+		ok( ( myQs.ptNode( secondPoint, { x: 3, y: 5 }, qs5 ) == qs_tr1 ), "ptNode A: X-Node(qs5), =vTo -> qs_tr1" );
+		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 5 }, qs5 ) == qs_tr2 ), "ptNode A: X-Node(qs5), =vTo -> qs_tr2" );
+		//		X-Node: 1.end point hit - horizontal
+		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 1 }, qs5 ) == qs_tr1 ), "ptNode A: X-Node(qs5), =vFrom, horiz -> qs_tr1" );
+		ok( ( myQs.ptNode( firstPoint, { x: 2, y: 1 }, qs5 ) == qs_tr2 ), "ptNode A: X-Node(qs5), =vFrom, horiz -> qs_tr2" );
+		//		X-Node: 2.end point hit - horizontal
+		ok( ( myQs.ptNode( secondPoint, { x: 2.5, y: 4 }, qs5 ) == qs_tr1 ), "ptNode A: X-Node(qs5), =vTo, horiz -> qs_tr1" );
+		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 4 }, qs5 ) == qs_tr2 ), "ptNode A: X-Node(qs5), =vTo, horiz -> qs_tr2" );
 		//
 		// point objects
 		firstPoint = { x: 1, y: 4 };
@@ -728,38 +699,38 @@ function test_QueryStructure() {
 		base_segment.sprev.sprev = base_segment.snext;
 		//
 		myQs = new PNLTRI.QueryStructure();
-		myQsRoot = myQs.setup_segments( base_segment );		// T_Y
+		myQsRoot = myQs.setup_segments( base_segment );		// Y-Node
 		//
 		qs_tr4 = myQsRoot.right;					// TODO
-		qs3 = myQsRoot.left;		// T_Y
+		qs3 = myQsRoot.left;		// Y-Node
 		qs_tr3 = qs3.left;
-		qs5 = qs3.right;			// T_X: base_segment
+		qs5 = qs3.right;			// X-Node: base_segment
 		qs_tr1 = qs5.left;
 		qs_tr2 = qs5.right;
-		//	T_SINK
+		//	SINK-Node
 		ok( ( myQs.ptNode( { x: 2, y: 5 }, { x: 3, y: 6 }, qs3.left ) == qs_tr3 ), "ptNode B: Sink direct -> qs_tr3" );
-		//	T_Y
-		ok( ( myQs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ) == qs_tr4 ), "ptNode B: T_Y(root), above -> qs_tr4" );
-		ok( ( myQs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ) == qs_tr3 ), "ptNode B: T_Y(qs3), below -> qs_tr3" );
-		//		T_Y: 1.end point hit
-		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 5 }, myQsRoot ) == qs_tr4 ), "ptNode B: T_Y(root), =vFrom, above -> qs_tr4" );
-		//		T_Y: 2.end point hit
-		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 0 }, qs3 ) == qs_tr3 ), "ptNode B: T_Y(qs3), =vTo, below -> qs_tr3" );
-		//	T_X
-		ok( ( myQs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5) -> qs_tr1" );
-		ok( ( myQs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5) -> qs_tr2" );
-		//		T_X: 1.end point hit - not horizontal
-		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 5 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vFrom -> qs_tr1" );
-		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 6 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vFrom -> qs_tr2" );
-		//		T_X: 2.end point hit - not horizontal
-		ok( ( myQs.ptNode( secondPoint, { x: 4, y: -1 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vTo -> qs_tr1" );
-		ok( ( myQs.ptNode( secondPoint, { x: 4, y:  0 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vTo -> qs_tr2" );
-		//		T_X: 1.end point hit - horizontal
-		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 4 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vFrom, horiz -> qs_tr1" );
-		ok( ( myQs.ptNode( firstPoint, { x: 2, y: 4 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vFrom, horiz -> qs_tr2" );
-		//		T_X: 2.end point hit - horizontal
-		ok( ( myQs.ptNode( secondPoint, { x: 2, y: 1 }, qs5 ) == qs_tr1 ), "ptNode B: T_X(qs5), =vTo, horiz -> qs_tr1" );
-		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 1 }, qs5 ) == qs_tr2 ), "ptNode B: T_X(qs5), =vTo, horiz -> qs_tr2" );
+		//	Y-Node
+		ok( ( myQs.ptNode( { x: 2, y: 5 }, { x: 3, y:  6 }, myQsRoot ) == qs_tr4 ), "ptNode B: Y-Node(root), above -> qs_tr4" );
+		ok( ( myQs.ptNode( { x: 2, y: 0 }, { x: 4, y: -1 }, qs3 ) == qs_tr3 ), "ptNode B: Y-Node(qs3), below -> qs_tr3" );
+		//		Y-Node: 1.end point hit
+		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 5 }, myQsRoot ) == qs_tr4 ), "ptNode B: Y-Node(root), =vFrom, above -> qs_tr4" );
+		//		Y-Node: 2.end point hit
+		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 0 }, qs3 ) == qs_tr3 ), "ptNode B: Y-Node(qs3), =vTo, below -> qs_tr3" );
+		//	X-Node
+		ok( ( myQs.ptNode( { x: 2, y: 2 }, { x: 3, y: 6 }, qs5 ) == qs_tr1 ), "ptNode B: X-Node(qs5) -> qs_tr1" );
+		ok( ( myQs.ptNode( { x: 2, y: 3 }, { x: 3, y: 6 }, qs5 ) == qs_tr2 ), "ptNode B: X-Node(qs5) -> qs_tr2" );
+		//		X-Node: 1.end point hit - not horizontal
+		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 5 }, qs5 ) == qs_tr1 ), "ptNode B: X-Node(qs5), =vFrom -> qs_tr1" );
+		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 6 }, qs5 ) == qs_tr2 ), "ptNode B: X-Node(qs5), =vFrom -> qs_tr2" );
+		//		X-Node: 2.end point hit - not horizontal
+		ok( ( myQs.ptNode( secondPoint, { x: 4, y: -1 }, qs5 ) == qs_tr1 ), "ptNode B: X-Node(qs5), =vTo -> qs_tr1" );
+		ok( ( myQs.ptNode( secondPoint, { x: 4, y:  0 }, qs5 ) == qs_tr2 ), "ptNode B: X-Node(qs5), =vTo -> qs_tr2" );
+		//		X-Node: 1.end point hit - horizontal
+		ok( ( myQs.ptNode( firstPoint, { x: 0, y: 4 }, qs5 ) == qs_tr1 ), "ptNode B: X-Node(qs5), =vFrom, horiz -> qs_tr1" );
+		ok( ( myQs.ptNode( firstPoint, { x: 2, y: 4 }, qs5 ) == qs_tr2 ), "ptNode B: X-Node(qs5), =vFrom, horiz -> qs_tr2" );
+		//		X-Node: 2.end point hit - horizontal
+		ok( ( myQs.ptNode( secondPoint, { x: 2, y: 1 }, qs5 ) == qs_tr1 ), "ptNode B: X-Node(qs5), =vTo, horiz -> qs_tr1" );
+		ok( ( myQs.ptNode( secondPoint, { x: 4, y: 1 }, qs5 ) == qs_tr2 ), "ptNode B: X-Node(qs5), =vTo, horiz -> qs_tr2" );
 	}
 
 	
@@ -866,25 +837,27 @@ function test_QueryStructure() {
 		equal( myQs.nbTrapezoids(), 7, "Add#1: Number of Trapezoids in Array (7)" );
 		//	upper point inserted -> test_splitNodeAtPoint();		TODO Tests
 /*		var tr5 = myQs.getTrapByIdx(4), qs_tr5 = tr5.sink;
-		equal( qs_tr1.nodetype, PNLTRI.T_Y, "Add#1: nodetype(tr1) -> T_Y" );
-		equal( qs_tr1.yval.y, 25, "Add#1: yval = 25" );
-		strictEqual( qs_tr1.seg, downward_segment, "Add#1: seg == downward_segment" );
-		strictEqual( qs_tr1.right.trap, tr1, "Add#1: right -> OrigTrap(tr1)" );
-		strictEqual( qs_tr1.right, tr1.sink, "Add#1: right == sink(OrigTrap(tr1))" );
-		strictEqual( qs_tr1.left, qs_tr5, "Add#1: left -> NewTrap(tr5)" );
-		strictEqual( qs_tr1.left.trap.uL, tr1, "Add#1: left -> NewTrap(tr5) [uL==tr1]" );
-		strictEqual( qs_tr1.left.trap.dL, tr3, "Add#1: left -> NewTrap(tr5) [dL==tr3]" );		*/
+		equal( qs_tr1.yval.y, 25, "Add#1: high: yval" );
+		ok( !qs_tr1.trap, "Add#1: high: no trapezoid" );
+		ok( !qs_tr1.seg, "Add#1: high: no segment" );
+		strictEqual( qs_tr1.seg, downward_segment, "Add#1: high.seg == downward_segment" );
+		strictEqual( qs_tr1.right.trap, tr1, "Add#1: high.right -> OrigTrap(tr1)" );
+		strictEqual( qs_tr1.right, tr1.sink, "Add#1: high.right == sink(OrigTrap(tr1))" );
+		strictEqual( qs_tr1.left, qs_tr5, "Add#1: high.left -> NewTrap(tr5)" );
+		strictEqual( qs_tr1.left.trap.uL, tr1, "Add#1: high.left -> NewTrap(tr5) [uL==tr1]" );
+		strictEqual( qs_tr1.left.trap.dL, tr3, "Add#1: high.left -> NewTrap(tr5) [dL==tr3]" );		*/
 		//	lower point inserted -> test_splitNodeAtPoint();		TODO Tests
 /*		var tr6 = myQs.getTrapByIdx(5), qs_tr6 = tr6.sink;
-		equal( qs_tr3.nodetype, PNLTRI.T_Y, "Add#1: nodetype(tr3) -> T_Y" );
-		equal( qs_tr3.yval.y, 10, "Add#1: yval = 10" );
-		strictEqual( qs_tr3.seg, downward_segment, "Add#1: seg == downward_segment" );
-		strictEqual( qs_tr3.right.trap, tr3, "Add#1: right -> OrigTrap(tr3)" );
-		strictEqual( qs_tr3.right, tr3.sink, "Add#1: right == sink(OrigTrap(tr3))" );
-		strictEqual( qs_tr3.left, qs_tr6, "Add#1: left -> NewTrap(tr6)" );
-		strictEqual( qs_tr3.left.trap.uL, tr3, "Add#1: left -> NewTrap(tr6) [uL==tr3]" );
-		ok( !qs_tr3.left.trap.dL, "Add#1: left -> NewTrap(tr6) [dL==null]" );
-		ok( !qs_tr3.left.trap.dR, "Add#1: left -> NewTrap(tr6) [dR==null]" );		*/
+		equal( qs_tr3.yval.y, 10, "Add#1: low: yval" );
+		ok( !qs_tr3.trap, "Add#1: low: no trapezoid" );
+		ok( !qs_tr3.seg, "Add#1: low: no segment" );
+		strictEqual( qs_tr3.seg, downward_segment, "Add#1: low.seg == downward_segment" );
+		strictEqual( qs_tr3.right.trap, tr3, "Add#1: low.right -> OrigTrap(tr3)" );
+		strictEqual( qs_tr3.right, tr3.sink, "Add#1: low.right == sink(OrigTrap(tr3))" );
+		strictEqual( qs_tr3.left, qs_tr6, "Add#1: low.left -> NewTrap(tr6)" );
+		strictEqual( qs_tr3.left.trap.uL, tr3, "Add#1: low.left -> NewTrap(tr6) [uL==tr3]" );
+		ok( !qs_tr3.left.trap.dL, "Add#1: low.left -> NewTrap(tr6) [dL==null]" );
+		ok( !qs_tr3.left.trap.dR, "Add#1: low.left -> NewTrap(tr6) [dR==null]" );		*/
 		//
 		//
 //		showDataStructure( myQsRoot );
@@ -1146,6 +1119,35 @@ function test_QueryStructure() {
 //		drawTrapezoids( myQsRoot, false, 0.4 );
 	}
 
+	function test_add_segment_spezial_6() {
+
+		var myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:43, y:31 }, { x:41, y:29 },
+			{ x:42, y:40 }, { x:36, y:24 },
+			{ x:34, y:16 }, { x:23, y:34 },
+			{ x: 8, y:32 }, { x: 1, y:28 },
+			{ x:14, y:38 }, { x:10, y: 6 }, 
+			{ x:63, y:26 }, { x:58, y:18 },
+			] ] );
+		var segListArray = myPolygonData.getSegments().concat();
+//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
+//		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
+		//
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+		//
+		myQs.add_segment_consistently( segListArray[ 0], 'Spec_6 #1' );
+		myQs.add_segment_consistently( segListArray[10], 'Spec_6 #2' );
+		myQs.add_segment_consistently( segListArray[ 6], 'Spec_6 #3' );
+		myQs.add_segment_consistently( segListArray[ 8], 'Spec_6 #4' );
+		myQs.add_segment_consistently( segListArray[ 2], 'Spec_6 #5' );
+		// endless loop, if in only_one_trap_below.1B_1UN_END inTrNext.uL and trNewLeft is not set
+		myQs.add_segment_consistently( segListArray[ 4], 'Spec_6 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+	}
+
 	
 	function test_add_segment_5ccw() {
 		// CCW-Ordering (Shapes)
@@ -1331,7 +1333,6 @@ function test_QueryStructure() {
 		//
 		test_init_query_structure_up();
 		test_init_query_structure_down();
-		test_trap_setAbove();
 		test_trap_splitOffLower();
 		test_splitNodeAtPoint1();
 		test_splitNodeAtPoint2();
@@ -1350,6 +1351,7 @@ function test_QueryStructure() {
 		test_add_segment_spezial_3();
 		test_add_segment_spezial_4();
 		test_add_segment_spezial_5();
+		test_add_segment_spezial_6();
 		// polygons
 		test_add_segment_5ccw();
 		test_add_segment_5cw();
@@ -1406,16 +1408,22 @@ function test_Trapezoider() {
 	function test_math_NH() {
 		var trap = new PNLTRI.Trapezoider();
 		//
-		equal( trap.math_NH(13,0), 1, "math_NH: 13, 0" );
-		equal( trap.math_NH(13,1), 4, "math_NH: 13, 1" );
-		equal( trap.math_NH(13,2), 7, "math_NH: 13, 2" );
+		// minimal number of segments
+		equal( trap.math_NH(3,0), 0, "math_NH: 3, 0" );
+		equal( trap.math_NH(3,1), 1, "math_NH: 3, 1" );
+		equal( trap.math_NH(3,2), 4, "math_NH: 3, 2" );		// too big
 		//
-		equal( trap.math_NH(100000,0), 1, "math_NH: 100000, 0" );
-		equal( trap.math_NH(100000,1), 6021, "math_NH: 100000, 1" );
-		equal( trap.math_NH(100000,2), 24668, "math_NH: 100000, 2" );
-		equal( trap.math_NH(100000,3), 49522, "math_NH: 100000, 3" );
-		equal( trap.math_NH(100000,4), 98632, "math_NH: 100000, 4" );
-		equal( trap.math_NH(100000,5), 5030159, "math_NH: 100000, 5" );
+		equal( trap.math_NH(13,0), 0, "math_NH: 13, 0" );
+		equal( trap.math_NH(13,1), 3, "math_NH: 13, 1" );
+		equal( trap.math_NH(13,2), 6, "math_NH: 13, 2" );
+		equal( trap.math_NH(13,3), 14, "math_NH: 13, 3" );		// too big
+		//
+		equal( trap.math_NH(100000,0), 0, "math_NH: 100000, 0" );
+		equal( trap.math_NH(100000,1), 6020, "math_NH: 100000, 1" );
+		equal( trap.math_NH(100000,2), 24667, "math_NH: 100000, 2" );
+		equal( trap.math_NH(100000,3), 49521, "math_NH: 100000, 3" );
+		equal( trap.math_NH(100000,4), 98631, "math_NH: 100000, 4" );
+		equal( trap.math_NH(100000,5), 5030158, "math_NH: 100000, 5" );		// too big
 	}
 
 
@@ -1536,7 +1544,11 @@ function test_Trapezoider() {
 		}
 		//
 		var startTrap = myTrapezoider.find_first_inside();
-		equal( startTrap.trapID, inExpectedStartTrap, "trapezoide_polygon ("+inDataName+"): Start-Trap-ID" );
+		if ( startTrap ) {
+			equal( startTrap.trapID, inExpectedStartTrap, "trapezoide_polygon ("+inDataName+"): Start-Trap-ID" );
+		} else {
+			ok( false, "trapezoide_polygon ("+inDataName+"): Start-Trap found" );
+		}
 		//
 		if ( inDebug > 0 ) {
 			drawTrapezoids( startTrap.sink, false, inDebug );

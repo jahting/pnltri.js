@@ -87,16 +87,16 @@ PNLTRI.PolygonData.prototype = {
 	//		yA > yB resp. xA > xB: 1, equal: 0, otherwise: -1
 	compare_pts_yx: function ( inPtA, inPtB ) {
 		var deltaY = inPtA.y - inPtB.y;
-		if ( deltaY > PNLTRI.Math.EPSILON_P ) {
-			return 1;
-		} else if ( deltaY < PNLTRI.Math.EPSILON_N ) {
+		if ( deltaY < PNLTRI.Math.EPSILON_N ) {
 			return -1;
+		} else if ( deltaY > PNLTRI.Math.EPSILON_P ) {
+			return 1;
 		} else {
 			var deltaX = inPtA.x - inPtB.x;
-			if ( deltaX > PNLTRI.Math.EPSILON_P ) {
-				return  1;
-			} else if ( deltaX < PNLTRI.Math.EPSILON_N ) {
+			if ( deltaX < PNLTRI.Math.EPSILON_N ) {
 				return -1;
+			} else if ( deltaX > PNLTRI.Math.EPSILON_P ) {
+				return  1;
 			} else {
 				return  0;
 			}

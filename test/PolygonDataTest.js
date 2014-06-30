@@ -628,7 +628,7 @@ function test_PolygonData() {
 			ok( false, "splitPolygonChain3: "+checkResult );
 		if ( checkResult = myPolygonData.checkMonoChainVertexIDs( 3, [ 2, 0, 1 ] ) )
 			ok( false, "splitPolygonChain3: "+checkResult );
-		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, 4 );
+//		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, 4 );
 	}
 	
 	function test_splitPolygonChain4_CCW() {			// correct winding order: contour: CCW, hole: CW

@@ -17,6 +17,13 @@
 	</head>
 
 	<body>
+		<h2><div id="version"></div></h2>
+		<script type="text/javascript">
+			var versionTarget = document.getElementById( "version" );
+			versionTarget.innerHTML = 'PnlTri.js Version: <em>' + PNLTRI.REVISION + '</em>';
+		</script>
+		
+		
 		<h4>Triangulator: Compare Three.js extract and Seidel</h4>
 		<div id="simple polygon without holes"></div>
 
@@ -96,8 +103,8 @@
 			startSection = endSection;
 
 			
-			inResultTarget = document.getElementById( "simple polygon without holes" );
-			inResultTarget.innerHTML = resultStr;
+			var resultTarget = document.getElementById( "simple polygon without holes" );
+			resultTarget.innerHTML = resultStr;
 		</script>
 	</body>
 

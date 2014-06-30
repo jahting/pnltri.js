@@ -23,13 +23,20 @@
 	</head>
 
 	<body>
+		<h2><div id="version"></div></h2>
+		<script type="text/javascript">
+			var versionTarget = document.getElementById( "version" );
+			versionTarget.innerHTML = 'PnlTri.js Version: <em>' + PNLTRI.REVISION + '</em>';
+		</script>
+		
+		
 		<h4>Triangulator for Simple Polygons with Holes</h4>
 		<div id="simple polygon with holes"></div>
 
 		<script type="text/javascript">
 			var	testData = new PolygonTestdata();
-			var polyDataNames = [ "article_poly", "trap_2up_2down", "pt_3_diag_max",
-									"squares_perftest_max", "tree_full", "xy_bad_saw",
+			var polyDataNames = [	"article_poly", "trap_2up_2down", "pt_3_diag_max",
+									"xy_bad_saw", "tree_full", "squares_perftest_max", 
 								];
 
 			var myTriangulator = new PNLTRI.Triangulator();
@@ -56,12 +63,21 @@
 				startSection = endSection;
 			}
 
-			inResultTarget = document.getElementById( "simple polygon with holes" );
-			inResultTarget.innerHTML = resultStr;
+			var resultTarget = document.getElementById( "simple polygon with holes" );
+			resultTarget.innerHTML = resultStr;
 			
 			// display last result
 //			drawPolygonLayers( { "poly": example_data, "triang": myTriangulator.lastPolyData.triangles_2_polygons() }, 2 );
 		</script>
+
+		
+		<!-- h2><div id="counter"></div></h2>
+		<script type="text/javascript">
+			var counterTarget = document.getElementById( "counter" );
+			counterTarget.innerHTML = 'Counter: 0: ' + PNLTRI.cnt_0 + ', 1: ' + PNLTRI.cnt_1 + ', 2: ' + PNLTRI.cnt_2 +
+											 ', 3: ' + PNLTRI.cnt_3 + ', 4: ' + PNLTRI.cnt_4 + ', 5: ' + PNLTRI.cnt_5 +
+											 ', 6: ' + PNLTRI.cnt_6;
+		</script -->
 	</body>
 
 </html>
