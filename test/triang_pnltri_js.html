@@ -88,6 +88,9 @@
 					perfStr += ' '+idx;
 				}
 				console.profileEnd();
+				// free memory
+				myTriangulator.clear_lastData();
+				perf_test_data = [];
 	
 				perfStr += ';';
 				perfTarget.innerHTML = perfStr;
