@@ -28,6 +28,15 @@
 			var versionTarget = document.getElementById( "version" );
 			versionTarget.innerHTML = 'PnlTri.js Version: <em>' + PNLTRI.REVISION + '</em>';
 		</script>
+
+		<p><div onclick="perfTriang()">Klick fuer Performance Test</div><div id="performance tests"></div></p>
+		<script type="text/javascript">
+			var perfDataName = "squares_perftest_mid";		// "tree_full"
+			var perfRuns = 5;
+
+			var perfTarget = document.getElementById( "performance tests" );
+			var perfStr='';
+		</script>
 		
 		
 		<h4>Triangulator for Simple Polygons with Holes</h4>
@@ -47,9 +56,7 @@
 				dataName = polyDataNames[dataIdx];
 				example_data = testData.get_polygon_with_holes( dataName );
 				durationTriang  = new Date().getTime();
-//				console.profile();
 				triangList = myTriangulator.triangulate_polygon( example_data );
-//				console.profileEnd();
 				durationTriang -= new Date().getTime();
 				
 //				alert("Vertices: " + example_data.length + "/" + example_data[0].length + "/" + myTriangulator.lastPolyData.vertices.length );
@@ -68,6 +75,23 @@
 			
 			// display last result
 //			drawPolygonLayers( { "poly": example_data, "triang": myTriangulator.lastPolyData.triangles_2_polygons() }, 2 );
+			
+			function perfTriang() {
+				var idx;
+				var perf_test_data = [];
+				for ( idx = 0; idx < perfRuns; idx++ ) {
+					perf_test_data.push( testData.get_polygon_with_holes( perfDataName ) );
+				}
+				console.profile();
+				for ( idx = 0; idx < perfRuns; idx++ ) {
+					myTriangulator.triangulate_polygon( perf_test_data[idx] );
+					perfStr += ' '+idx;
+				}
+				console.profileEnd();
+	
+				perfStr += ';';
+				perfTarget.innerHTML = perfStr;
+			}
 		</script>
 
 		
