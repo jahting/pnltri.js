@@ -74,7 +74,6 @@ function test_MonoTriangulator() {
 		initSeglistMonoChain( myVertices );
 		myMonoTriang.triangulate_monotone_polygon( myMonoChain[1] );
 		equal( triangList.length, 1, "RHS Triangle: number" );
-//		deepEqual(	triangList[0], [ 1, 2, 0 ], "RHS Triangle: Triangle, CCW: start at posmax" );
 		deepEqual(	triangList[0], [ 2, 0, 1 ], "RHS Triangle (changed to LHS): Triangle, CCW: start at posmax" );
 		//
 		// Triangle: LeftHandSide is the single segment chain
@@ -90,8 +89,6 @@ function test_MonoTriangulator() {
 		initSeglistMonoChain( myVertices );
 		myMonoTriang.triangulate_monotone_polygon( myMonoChain[1] );
 		equal( triangList.length, 2, "RHS 4-vert: number" );
-//		deepEqual(	triangList, [	[ 2, 3, 0 ], [ 1, 2, 0 ],
-//									], "RHS 4-vert: Triangles, CCW: start at posmax" );
 		deepEqual(	triangList, [	[ 2, 3, 0 ], [ 2, 0, 1 ],
 									], "RHS 4-vert: Triangles (changed to LHS), CCW: start at posmax" );
 		//
@@ -109,8 +106,6 @@ function test_MonoTriangulator() {
 		initSeglistMonoChain( myVertices );
 		myMonoTriang.triangulate_monotone_polygon( myMonoChain[3] );
 		equal( triangList.length, 4, "RHS n-vert: number" );
-//		deepEqual(	triangList, [	[ 4, 5, 0 ], [ 0, 1, 2 ], [ 4, 0, 2 ], [ 3, 4, 2 ],
-//									], "RHS n-vert: Triangles, CCW: start at posmax" );
 		deepEqual(	triangList, [	[ 4, 5, 0 ], [ 0, 1, 2 ], [ 4, 0, 2 ], [ 4, 2, 3 ],
 									], "RHS n-vert: Triangles (changed to LHS), CCW: start at posmax" );
 //		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );

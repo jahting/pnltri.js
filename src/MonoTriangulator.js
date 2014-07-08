@@ -42,7 +42,7 @@ PNLTRI.MonoTriangulator.prototype = {
 
 	//	algorithm to triangulate an uni-y-monotone polygon in O(n) time.[FoM84]
 	 
-	triangulate_monotone_polygon: function ( monoPosmax ) {
+	triangulate_monotone_polygon: function ( monoPosmax ) {			// private
 		var scope = this;
 		
 		function error_cleanup() {

@@ -66,6 +66,7 @@ PNLTRI.Triangulator.prototype = {
 		}
 
 
+		this.clear_lastData();
 		if ( ( !inPolygonChains ) || ( inPolygonChains.length == 0 ) )		return	[];
 		//
 		// initializes general polygon data structure
@@ -91,6 +92,11 @@ PNLTRI.Triangulator.prototype = {
 			//
 			var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
 			myTriangulator.triangulate_all_polygons();
+			//
+			// cleanup
+			//
+			var segments = myPolygonData.getSegments();
+			for (var i = 0; i < segments.length; i++) { segments[i].vFrom.outSegs = null }
 		}
 		//
 		this.lastPolyData = myPolygonData;

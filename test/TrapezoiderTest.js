@@ -97,24 +97,6 @@ PNLTRI.QueryStructure.prototype.add_segment_consistently = function ( inSegment,
 		ok( false, "add_segment_consistently #"+inTestID+": " + bugStr );
 	}
 }
-// check all trapezoids for consistent l/r-segment orientation
-PNLTRI.QueryStructure.prototype.check_trapezoids_segment_orientation = function () {
-	// if the polygon chains have the correct orientation
-	//	(contour: CCW, holes: CW), then all trapezoids lseg/rseg have opposing
-	//	directions, assumed, the missing outer segments have CW orientation !
-	
-	var bugList = [];
-	
-	var currTrap, rightDir, leftDir;
-	for (var i=0; i<this.trapArray.length; i++) {
-		currTrap = this.trapArray[i];
-		rightDir = ( currTrap.rseg ) ? currTrap.rseg.upward : false;
-		leftDir = ( currTrap.lseg ) ? currTrap.lseg.upward : true;
-		if ( rightDir == leftDir )		bugList.push( "ID#"+currTrap.trapID );
-	}
-	
-	return	( bugList.length == 0 ) ? null : bugList;
-};
 // check if trapezoid has specific neighbors
 PNLTRI.QueryStructure.prototype.check_trapezoid_neighbors = function ( inTrapId, inChkUL, inChkUR, inChkDL, inChkDR, inTestName ) {
 	var trapezoid = this.getTrapByIdx(inTrapId);
@@ -755,7 +737,7 @@ function test_QueryStructure() {
 		//
 		equal( myQs.minDepth(), -1, "assign_depths: Min depth: -1" );
 		equal( myQs.maxDepth(), -1, "assign_depths: Max depth: -1" );
-		myQs.assignDepths();			// marks outside trapezoids
+		myQs.assignDepths(myPolygonData);			// marks outside trapezoids
 		equal( myQs.minDepth(), 0, "assign_depths: Min depth: 0" );
 		equal( myQs.maxDepth(), 1, "assign_depths: Max depth: 1" );
 		//
@@ -778,7 +760,7 @@ function test_QueryStructure() {
 		//
 		//	Main test: all outside
 		//
-		myQs.assignDepths();			// marks all trapezoids as outside
+		myQs.assignDepths(myPolygonData);			// marks all trapezoids as outside
 		equal( myQs.minDepth(), 0, "assign_depths: Min depth: 0" );
 		equal( myQs.maxDepth(), 0, "assign_depths: Max depth: 0" );
 		//
@@ -1320,7 +1302,7 @@ function test_QueryStructure() {
 		}
 		ok( myPolygonData.allSegsInQueryStructure(), "add_segment_NEW: all segments inserted" );
 		console.log("add_segment_NEW: Number of Trapezoids: ", myQs.nbTrapezoids() );
-		myQs.assignDepths();			// marks outside trapezoids
+		myQs.assignDepths(myPolygonData);			// marks outside trapezoids
 		equal( myQs.minDepth(), -1, "add_segment_NEW: Min depth == -1 (closed polygon)" );		
 		//
 //		showDataStructure( myQsRoot );
@@ -1381,9 +1363,6 @@ PNLTRI.Trapezoider.prototype.minDepth = function () {
 };
 PNLTRI.Trapezoider.prototype.maxDepth = function () {
 	return	this.queryStructure.maxDepth();
-};
-PNLTRI.Trapezoider.prototype.check_trapezoids_segment_orientation = function () {
-	return	this.queryStructure.check_trapezoids_segment_orientation();
 };
 PNLTRI.Trapezoider.prototype.check_trapezoid_neighbors = function ( inTrapId, inChkU0, inChkU1, inChkD0, inChkD1, inTestName ) {
 	return	this.queryStructure.check_trapezoid_neighbors( inTrapId, inChkU0, inChkU1, inChkD0, inChkD1, inTestName );
@@ -1536,8 +1515,6 @@ function test_Trapezoider() {
 		//
 		if ( buglist = myPolygonData.check_segments_consistency() )
 			ok( !buglist, "trapezoide_polygon ("+inDataName+") segment consistency: " + buglist.join(", ") );
-		if ( buglist = myTrapezoider.check_trapezoids_segment_orientation() )
-			ok( !buglist, "trapezoide_polygon ("+inDataName+") trapezoid segment consistency: " + buglist.join(", ") );
 		//
 		if ( inPolyLeftArr ) {
 			deepEqual( myPolygonData.get_PolyLeftArr(), inPolyLeftArr, "trapezoide_polygon ("+inDataName+"): PolyLeftArr OK?" );
@@ -1581,6 +1558,9 @@ function test_Trapezoider() {
 		test_trapezoide_polygon( "three_error#4", 102, 205, 15, 1, [ true ], 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
 		test_trapezoide_polygon( "three_error#4b", 102, 205, 6, 1, [ false ], 0 );		// 0.04; 4.Error, integrating into Three.js (USA Maine)
 		test_trapezoide_polygon( "hole_first", 19, 39, 13, 2, [ false, false ], 0 );	// 0.5; 5.Error, integrating into Three.js ("R")
+		test_trapezoide_polygon( "two_polygons#1", 20, 41, 3, 1, [ true, false ], 0 );	// 0.5; 6.Error, integrating into Three.js ("i")
+		test_trapezoide_polygon( "two_polygons#2", 6, 13, 3, 1, [ true, false ], 0 );	// 1; my#6: two trivial polygons
+		test_trapezoide_polygon( "polygons_inside_hole", 19, 39, 7, 3, [ true, true, true, false ], 0 );	// 0.7; my#7: square with unregular hole with two polygons inside
 		//
 //		console.perform();
 		test_trapezoide_polygon( "squares_perftest_mid", 904, 1809, 399, 2, null, 0 );	// 1: 15x15 Squares in Squares Performance Test

@@ -21,7 +21,7 @@ PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
 	
 	this.depth = -1;			// no depth assigned yet
 	
-	this.monoDiag = null;		// splitting diagonal during monotonization ?
+	this.monoDone = false;		// monotonization: done with trying to split this trapezoid ?
 	
 };
 
@@ -420,7 +420,7 @@ PNLTRI.QueryStructure.prototype = {
 					trNewLeft.uL = null;
 				}
 			}
-	}
+		}
 
 		// functions handling the relationship to the lower neighbors (dL, dR)
 		//	of trNewLeft and trNewRight
@@ -662,7 +662,7 @@ PNLTRI.QueryStructure.prototype = {
 			return;
 		}		*/
 		
-		var segHighVert, segHighRoot, meetsHighAdjSeg;	// y-max vertex
+		var segHighVert, segHighRoot, meetsHighAdjSeg;		// y-max vertex
 		var segLowVert , segLowRoot, meetsLowAdjSeg;		// y-min vertex
 		
 		if ( inSegment.upward ) {
@@ -818,15 +818,13 @@ PNLTRI.QueryStructure.prototype = {
 
 	// Assigns a depth to all trapezoids;
 	//	0: outside, 1: main polygon, 2: holes, 3:polygons in holes, ...
-	// Checks segment orientation and reverses polyChain winding order if necessary
-	//	=> Goal: contour in CCW, holes in CW
-	//	=> all trapezoids lseg/rseg have opposing directions,
-	//		assumed, the missing outer segments have CW orientation !
+	// Checks segment orientation and marks those polygon chains for reversal
+	//	where the polygon inside lies to their right (contour in CW, holes in CCW)
 	assignDepths: function ( inPolyData ) {
 		var thisDepth = [ this.trapArray[0] ];
 		var nextDepth = [];
 		
-		var thisTrap, otherSide, curDepth = 0;
+		var thisTrap, borderSeg, curDepth = 0;
 		do {
 			// rseg should exactely go upward on trapezoids inside the polygon (odd depth)
 			var expectedRsegUpward = ( ( curDepth % 2 ) == 1 );
@@ -839,14 +837,13 @@ PNLTRI.QueryStructure.prototype = {
 				if ( thisTrap.dL )	thisDepth.push( thisTrap.dL );
 				if ( thisTrap.dR )	thisDepth.push( thisTrap.dR );
 				//
-				if ( ( otherSide = thisTrap.lseg ) && ( otherSide.trLeft.depth == -1 ) )
-					nextDepth.push( otherSide.trLeft );
-				if ( ( otherSide = thisTrap.rseg ) && ( otherSide.trRight.depth == -1 ) ) {
-					nextDepth.push( otherSide.trRight );
-					if ( ( otherSide.upward != expectedRsegUpward ) && inPolyData ) {
-						inPolyData.reverse_polygon_chain( otherSide );
-//						inPolyData.set_PolyLeft_wrong( otherSide.chainId );
-					}
+				if ( ( borderSeg = thisTrap.lseg ) && ( borderSeg.trLeft.depth == -1 ) )
+					nextDepth.push( borderSeg.trLeft );
+				if ( borderSeg = thisTrap.rseg ) {
+					if ( borderSeg.trRight.depth == -1 )
+						nextDepth.push( borderSeg.trRight );
+					if ( borderSeg.upward != expectedRsegUpward )
+						inPolyData.set_PolyLeft_wrong( borderSeg.chainId );
 				}
 			}
 			thisDepth = nextDepth; nextDepth = [];
@@ -862,7 +859,7 @@ PNLTRI.QueryStructure.prototype = {
 		var thisTrap;
 		for (var i=0, j=this.trapArray.length; i<j; i++) {
 			thisTrap = this.trapArray[i];
-			if ( ( ( thisTrap.depth % 2 ) == 1 ) && ( !thisTrap.monoDiag ) &&
+			if ( ( ( thisTrap.depth % 2 ) == 1 ) && ( !thisTrap.monoDone ) &&
 				 ( ( !thisTrap.uL && !thisTrap.uR ) || ( !thisTrap.dL && !thisTrap.dR ) )
 			 	) {
 				if ( thisTrap.lseg )		 return	thisTrap;		// condition for robustness
@@ -981,6 +978,11 @@ PNLTRI.Trapezoider.prototype = {
 		}
 		
 		myQs.assignDepths( this.polyData );
+		// cleanup
+		for (i = 0; i < anzSegs; i++) {
+			randSegListArray[i].trLeft = null;
+			randSegListArray[i].trRight = null;
+		}
 	},
 
 };

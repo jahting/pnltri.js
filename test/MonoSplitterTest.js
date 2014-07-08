@@ -5,7 +5,7 @@
 /*	Base class extensions - for testing only */
 
 PNLTRI.MonoSplitter.prototype.getQsRoot = function () {
-		return	this.trapezoider.getQsRoot();
+	return	this.trapezoider.getQsRoot();
 };
 PNLTRI.MonoSplitter.prototype.alyTrap_check = function ( inTrap, inFromUp, inFromLeft, inTestName ) {
 	var inChain = 0;
@@ -15,7 +15,7 @@ PNLTRI.MonoSplitter.prototype.alyTrap_check = function ( inTrap, inFromUp, inFro
 		while ( paras = trapQueue.pop() ) { mock_check( paras ) }
 		ok( mock_check_calls(), inTestName + ", all calls received" );
 	}
-	ok( inTrap.monoDiag, inTestName );
+	ok( inTrap.monoDone, inTestName );
 };
 PNLTRI.MonoSplitter.prototype.mockSetup = function () {
 	
@@ -117,7 +117,7 @@ function test_MonoSplitter() {
 		mock_set_expected();
 		myMono.alyTrap_check( myTrap, true, false, "TL_BL: 2.from uR, no diag" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [ [ myTrap.uR, false, false, 0 ] ] );
 		myMono.alyTrap_check( myTrap, false, false, "TL_BL: from dR, no diag" );
 	}
@@ -157,7 +157,7 @@ function test_MonoSplitter() {
 		mock_set_expected( [ [ myTrap.dL, true, true, 0 ] ] );
 		myMono.alyTrap_check( myTrap, true, true, "TR_BR: from uL, no diag" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [ [ myTrap.uL, false, true, 0 ] ] );
 		myMono.alyTrap_check( myTrap, false, true, "TR_BR: from dL, no diag" );
 	}
@@ -352,7 +352,7 @@ function test_MonoSplitter() {
 								[ myTrap.dL, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false, "TL_BR: from uR, diag: vHigh(left)->vLow(right)" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], true ],		// (25,10)->(10,30)
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TL_BR: from dL, diag: vLow(right)->vHigh(left)" );
@@ -396,7 +396,7 @@ function test_MonoSplitter() {
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TR_BL: from uL, diag: vLow(left)->vHigh(right)" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], false ],		// (35,30)->(15,10)
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TR_BL: from dR, diag: vHigh(right)->vLow(left)" );
@@ -443,13 +443,13 @@ function test_MonoSplitter() {
 								[ myTrap.dL, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false, "TL_BM: from uR, diag: vHigh(left)->vLow(middle)" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (10,30)->(20,15)
 								[ myTrap.uR, false, false, 0 ],
 								[ myTrap.dL, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TL_BM: from dR, diag: vHigh(left)->vLow(middle)" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], true ],		// (20,15)->(10,30)
 								[ myTrap.dR, true, false, 7 ],
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
@@ -497,13 +497,13 @@ function test_MonoSplitter() {
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TR_BM: from uL, diag: vLow(middle)->vHigh(right)" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], true ],		// (20,15)->(35,30)
 								[ myTrap.uL, false, true, 0 ],
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TR_BM: from dL, diag: vLow(middle)->vHigh(right)" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], false ],		// (35,30)->(20,15)
 								[ myTrap.dL, true, true, 7 ],
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
@@ -551,13 +551,13 @@ function test_MonoSplitter() {
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TM_BL: from uL, diag: vLow(left)->vHigh(middle)" );
 			// from uR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[4], false ],		// (20,25)->(15,10)
 								[ myTrap.dR, true, false, 0 ],
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false, "TM_BL: from uR, diag: vHigh(middle)->vLow(left)" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[4], false ],		// (20,25)->(15,10)
 								[ myTrap.uR, false, false, 0 ],
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
@@ -605,13 +605,13 @@ function test_MonoSplitter() {
 								[ myTrap.dL, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false, "TM_BR: from uR, diag: vHigh(middle)->vLow(right)" );
 			// from uL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], true ],		// (25,10)->(20,25)
 								[ myTrap.dL, true, true, 0 ],
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TM_BR: from uL, diag: vLow(right)->vHigh(middle)" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[4], true ],		// (25,10)->(20,25)
 								[ myTrap.uL, false, true, 0 ],
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
@@ -662,14 +662,14 @@ function test_MonoSplitter() {
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TM_BM: from uL, diag: vLow(middle)->vHigh(middle)" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[5], true ],		// (22,15)->(20,25)
 								[ myTrap.uL, false, true, 0 ],
 								[ myTrap.dR, true, false, 7 ],
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TM_BM: from dL, diag: vLow(middle)->vHigh(middle)" );
 			// from uR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 //		mock_check_off();
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[5], false ],		// (20,25)->(22,15)
 								[ myTrap.dR, true, false, 0 ],
@@ -677,7 +677,7 @@ function test_MonoSplitter() {
 								[ myTrap.dL, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false, "TM_BM: from uR, diag: vHigh(middle)->vLow(middle)" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[5], false ],		// (20,25)->(22,15)
 								[ myTrap.uR, false, false, 0 ],
 								[ myTrap.dL, true, true, 7 ],
@@ -727,7 +727,7 @@ function test_MonoSplitter() {
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TLR_BM: from dL, diag: vLow(middle)->vHigh" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[2], myVertices[0], false ],		// (20,25)->(22,15)
 								[ myTrap.dR, true, false, 0 ],
 								[ myTrap.dL, true, true, 7 ] ], [	7 ] );
@@ -776,7 +776,7 @@ function test_MonoSplitter() {
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TM_BLR: from uL, diag: vLow->vHigh(middle)" );
 			// from uR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[1], myVertices[3], false ],		// (20,25)->(22,15)
 								[ myTrap.uR, false, false, 0 ],
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
@@ -833,13 +833,13 @@ function test_MonoSplitter() {
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TR_BM__c_CCW_h_CW: from uL, diag: vLow(middle)->vHigh(right)" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], true ],		// (20,25)->(35,30)
 								[ myTrap.uL, false, true, 0 ],
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TR_BM__c_CCW_h_CW: from dL, diag: vLow(middle)->vHigh(right)" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], false ],		// (35,30)->(20,25)
 								[ myTrap.dL, true, true, 7 ],
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
@@ -886,13 +886,13 @@ function test_MonoSplitter() {
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, true, "TR_BM__c_CW_h_CCW: from uL, diag: vLow(middle)->vHigh(right)" );
 			// from dL
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], true ],		// (20,25)->(35,30)
 								[ myTrap.uL, false, true, 0 ],
 								[ myTrap.dR, true, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TR_BM__c_CW_h_CCW: from dL, diag: vLow(middle)->vHigh(right)" );
 			// from dR
-		myTrap.monoDiag = null;			// => not yet visited
+		myTrap.monoDone = false;			// => not yet visited
 		mock_set_expected( [	[ 0, myVertices[3], myVertices[2], false ],		// (35,30)->(20,25)
 								[ myTrap.dL, true, true, 7 ],
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
@@ -962,12 +962,17 @@ function test_MonoSplitter() {
 		test_monotonate_trapezoids( "article_poly", 12, 0 );			// 1.5; from article Sei91
 		test_monotonate_trapezoids( "square_3triangholes", 2, 0 );		// 5; from	"Narkhede A. and Manocha D.", data_1
 		test_monotonate_trapezoids( "trap_2up_2down", 2, 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors
+		test_monotonate_trapezoids( "pt_3_diag_max", 4, 0 );			// 4: vertex (6,6) with 3 additional diagonals (max)
+		test_monotonate_trapezoids( "xy_bad_saw", 11, 0 );				// 2: very inconvenient contour in X- and Y-direction
+
 		test_monotonate_trapezoids( "hole_short_path", 4, 0 );			// 0.8; shortest path to hole is outside polygon
+
 		test_monotonate_trapezoids( "three_error#1", 18, 0 );			// 1; 1.Error, integrating into Three.js
 		test_monotonate_trapezoids( "three_error#2", 12, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
 		test_monotonate_trapezoids( "three_error#3", 28, 0 );			// 3000; 3.Error, integrating into Three.js (logbuffer)
 		test_monotonate_trapezoids( "three_error#4", 32, 0 );			// 1; 4.Error, integrating into Three.js (USA Maine)
 		test_monotonate_trapezoids( "three_error#4b", 32, 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_monotonate_trapezoids( "hole_first", 7, 0 );				// 0.5; 5.Error, integrating into Three.js ("R")
 		test_monotonate_trapezoids( "two_polygons#1", 14, 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
 		test_monotonate_trapezoids( "two_polygons#2", 2, 0 );			// 1; my#6: two trivial polygons
 		test_monotonate_trapezoids( "polygons_inside_hole", 5, 0 );		// 0.7; my#7: square with unregular hole with two polygons inside

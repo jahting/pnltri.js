@@ -38,19 +38,13 @@ PNLTRI.MonoSplitter.prototype = {
 				
 		// Generate the uni-y-monotone sub-polygons from
 		//	the trapezoidation of the polygon.
-		//	!!  for the start triangle trapezoid it doesn't matter
-		//	!!	from where we claim to enter it
 		this.polyData.initMonoChains();
 		
-		var curChain = 0;
 		var curStart = this.startTrap;
 		while (curStart) {
-			this.polyData.monoSubPolyChains[curChain] = curStart.lseg;
-			this.alyTrap( curChain, curStart, null, null, null );
-			if ( curStart = this.trapezoider.find_first_inside() ) {
-				// console.log("another Polygon");
-				curChain = this.polyData.monoSubPolyChains.length;
-			}
+			this.alyTrap(	this.polyData.newMonoChain( curStart.lseg ),
+							curStart, null, null, null );
+			curStart = this.trapezoider.find_first_inside();
 		};
 
 		// return number of UNIQUE sub-polygons created
@@ -64,7 +58,7 @@ PNLTRI.MonoSplitter.prototype = {
 	//
 	//	!! public for Mock-Tests only !!
 
-	doSplit: function ( inChain, inVertLow, inVertHigh, inLow2High ) {
+	doSplit: function ( inChain, inVertLow, inVertHigh, inLow2High ) {				// private
 		return this.polyData.splitPolygonChain( inChain, inVertLow, inVertHigh, inLow2High );
 	},
 
@@ -74,7 +68,7 @@ PNLTRI.MonoSplitter.prototype = {
 	//		lseg: always goes downwards
 	//	This is preserved during the splitting.
 		
-	alyTrap: function ( inChain, inTrap, inFromUp, inFromLeft, inOneStep ) {
+	alyTrap: function ( inChain, inTrap, inFromUp, inFromLeft, inOneStep ) {		// private
 
 		var trapQueue = [];
 		var thisTrap, fromUp, fromLeft, curChain, newChain;
@@ -111,8 +105,8 @@ PNLTRI.MonoSplitter.prototype = {
 		trapList_addItem( inTrap, inFromUp, inFromLeft, inChain );
 		
 		while ( trapList_getItem() ) {
-			if ( thisTrap.monoDiag )	continue;
-			thisTrap.monoDiag = true;
+			if ( thisTrap.monoDone )	continue;
+			thisTrap.monoDone = true;
 		
 			if ( !thisTrap.lseg || !thisTrap.rseg ) {
 				console.log("ERR alyTrap: lseg/rseg missing", thisTrap);

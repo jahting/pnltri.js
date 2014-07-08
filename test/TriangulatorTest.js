@@ -12,7 +12,6 @@ function test_Triangulator() {
 		//
 		var myPolygonData = new PNLTRI.PolygonData( example_data );
 		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );			// implicitly creates trapezoids
-		var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
 		//
 		// Main Test
 		//
@@ -25,6 +24,7 @@ function test_Triangulator() {
 			drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
 		}
 		//
+		var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
 		myTriangulator.triangulate_all_polygons();
 		var triangList = myPolygonData.getTriangles();		// sorted results !!
 		equal( triangList.length, expectedTriangList.length, "triangulate_polygon_details ("+inDataName+"): Number of Triangles" );
