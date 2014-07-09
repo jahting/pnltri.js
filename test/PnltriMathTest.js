@@ -143,3 +143,82 @@ function compute_array_shuffle_iterator( inResultTarget ) {
 	}
 }
 
+
+// #############################################################################
+
+
+function test_PnlTri_Math() {
+
+	function test_compare_pts_yx() {
+		// A > B
+		var result = PNLTRI.Math.compare_pts_yx( { x:30, y:22 }, { x:20, y:20 } );
+		equal( result,  1, "A>B, wg. Y" );
+		var result = PNLTRI.Math.compare_pts_yx( { x:30, y:20 }, { x:20, y:20 } );
+		equal( result,  1, "A>B, wg. X" );
+		// A < B
+		var result = PNLTRI.Math.compare_pts_yx( { x:20, y:20 }, { x:30, y:22 } );
+		equal( result, -1, "A<B, wg. Y" );
+		var result = PNLTRI.Math.compare_pts_yx( { x:20, y:20 }, { x:30, y:20 } );
+		equal( result, -1, "A<B, wg. X" );
+		var result = PNLTRI.Math.compare_pts_yx( { x:20, y:20 }, { x:20.000000000101, y:20 } );
+		equal( result, -1, "A<B, wg. X, trotz EPS" );
+		// A == B
+		var result = PNLTRI.Math.compare_pts_yx( { x:20, y:20 }, { x:20, y:20 } );
+		equal( result,  0, "A==B" );
+		var result = PNLTRI.Math.compare_pts_yx( { x:20, y:20 }, { x:20, y:20 + PNLTRI.Math.EPSILON_P * 0.8 } );
+		equal( result,  0, "A==B, trotz Y" );
+		var result = PNLTRI.Math.compare_pts_yx( { x:20, y:20 }, { x:20 + PNLTRI.Math.EPSILON_P * 0.8, y:20 } );
+		equal( result,  0, "A==B, trotz X" );
+		// complex 3-way comparisons - Assumption: all Y are equal because of EPS
+		//  if Error: EPS with Lexicographic ordering leads to wrong result !!
+		var coordLow	= { x: 101, y: 100.40000000000002 };
+		var coordHigh = { x: 104, y: 100.39999999999998 };
+		var coordMiddle	= { x: 102, y: 100.4 };
+		var result = PNLTRI.Math.compare_pts_yx( coordHigh, coordMiddle );
+		equal( result, 1, "High > Middle" );
+		var result = PNLTRI.Math.compare_pts_yx( coordHigh, coordLow );
+		equal( result, 1, "High > Low" );
+		var result = PNLTRI.Math.compare_pts_yx( coordMiddle, coordLow );
+		equal( result, 1, "Middle > Low" );
+	}
+
+	function test_mapAngle() {
+		equal( PNLTRI.Math.vectorLength( { x:3, y:4 } ), 5, "vectorLength: 3,4" );
+		//
+		equal( PNLTRI.Math.vectorLength( { x:0, y:6 } ), 6, "vectorLength: 0,6" );
+		equal( PNLTRI.Math.dotProd( { x:0, y:6 }, { x:-5.5, y:1 } ), 6, "dotProd: 0,6 -5.5,1" );
+		equal( PNLTRI.Math.crossProd( { x:0, y:6 }, { x:-5.5, y:1 } ), 33, "crossProd: 0,6 -5.5,1" );
+		equal( PNLTRI.Math.mapAngle( { x:6, y:0 }, { x:6, y:6 }, { x:0.5, y:1 } ), 0.8211145618000169, "mapAngle: 6,0 6,6 0.5,1" );
+		//
+		equal( PNLTRI.Math.dotProd( { x:0.5, y:1 }, { x:5.5, y:-1 } ), 1.75, "dotProd: 0.5,1 5.5,-1" );
+		equal( PNLTRI.Math.crossProd( { x:0.5, y:1 }, { x:5.5, y:-1 } ), -6, "crossProd: 0.5,1 5.5,-1" );
+		equal( PNLTRI.Math.mapAngle( { x:0.5, y:1 }, { x:1, y:2 }, { x:6, y:0 } ), 3.28, "mapAngle: 0.5,1 1,2 6,0" );
+	
+		//
+		equal( PNLTRI.Math.crossProd( { x:1, y:-0.5 }, { x:4, y:0.5 } ), 2.5, "crossProd: 1,-0.5 4,0.5" );
+		equal( PNLTRI.Math.mapAngle( { x:1, y:2 }, { x:2, y:1.5 }, { x:5, y:2.5 } ), 0.16794970566215628, "mapAngle: 1,2 2,1.5 5,2.5" );
+		//
+		equal( PNLTRI.Math.crossProd( { x:-2, y:0.5 }, { x:-4, y:-0.5 } ), 3, "crossProd: -2,0.5 -4,-0.5" );
+		equal( PNLTRI.Math.mapAngle( { x:5, y:2.5 }, { x:3, y:3 }, { x:1, y:2 } ), 0.0674319017259104, "mapAngle: 5,2.5 3,3 1,2" );
+	
+		//
+		equal( PNLTRI.Math.crossProd( { x:0, y:-1 }, { x:-4.5, y:0.5 } ), -4.5, "crossProd: 0,-1 -4.5,0.5" );
+		equal( PNLTRI.Math.mapAngle( { x:5, y:3.5 }, { x:5, y:2.5 }, { x:0.5, y:4 } ), 2.8895684739251535, "mapAngle: 5,3.5 5,2.5 0.5,4" );
+		//
+		equal( PNLTRI.Math.crossProd( { x:0.5, y:1 }, { x:4.5, y:-0.5 } ), -4.75, "crossProd: 0.5,1 4.5,-0.5" );
+		equal( PNLTRI.Math.mapAngle( { x:0.5, y:4 }, { x:1, y:5 }, { x:5, y:3.5 } ), 3.3457053588273564, "mapAngle: 0.5,4 1,5 5,3.5" );
+	
+		//
+		equal( PNLTRI.Math.crossProd( { x:1, y:-0.5 }, { x:-1, y:1 } ), 0.5, "crossProd: 1,-0.5 -1,1" );
+		equal( PNLTRI.Math.mapAngle( { x:1, y:5 }, { x:2, y:4.5 }, { x:0, y:6 } ), 1.9486832980505138, "mapAngle: 1,5 2,4.5 0,6" );
+		//
+		equal( PNLTRI.Math.crossProd( { x:0, y:-6 }, { x:1, y:-1 } ), 6, "crossProd: 0,-6 1,-1" );
+		equal( PNLTRI.Math.mapAngle( { x:0, y:6 }, { x:0, y:0 }, { x:1, y:5 } ), 0.29289321881345254, "mapAngle: 0,6 0,0 1,5" );
+	}
+
+	test( "PnlTri.Math", function() {
+		test_compare_pts_yx();
+		test_mapAngle();
+	});
+}
+

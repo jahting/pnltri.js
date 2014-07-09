@@ -45,6 +45,64 @@ PNLTRI.Math = {
 		// < 0:  v lies right of u
 	},
 
+
+	vectorLength: function (v0) {
+		return	Math.sqrt( v0.x * v0.x + v0.y * v0.y );
+	},
+	dotProd: function (v0, v1) {
+		// DOT: cos(theta) * len(v0) * len(v1)
+		return	( v0.x * v1.x + v0.y * v1.y );
+	},
+	crossProd: function (v0, v1) {
+		// CROSS_SINE: sin(theta) * len(v0) * len(v1)
+		return	( v0.x * v1.y - v1.x * v0.y );
+		// == 0: colinear (theta == 0 or 180 deg == PI rad)
+		// > 0:  v1 lies left of v0, CCW angle from v0 to v1 is convex ( < 180 deg )
+		// < 0:  v1 lies right of v0, CW angle from v0 to v1 is convex ( < 180 deg )
+	},
+	
+	// monotone mapping of the CCW angle between the two vectors:
+	//	inPtVertex->inPtFrom and inPtVertex->inPtTo
+	//  from 0..360 degrees onto the range of 0..4
+	//		0..90 -> 0..1, 90..180 -> 1..2, ...
+	// result-curve (looking like an upward stair/wave) is:
+	//	  0 to 180 deg: 1 - cos(theta)
+	//  180 to 360 deg: 2 + cos(theta)    (same shape as for 0-180 but pushed up)
+
+	mapAngle: function ( inPtVertex, inPtFrom, inPtTo ) {
+	
+		var v0 = {	x: inPtFrom.x - inPtVertex.x,			// Vector inPtVertex->inPtFrom
+					y: inPtFrom.y - inPtVertex.y }
+		var v1 = {	x: inPtTo.x - inPtVertex.x,				// Vector inPtVertex->inPtTo
+					y: inPtTo.y - inPtVertex.y }
+		var cosine = PNLTRI.Math.dotProd(v0, v1) / PNLTRI.Math.vectorLength(v0) / PNLTRI.Math.vectorLength(v1);
+																		// CCW angle from inPtVertex->inPtFrom
+		if ( PNLTRI.Math.crossProd(v0, v1) >= 0 )	return 1-cosine;	// to inPtTo <= 180 deg. (convex, to the left)
+		else										return 3+cosine;	// to inPtTo > 180 deg. (concave, to the right)
+	},
+
+
+	//	like compare (<=>)
+	//		yA > yB resp. xA > xB: 1, equal: 0, otherwise: -1
+	compare_pts_yx: function ( inPtA, inPtB ) {
+		var deltaY = inPtA.y - inPtB.y;
+		if ( deltaY < PNLTRI.Math.EPSILON_N ) {
+			return -1;
+		} else if ( deltaY > PNLTRI.Math.EPSILON_P ) {
+			return 1;
+		} else {
+			var deltaX = inPtA.x - inPtB.x;
+			if ( deltaX < PNLTRI.Math.EPSILON_N ) {
+				return -1;
+			} else if ( deltaX > PNLTRI.Math.EPSILON_P ) {
+				return  1;
+			} else {
+				return  0;
+			}
+		}
+	},
+
+
 }
 
 // precision of floating point arithmetic
@@ -142,26 +200,6 @@ PNLTRI.PolygonData.prototype = {
 
 		
 	/*	Helper  */
-	
-	//	like compare (<=>)
-	//		yA > yB resp. xA > xB: 1, equal: 0, otherwise: -1
-	compare_pts_yx: function ( inPtA, inPtB ) {
-		var deltaY = inPtA.y - inPtB.y;
-		if ( deltaY < PNLTRI.Math.EPSILON_N ) {
-			return -1;
-		} else if ( deltaY > PNLTRI.Math.EPSILON_P ) {
-			return 1;
-		} else {
-			var deltaX = inPtA.x - inPtB.x;
-			if ( deltaX < PNLTRI.Math.EPSILON_N ) {
-				return -1;
-			} else if ( deltaX > PNLTRI.Math.EPSILON_P ) {
-				return  1;
-			} else {
-				return  0;
-			}
-		}
-	},
 
 	// checks winding order by calculating the area of the polygon
 	isClockWise: function ( inStartSeg ) {
@@ -200,7 +238,7 @@ PNLTRI.PolygonData.prototype = {
 			vFrom: inVertexFrom,	// -> start point entry in vertices
 			vTo: inVertexTo,		// -> end point entry in vertices
 			// upward segment? (i.e. vTo > vFrom) !!! only valid for sprev,snext NOT for mprev,mnext !!!
-			upward: ( this.compare_pts_yx(inVertexTo, inVertexFrom) == 1 ),
+			upward: ( PNLTRI.Math.compare_pts_yx(inVertexTo, inVertexFrom) == 1 ),
 			// doubly linked list of original polygon chains (not the monoChains !)
 			sprev: null,			// previous segment
 			snext: null,			// next segment
@@ -208,13 +246,17 @@ PNLTRI.PolygonData.prototype = {
 			//	for performance reasons:
 			//	 initialization of all fields added later
 			//
+			// for trapezoids
+			rootFrom: null,			// root of partial tree where vFrom is located
+			rootTo: null,			// root of partial tree where vTo is located
+			is_inserted: false,		// already inserted into QueryStructure ?
 			// for assigning depth: trapezoids
-			trLeft: null,		// one trapezoid bordering on the left of this segment
-			trRight: null,		// one trapezoid bordering on the right of this segment
+			trLeft: null,			// one trapezoid bordering on the left of this segment
+			trRight: null,			// one trapezoid bordering on the right of this segment
 			// for monochains
-			mprev: null,		// doubly linked list for monotone chains (sub-polygons)
+			mprev: null,			// doubly linked list for monotone chains (sub-polygons)
 			mnext: null,
-			marked: false,		// already visited during unique monoChain identification ?
+			marked: false,			// already visited during unique monoChain identification ?
 		};
 	},
 	
@@ -335,6 +377,26 @@ PNLTRI.PolygonData.prototype = {
 	},
 
 
+	// search for the outSegment "segNext" so that the CCW angle between
+	//	inVertFrom->segNext.vertTo and inVertFrom->inVertTo is smallest/biggest
+	//	=> inVertFrom->segNext.vertTo is the next to the right/left of inVertFrom->inVertTo
+
+	get_out_segment_next_right_of: function ( inVertFrom, inVertTo ) {
+
+		var tmpSeg, tmpAngle;
+
+		var segNext = null;
+		var minAngle = 4.0;			// <=> 360 degrees
+		for (var i = 0; i < inVertFrom.outSegs.length; i++) {
+			tmpSeg = inVertFrom.outSegs[i]
+			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) < minAngle ) {
+				minAngle = tmpAngle;
+				segNext = tmpSeg;
+			}
+		}
+		return	segNext;
+	},
+
 	// Split the polygon chain (mprev, mnext !) including inVertLow and inVertHigh into
 	// two chains by adding two new segments (inVertLow, inVertHigh) and (inVertHigh, inVertLow).
 	//
@@ -364,61 +426,6 @@ PNLTRI.PolygonData.prototype = {
 
 	splitPolygonChain: function ( inCurrPolyIdx, inVertLow, inVertHigh, inCurrPolyLiesToTheLeft ) {			// <<<<<< public
 
-		// monotone mapping of the CCW angle between the two vectors:
-		//	inPtVertex->inPtFrom and inPtVertex->inPtTo
-		//  from 0..360 degrees onto the range of 0..4
-		//		0..90 -> 0..1, 90..180 -> 1..2, ...
-		// result-curve (looking like an upward stair/wave) is:
-		//	  0 to 180 deg: 1 - cos(theta)
-		//  180 to 360 deg: 2 + cos(theta)    (same shape as for 0-180 but pushed up)
-
-		function mapAngle( inPtVertex, inPtFrom, inPtTo ) {
-		
-			function vectorLength(v0) {		// LENGTH
-				return	Math.sqrt( v0.x * v0.x + v0.y * v0.y );
-			}
-			function dotProd(v0, v1) {
-				// DOT: cos(theta) * len(v0) * len(v1)
-				return	( v0.x * v1.x + v0.y * v1.y );
-			}
-			function crossProd(v0, v1) {
-				// CROSS_SINE: sin(theta) * len(v0) * len(v1)
-				return	( v0.x * v1.y - v1.x * v0.y );
-				// == 0: colinear (theta == 0 or 180 deg == PI rad)
-				// > 0:  v1 lies left of v0, CCW angle from v0 to v1 is convex ( < 180 deg )
-				// < 0:  v1 lies right of v0, CW angle from v0 to v1 is convex ( < 180 deg )
-			}
-			
-			var v0 = {	x: inPtFrom.x - inPtVertex.x,			// Vector inPtVertex->inPtFrom
-						y: inPtFrom.y - inPtVertex.y }
-			var v1 = {	x: inPtTo.x - inPtVertex.x,				// Vector inPtVertex->inPtTo
-						y: inPtTo.y - inPtVertex.y }
-			var cosine = dotProd(v0, v1)/vectorLength(v0)/vectorLength(v1);
-																// CCW angle from inPtVertex->inPtFrom
-			if ( crossProd(v0, v1) >= 0 )	return 1-cosine;	// to inPtTo <= 180 deg. (convex, to the left)
-			else							return 3+cosine;	// to inPtTo > 180 deg. (concave, to the right)
-		}
-
-		// search for the outSegment "segNext" so that the CCW angle between
-		//	inVertFrom->segNext.vertTo and inVertFrom->inVertTo is smallest/biggest
-		//	=> inVertFrom->segNext.vertTo is the next to the right/left of inVertFrom->inVertTo
-
-		function get_out_segment_next_right_of( inVertFrom, inVertTo ) {
-
-			var tmpSeg, tmpAngle;
-
-			var segNext = null;
-			var minAngle = 4.0;			// <=> 360 degrees
-			for (var i = 0; i < inVertFrom.outSegs.length; i++) {
-				tmpSeg = inVertFrom.outSegs[i]
-				if ( ( tmpAngle = mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) < minAngle ) {
-					minAngle = tmpAngle;
-					segNext = tmpSeg;
-				}
-			}
-			return	segNext;
-		}
-
 		// (inVertLow, inVertHigh) is the new diagonal to be added to the polygon.
 
 		// To keep polygon winding order consistent currPoly gets
@@ -430,8 +437,8 @@ PNLTRI.PolygonData.prototype = {
 		var vertLowOutSeg, vertHighOutSeg;
 
 		currPoly_gets_newSegLow2High = inCurrPolyLiesToTheLeft;
-		vertLowOutSeg  = get_out_segment_next_right_of( inVertLow, inVertHigh );
-		vertHighOutSeg = get_out_segment_next_right_of( inVertHigh, inVertLow );
+		vertLowOutSeg  = this.get_out_segment_next_right_of( inVertLow, inVertHigh );
+		vertHighOutSeg = this.get_out_segment_next_right_of( inVertHigh, inVertLow );
 
 		var segOutFromVertLow  = vertLowOutSeg.segOut;
 		var segOutFromVertHigh = vertHighOutSeg.segOut;
@@ -487,7 +494,7 @@ PNLTRI.PolygonData.prototype = {
 				} else {
 					frontMono.marked = true;
 				}
-				if ( this.compare_pts_yx( frontPt, ymaxPt ) == 1 ) {
+				if ( PNLTRI.Math.compare_pts_yx( frontPt, ymaxPt ) == 1 ) {
 					ymaxPt = frontPt;
 					monoPosmax = frontMono;
 				}
@@ -890,7 +897,6 @@ PNLTRI.QueryStructure = function ( inPolygonData ) {
 	this.root = new PNLTRI.QsNode( initialTrap );
 
 	if ( inPolygonData ) {
-		var segListArray = inPolygonData.getSegments();
 		/*
 		 * adds and initializes specific attributes for all segments
 		 *	// -> QueryStructure: roots of partial tree where vertex is located
@@ -898,13 +904,11 @@ PNLTRI.QueryStructure = function ( inPolygonData ) {
 		 *	// marker
 		 *	is_inserted:	already inserted into QueryStructure ?
 		 */
+		var segListArray = inPolygonData.getSegments();
 		for ( var i = 0; i < segListArray.length; i++ ) {
 			segListArray[i].rootFrom = segListArray[i].rootTo = this.root;
 			segListArray[i].is_inserted = false;
 		}
-		this.compare_pts_yx = inPolygonData.compare_pts_yx;
-	} else {
-		this.compare_pts_yx = PNLTRI.PolygonData.prototype.compare_pts_yx;
 	}
 };
 
@@ -1011,7 +1015,7 @@ PNLTRI.QueryStructure.prototype = {
 											// 4 times as often as X-Node
 				if ( inPt == qsNode.yval )	compPt = inPtOther;				// the point is already inserted.
 				else						compPt = inPt;
-				compRes = this.compare_pts_yx( compPt, qsNode.yval );
+				compRes = PNLTRI.Math.compare_pts_yx( compPt, qsNode.yval );
 /*				if ( compRes == 0 ) {			// TODO: Testcase
 					console.log("ptNode: Pts too close together#1: ", compPt, qsNode.yval );
 				}		*/
@@ -1050,8 +1054,8 @@ PNLTRI.QueryStructure.prototype = {
 					}
 				} else {
 					compPt = inPt;
-/*					if ( ( this.compare_pts_yx( compPt, qsNode.seg.vFrom ) *			// TODO: Testcase
-							this.compare_pts_yx( compPt, qsNode.seg.vTo )
+/*					if ( ( PNLTRI.Math.compare_pts_yx( compPt, qsNode.seg.vFrom ) *			// TODO: Testcase
+							PNLTRI.Math.compare_pts_yx( compPt, qsNode.seg.vTo )
 						   ) == 0 ) {
 						console.log("ptNode: Pts too close together#2: ", compPt, qsNode.seg );
 					}		*/
@@ -1095,7 +1099,7 @@ PNLTRI.QueryStructure.prototype = {
 		// functions handling the relationship to the upper neighbors (uL, uR)
 		//	of trNewLeft and trNewRight
 		
-		function	fresh_seg_or_upward_cusp() {
+		function fresh_seg_or_upward_cusp() {
 			// trCurrent has at most 1 upper neighbor
 			//	and should also have at least 1, since the high-point trapezoid
 			//	has been split off another one, which is now above
@@ -1147,7 +1151,7 @@ PNLTRI.QueryStructure.prototype = {
 			}
  		}
 		
-		function	continue_chain_from_above() {
+		function continue_chain_from_above() {
 			// trCurrent has at least 2 upper neighbors
 			if ( trCurrent.usave ) {
 				// 3 upper neighbors (part II)
@@ -1215,7 +1219,7 @@ PNLTRI.QueryStructure.prototype = {
 		// trNewLeft or trNewRight MIGHT have been extended from above
 		//  !! in that case dL and dR are different from trCurrent and MUST be set here !!
 
-		function	only_one_trap_below( inTrNext ) {
+		function only_one_trap_below( inTrNext ) {
 
 			if ( trCurrent.vLow == trLast.vLow ) {
 				// final part of segment

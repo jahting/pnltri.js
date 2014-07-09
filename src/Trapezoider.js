@@ -102,7 +102,6 @@ PNLTRI.QueryStructure = function ( inPolygonData ) {
 	this.root = new PNLTRI.QsNode( initialTrap );
 
 	if ( inPolygonData ) {
-		var segListArray = inPolygonData.getSegments();
 		/*
 		 * adds and initializes specific attributes for all segments
 		 *	// -> QueryStructure: roots of partial tree where vertex is located
@@ -110,13 +109,11 @@ PNLTRI.QueryStructure = function ( inPolygonData ) {
 		 *	// marker
 		 *	is_inserted:	already inserted into QueryStructure ?
 		 */
+		var segListArray = inPolygonData.getSegments();
 		for ( var i = 0; i < segListArray.length; i++ ) {
 			segListArray[i].rootFrom = segListArray[i].rootTo = this.root;
 			segListArray[i].is_inserted = false;
 		}
-		this.compare_pts_yx = inPolygonData.compare_pts_yx;
-	} else {
-		this.compare_pts_yx = PNLTRI.PolygonData.prototype.compare_pts_yx;
 	}
 };
 
@@ -223,7 +220,7 @@ PNLTRI.QueryStructure.prototype = {
 											// 4 times as often as X-Node
 				if ( inPt == qsNode.yval )	compPt = inPtOther;				// the point is already inserted.
 				else						compPt = inPt;
-				compRes = this.compare_pts_yx( compPt, qsNode.yval );
+				compRes = PNLTRI.Math.compare_pts_yx( compPt, qsNode.yval );
 /*				if ( compRes == 0 ) {			// TODO: Testcase
 					console.log("ptNode: Pts too close together#1: ", compPt, qsNode.yval );
 				}		*/
@@ -262,8 +259,8 @@ PNLTRI.QueryStructure.prototype = {
 					}
 				} else {
 					compPt = inPt;
-/*					if ( ( this.compare_pts_yx( compPt, qsNode.seg.vFrom ) *			// TODO: Testcase
-							this.compare_pts_yx( compPt, qsNode.seg.vTo )
+/*					if ( ( PNLTRI.Math.compare_pts_yx( compPt, qsNode.seg.vFrom ) *			// TODO: Testcase
+							PNLTRI.Math.compare_pts_yx( compPt, qsNode.seg.vTo )
 						   ) == 0 ) {
 						console.log("ptNode: Pts too close together#2: ", compPt, qsNode.seg );
 					}		*/
@@ -307,7 +304,7 @@ PNLTRI.QueryStructure.prototype = {
 		// functions handling the relationship to the upper neighbors (uL, uR)
 		//	of trNewLeft and trNewRight
 		
-		function	fresh_seg_or_upward_cusp() {
+		function fresh_seg_or_upward_cusp() {
 			// trCurrent has at most 1 upper neighbor
 			//	and should also have at least 1, since the high-point trapezoid
 			//	has been split off another one, which is now above
@@ -359,7 +356,7 @@ PNLTRI.QueryStructure.prototype = {
 			}
  		}
 		
-		function	continue_chain_from_above() {
+		function continue_chain_from_above() {
 			// trCurrent has at least 2 upper neighbors
 			if ( trCurrent.usave ) {
 				// 3 upper neighbors (part II)
@@ -427,7 +424,7 @@ PNLTRI.QueryStructure.prototype = {
 		// trNewLeft or trNewRight MIGHT have been extended from above
 		//  !! in that case dL and dR are different from trCurrent and MUST be set here !!
 
-		function	only_one_trap_below( inTrNext ) {
+		function only_one_trap_below( inTrNext ) {
 
 			if ( trCurrent.vLow == trLast.vLow ) {
 				// final part of segment
