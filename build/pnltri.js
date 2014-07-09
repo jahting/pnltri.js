@@ -21,11 +21,6 @@ var PNLTRI = { REVISION: '1.4' };
 
 PNLTRI.Math = {
 
-	log2: function ( inNum ) {
-		// return	Math.log2(inNum);			// not everywhere defined !!
-		return	Math.log(inNum)/Math.LN2;
-	},
-
 	random: Math.random,		// function to use for random number generation
 
 	// generate random ordering in place:
@@ -1686,23 +1681,8 @@ PNLTRI.Trapezoider.prototype = {
 	},
 	
 	/*
-	 * Mathematics & Geometry helper methods
+	 * Mathematics helper methods
 	 */
-
-	//
-	//	The two CENTRAL methods for the near-linear performance	!!!
-	//
-	math_logstar_n: function ( inNum ) {
-		var i, v;
-		for ( i = 0, v = inNum; v >= 1; i++ ) { v = PNLTRI.Math.log2(v) }
-		return	( i - 1 );
-	},
-	math_NH: function ( inN, inH ) {
-		var i, v;
-		for ( i = 0, v = inN; i < inH; i++ ) { v = PNLTRI.Math.log2(v) }
-		return	Math.ceil( 1.0 * inN / v ) - 1;
-	},
-
 	
 	optimise_randomlist: function ( inOutSegListArray ) {
 		// makes sure that the first N segments are one from each of the N polygon chains
@@ -1739,43 +1719,34 @@ PNLTRI.Trapezoider.prototype = {
 		this.optimise_randomlist( randSegListArray );
 //		console.log( "Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
 		
-		var anzSegs = randSegListArray.length;
+		var nbSegs = randSegListArray.length;
 		var myQs = this.queryStructure;
-		var i, iEnd, h;
 
-		var logStarN = this.math_logstar_n(anzSegs);		// TODO: replace with Array of "iEnd"s
-		for (h = 1; h <= logStarN; h++) {
-			iEnd = this.math_NH(anzSegs, h);
-			for (i = this.math_NH(anzSegs, h -1); i < iEnd; i++) {
-				myQs.add_segment( randSegListArray[i] );
-//				myQs.add_segment_consistently( randSegListArray[i], 'RandomA#' + i );
-			}
+		var current = 0, logstar = nbSegs;
+		while ( current < nbSegs ) {
+			logstar = Math.log(logstar)/Math.LN2;		// == log2(logstar)
+			var partEnd = ( logstar > 1 ) ? Math.floor( nbSegs / logstar ) : nbSegs;
+
+			for (; current < partEnd; current++ ) { myQs.add_segment( randSegListArray[current] ) }
+//			console.log( nbSegs, current );
 
 			// To speed up the segment insertion into the trapezoidation
-			//	the endponts of those segments not yet inserted are
-			//	repeatedly pre-located,
+			//	the endponts of those segments not yet inserted
+			//	are repeatedly pre-located,
 			// thus their final location-query can start at the top of the
 			//	appropriate sub-tree instead of the root of the whole
 			//	query structure.
 			//
-			for (i = iEnd; i < anzSegs; i++) {
+			for (var i = current; i < nbSegs; i++) {
 				var segment = randSegListArray[i];
 				segment.rootFrom = this.queryStructure.ptNode( segment.vFrom, segment.vTo, segment.rootFrom );
 				segment.rootTo	 = this.queryStructure.ptNode( segment.vTo, segment.vFrom, segment.rootTo );
 			}
 		}
 		
-		for (i = this.math_NH( anzSegs, logStarN ); i < anzSegs; i++) {
-			myQs.add_segment( randSegListArray[i] );
-//			myQs.add_segment_consistently( randSegListArray[i], 'RandomB#' + i );
-		}
-		
 		myQs.assignDepths( this.polyData );
 		// cleanup
-		for (i = 0; i < anzSegs; i++) {
-			randSegListArray[i].trLeft = null;
-			randSegListArray[i].trRight = null;
-		}
+		for (i = 0; i < nbSegs; i++) { randSegListArray[i].trLeft = randSegListArray[i].trRight = null; }
 	},
 
 };

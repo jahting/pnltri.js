@@ -4,11 +4,6 @@
 
 PNLTRI.Math = {
 
-	log2: function ( inNum ) {
-		// return	Math.log2(inNum);			// not everywhere defined !!
-		return	Math.log(inNum)/Math.LN2;
-	},
-
 	random: Math.random,		// function to use for random number generation
 
 	// generate random ordering in place:

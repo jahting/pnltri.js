@@ -1366,7 +1366,23 @@ PNLTRI.Trapezoider.prototype.maxDepth = function () {
 };
 PNLTRI.Trapezoider.prototype.check_trapezoid_neighbors = function ( inTrapId, inChkU0, inChkU1, inChkD0, inChkD1, inTestName ) {
 	return	this.queryStructure.check_trapezoid_neighbors( inTrapId, inChkU0, inChkU1, inChkD0, inChkD1, inTestName );
-}
+};
+//
+//	The CENTRAL method for the near-linear performance	!!!
+//	Was inlined into trapezoide_polygon for performance.
+//
+PNLTRI.Trapezoider.prototype.math_logstar_stops = function ( inNbSegs ) {
+	var logStarSections = [ 0 ];
+
+	var idx, logstar;
+	for ( idx = 1, logstar = inNbSegs; logstar > 1; idx++ ) {
+		logstar = Math.log(logstar)/Math.LN2;		// == log2(logstar)
+		logStarSections[idx] = ( logstar > 1 ) ? Math.floor( inNbSegs / logstar ) : inNbSegs;
+	}
+	
+//	console.log( "GesamtListe: ", logStarSections.join(", ") );
+	return	logStarSections;
+};
 
 
 function test_Trapezoider() {
@@ -1374,35 +1390,21 @@ function test_Trapezoider() {
 	var	testData = new PolygonTestdata();
 
 	
-	function test_math_logstar_n() {
+	function test_math_logstar_stops() {
 		var trap = new PNLTRI.Trapezoider();
 		//
-		equal( trap.math_logstar_n(13), 2, "log*(13)" );
-		equal( trap.math_logstar_n(100), 3, "log*(100)" );
-		equal( trap.math_logstar_n(10000), 3, "log*(10000)" );
-		equal( trap.math_logstar_n(100000), 4, "log*(100000)" );
-		equal( trap.math_logstar_n(10000000000), 4, "log*(10000000000)" );
-	}
-
-	function test_math_NH() {
-		var trap = new PNLTRI.Trapezoider();
+		deepEqual( trap.math_logstar_stops(      6 ), [ 0, 2, 4, 6 ], "math_logstar_stops: 6" );
+		deepEqual( trap.math_logstar_stops(     16 ), [ 0, 4, 8, 16 ], "math_logstar_stops: 16" );
+		deepEqual( trap.math_logstar_stops(     17 ), [ 0, 4, 8, 16, 17 ], "math_logstar_stops: 17" );
+		deepEqual( trap.math_logstar_stops(    314 ), [ 0, 37, 102, 195, 314 ], "math_logstar_stops: 314" );
+		deepEqual( trap.math_logstar_stops(   6404 ), [ 0, 506, 1749, 3420, 6404 ], "math_logstar_stops: 6404" );
+		deepEqual( trap.math_logstar_stops( 100000 ), [ 0, 6020, 24667, 49521, 98631, 100000 ], "math_logstar_stops: 100000" );
 		//
-		// minimal number of segments
-		equal( trap.math_NH(3,0), 0, "math_NH: 3, 0" );
-		equal( trap.math_NH(3,1), 1, "math_NH: 3, 1" );
-		equal( trap.math_NH(3,2), 4, "math_NH: 3, 2" );		// too big
-		//
-		equal( trap.math_NH(13,0), 0, "math_NH: 13, 0" );
-		equal( trap.math_NH(13,1), 3, "math_NH: 13, 1" );
-		equal( trap.math_NH(13,2), 6, "math_NH: 13, 2" );
-		equal( trap.math_NH(13,3), 14, "math_NH: 13, 3" );		// too big
-		//
-		equal( trap.math_NH(100000,0), 0, "math_NH: 100000, 0" );
-		equal( trap.math_NH(100000,1), 6020, "math_NH: 100000, 1" );
-		equal( trap.math_NH(100000,2), 24667, "math_NH: 100000, 2" );
-		equal( trap.math_NH(100000,3), 49521, "math_NH: 100000, 3" );
-		equal( trap.math_NH(100000,4), 98631, "math_NH: 100000, 4" );
-		equal( trap.math_NH(100000,5), 5030158, "math_NH: 100000, 5" );		// too big
+		// "0, 2, 4, 7", "0, 2, 5, 8", "0, 3, 5, 10", "0, 3, 6, 12", "0, 3, 6, 13", "0, 3, 7, 15"
+		// "0, 4, 8, 17, 18", "0, 4, 9, 17, 19", "0, 4, 9, 18, 20", "0, 4, 9, 19, 21"
+		// "0, 5, 11, 22, 26", "0, 5, 12, 23, 28", "0, 6, 13, 25, 31", "0, 7, 16, 30, 39"
+		// "0, 7, 16, 31, 40", "0, 8, 20, 38, 51", "0, 13, 33, 63, 91", "0, 14, 34, 64, 92"
+		// "0, 15, 37, 70, 102", "0, 92, 274, 525, 904"
 	}
 
 
@@ -1538,8 +1540,7 @@ function test_Trapezoider() {
 
 
 	test( "Trapezoider for (Simple) Polygons", function() {
-		test_math_logstar_n();
-		test_math_NH();
+		test_math_logstar_stops();
 		test_optimise_randomlist();
 		//
 		test_trapezoide_polygon_structure();	// detailed trapezoid structure

@@ -1354,14 +1354,14 @@ PolygonTestdata.prototype = {
 			 ( inDataName == "squares_perftest_max" ) ) {
 			// for Performance-Test with 40x40 holes
 			var upperLimit = 40; 		// 160: ~3 seconds
-			var	anzSquare = ( inDataName == "squares_perftest_max" ) ? upperLimit :
+			var	nbSquares = ( inDataName == "squares_perftest_max" ) ? upperLimit :
 								( ( inDataName == "squares_perftest_mid" ) ? 15 : 3 );
-			var scale = Math.floor( upperLimit/anzSquare );
+			var scale = Math.floor( upperLimit/nbSquares );
 			var shape = [ { x:upperLimit, y:upperLimit }, { x: 0, y:upperLimit }, { x: 0, y: 0 }, { x:upperLimit, y: 0 } ];
 			var holeTemplate = [ { x:0.2, y:0.2 }, { x:0.2, y:0.8 }, { x:0.8, y:0.8 }, { x:0.8, y:0.2 } ];
 			var polys = [ shape ];
-			for (var i=0; i<anzSquare; i++) {
-				for (var j=0; j<anzSquare; j++) {
+			for (var i=0; i<nbSquares; i++) {
+				for (var j=0; j<nbSquares; j++) {
 					var hole = [];
 					for (var k=0; k<holeTemplate.length; k++) {
 						hole.push( { x: scale * (i + holeTemplate[k].x), y: scale * (j+ holeTemplate[k].y) } );
