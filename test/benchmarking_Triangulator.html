@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>PnlTri.js Benchmark Tests - Using Files in /build</title>
+		
+		<script type="text/javascript" src="../vendor/benchmark-1.0.0.js"></script>
+		
+		<!-- add PnlTri.js help files below -->
+		
+		<script type="text/javascript" src="PolygonTestdata.js"></script>
+		
+		<!-- add PnlTri.js sources to test below -->
+		
+		<script type="text/javascript" src="../build/pnltri.min.js"></script>
+		
+	</head>
+	<body>
+		During this Benchmarking test the browser will be unresponsive.<br/><br/>
+		
+		Benchmark output is written to the JavaScript console.  To access the JavaScript console presss Ctrl-Shift-J.
+		
+		<h2><div id="version"></div></h2>
+		<script type="text/javascript">
+			var versionTarget = document.getElementById( "version" );
+			versionTarget.innerHTML = 'PnlTri.js Version: <em>' + PNLTRI.REVISION + '</em>';
+		</script>
+		
+		<!-- add class-based unit tests below -->
+		
+		<script src="TriangulatorBenchmarks.js"></script>
+		
+	</body>
+</html>
