@@ -9,6 +9,8 @@
 window['PNLTRI'] = PNLTRI;
 PNLTRI['REVISION'] = PNLTRI.REVISION;
 
+PNLTRI['Math'] = PNLTRI.Math;
+
 PNLTRI['Triangulator'] = PNLTRI.Triangulator;
 PNLTRI.Triangulator.prototype['clear_lastData'] = PNLTRI.Triangulator.prototype.clear_lastData;
 PNLTRI.Triangulator.prototype['get_PolyLeftArr'] = PNLTRI.Triangulator.prototype.get_PolyLeftArr;

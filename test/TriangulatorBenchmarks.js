@@ -12,7 +12,7 @@ var myRandom = function ( inSeed ) {
 	var rand = Math.abs(Math.sin(random_seed++)) * 10000;
 	return	rand - Math.floor(rand);
 }
-
+PNLTRI.Math.random = myRandom;
 
 
 var	testData = new PolygonTestdata();
@@ -24,6 +24,7 @@ var myTriangulator = new PNLTRI.Triangulator();
 var suite = new Benchmark.Suite;
 
 suite.add('tree_full', function() {
+		myRandom( 52 );			// constant seed
 		perf_test_data = testData.get_polygon_with_holes( 'tree_full' );
 		myTriangulator.triangulate_polygon( perf_test_data );
 		// free memory
@@ -33,6 +34,7 @@ suite.add('tree_full', function() {
 );
 
 suite.add('squares_perftest_mid', function() {
+		myRandom( 52 );			// constant seed
 		perf_test_data = testData.get_polygon_with_holes( 'squares_perftest_mid' );
 		myTriangulator.triangulate_polygon( perf_test_data );
 		// free memory
@@ -51,11 +53,7 @@ suite.add('squares_perftest_max', function() {
 		// free memory
 		myTriangulator.clear_lastData();
 		perf_test_data = null;
-	}, { maxTime: 10,
-		setup: function() {
-			r.f.random = myRandom;
-		}
-	}
+	}, { maxTime: 10 }
 );
 
 // called after each run cycle
