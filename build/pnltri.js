@@ -1009,7 +1009,7 @@ PNLTRI.QueryStructure.prototype = {
 	//	 to determine on which side.
 
 	// TODO: may need to prevent infinite loop in case of messed up
-	//	trapezoid structure (s. test_add_segment_spezial_6)
+	//	trapezoid structure (s. test_add_segment_special_6)
 
 	ptNode: function ( inPt, inPtOther, inQsNode ) {
 		var compPt, compRes;
@@ -1049,30 +1049,36 @@ PNLTRI.QueryStructure.prototype = {
 							if ( inPt == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
 //								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vFrom", inPt, inPtOther, qsNode );
-								qsNode = qsNode.right;				// ??? TODO: for test_add_segment_spezial_4B !!
+								qsNode = qsNode.right;				// ??? TODO: for test_add_segment_special_4B !!
 							} else {
 								// connected at qsNode.seg.vTo
 //								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vTo", inPt, inPtOther, qsNode );
-								qsNode = qsNode.left;				// ??? TODO: for test_add_segment_spezial_4A !!
+								qsNode = qsNode.left;				// ??? TODO: for test_add_segment_special_4A !!
 							}
 						}
 					}
 				} else {
-					compPt = inPt;
-/*					if ( ( PNLTRI.Math.compare_pts_yx( compPt, qsNode.seg.vFrom ) *			// TODO: Testcase
-							PNLTRI.Math.compare_pts_yx( compPt, qsNode.seg.vTo )
+/*					if ( ( PNLTRI.Math.compare_pts_yx( inPt, qsNode.seg.vFrom ) *			// TODO: Testcase
+							PNLTRI.Math.compare_pts_yx( inPt, qsNode.seg.vTo )
 						   ) == 0 ) {
-						console.log("ptNode: Pts too close together#2: ", compPt, qsNode.seg );
+						console.log("ptNode: Pts too close together#2: ", inPt, qsNode.seg );
 					}		*/
-					compRes = this.is_left_of( qsNode.seg, compPt, true );
+					compRes = this.is_left_of( qsNode.seg, inPt, true );
 					if ( compRes > 0 ) {
 						qsNode = qsNode.left;
 					} else if ( compRes < 0 ) {
 						qsNode = qsNode.right;
 					} else {
-						// ???TODO: for test_add_segment_spezial_4B !!
-						// qsNode = qsNode.left;		// left
-						qsNode = qsNode.right;		// right
+						compRes = this.is_left_of( qsNode.seg, inPtOther, false );
+						if ( compRes > 0 ) {
+							qsNode = qsNode.left;
+						} else if ( compRes < 0 ) {
+							qsNode = qsNode.right;
+						} else {
+							// ???	TODO: for test_add_segment_special_4B !!
+							// qsNode = qsNode.left;		// left
+							qsNode = qsNode.right;		// right
+						}
 					}
 				}
 			} else {		// SINK-Node: trapezoid area
@@ -1416,31 +1422,107 @@ PNLTRI.QueryStructure.prototype = {
 					trNewRight.dR = trCurrent.dR;
 					trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
 				} else {							// trCurrent.vLow lies ON inSegment
-					//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
-					// console.log( "two_trap_below: vLow ON new segment, touching from left" );
-					//			  +
-					//		NL	 +  NR
-					//			+
-					//    - - -*-------
-					//	 	  +	\  C.dR
-					//	  C.dL	 \
-					trNext = trCurrent.dL;				// TODO: for test_add_segment_spezial_4A -> like intersecting dL
-					// setAbove part 2
-					trCurrent.dL.uR = trNewRight;
-					// setBelow part 1
-					trNewRight.dR = trCurrent.dR;
-					trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
-					//
-					// OR:			TODO
-					//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
-					// console.log( "two_trap_below: vLow ON new segment, touching from right" );
-					//		 +
-					//	  NL  +  NR
-					//		   +
-					//   -------*- - - -
-					//		   / +
-					//	 C.dL /	C.dR
-//					trNext = trCurrent.dR;				// TODO: -> like intersecting dR
+					var vLowSeg = trCurrent.dL.rseg;
+					var directionIsUp = vLowSeg.upward;
+					var otherPt = directionIsUp ? vLowSeg.vFrom : vLowSeg.vTo;
+					compRes = scope.is_left_of( inSegment, otherPt, false );
+					if ( compRes > 0 ) {				// otherPt is left of inSegment
+						//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
+						// console.log( "two_trap_below: vLow ON new segment, touching from right" );
+						//		 +
+						//	  NL  +  NR
+						//		   +
+						//   -------*- - - -
+						//		   / +
+						//	 C.dL /	C.dR
+						trNext = trCurrent.dR;				// TODO: -> like intersecting dR
+						// setAbove part 2
+						trCurrent.dR.uL = trNewLeft;
+						// setBelow part 1
+						trNewLeft.dL = trCurrent.dL;
+						trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway
+					} else if ( compRes < 0 ) {			// otherPt is right of inSegment
+						//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
+						// console.log( "two_trap_below: vLow ON new segment, touching from left" );
+						//			  +
+						//		NL	 +  NR
+						//			+
+						//    - - -*-------
+						//	 	  +	\  C.dR
+						//	  C.dL	 \
+						trNext = trCurrent.dL;				// TODO: for test_add_segment_special_4A -> like intersecting dL
+						// setAbove part 2
+						trCurrent.dL.uR = trNewRight;
+						// setBelow part 1
+						trNewRight.dR = trCurrent.dR;
+						trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
+					} else {							// otherPt lies ON inSegment
+						vLowSeg = directionIsUp ? vLowSeg.snext : vLowSeg.sprev;		// other segment with trCurrent.vLow
+						otherPt = directionIsUp ? vLowSeg.vTo : vLowSeg.vFrom;
+						compRes = scope.is_left_of( inSegment, otherPt, false );
+						if ( compRes > 0 ) {				// otherPt is left of inSegment
+							//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
+							// console.log( "two_trap_below: vLow ON new segment, touching from right" );
+							//		 +
+							//	  NL  +  NR
+							//		   +
+							//   -------*- - - -		// TODO
+							//		   / +
+							//	 C.dL /	C.dR
+							trNext = trCurrent.dR;				// TODO: -> like intersecting dR
+							// setAbove part 2
+							trCurrent.dR.uL = trNewLeft;
+							// setBelow part 1
+							trNewLeft.dL = trCurrent.dL;
+							trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway
+						} else if ( compRes < 0 ) {			// otherPt is right of inSegment
+							//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
+							// console.log( "two_trap_below: vLow ON new segment, touching from left" );
+							//			  +
+							//		NL	 +  NR
+							//			+
+							//    - - -*-------			// TODO
+							//	 	  +	\  C.dR
+							//	  C.dL	 \
+							trNext = trCurrent.dL;				// TODO: for test_add_segment_special_4A -> like intersecting dL
+							// setAbove part 2
+							trCurrent.dL.uR = trNewRight;
+							// setBelow part 1
+							trNewRight.dR = trCurrent.dR;
+							trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
+						} else {							// otherPt lies ON inSegment
+/*							//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
+							// console.log( "two_trap_below: vLow ON new segment, touching from right" );
+							//		 +
+							//	  NL  +  NR
+							//		   +
+							//   -------*- - - -
+							//		   / +
+							//	 C.dL /	C.dR
+							trNext = trCurrent.dR;				// TODO: -> like intersecting dR
+							// setAbove part 2
+							trCurrent.dR.uL = trNewLeft;
+							// setBelow part 1
+							trNewLeft.dL = trCurrent.dL;
+							trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway		*/
+							//
+							// OR:			TODO
+							//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
+							// console.log( "two_trap_below: vLow ON new segment, touching from left" );
+							//			  +
+							//		NL	 +  NR
+							//			+
+							//    - - -*-------
+							//	 	  +	\  C.dR
+							//	  C.dL	 \
+							trNext = trCurrent.dL;				// TODO: for test_add_segment_special_4A -> like intersecting dL
+							// setAbove part 2
+							trCurrent.dL.uR = trNewRight;
+							// setBelow part 1
+							trNewRight.dR = trCurrent.dR;
+							trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
+						}
+					}
 				}
 				// setBelow part 2
 				trNewLeft.dR = trNewRight.dL = trNext;
