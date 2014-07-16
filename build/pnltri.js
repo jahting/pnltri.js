@@ -802,22 +802,27 @@ PNLTRI.EarClipTriangulator.prototype = {
 
 /** @constructor */
 PNLTRI.Trapezoid = function ( inHigh, inLow, inLeft, inRight ) {
-	
+
 	this.vHigh = inHigh ? inHigh : { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY };
 	this.vLow  = inLow  ? inLow  : { x: Number.NEGATIVE_INFINITY, y: Number.NEGATIVE_INFINITY };
-	
+
 	this.lseg = inLeft;
 	this.rseg = inRight;
-		
+
+//	this.uL = null;				// -> Trapezoid: upper left neighbor
+//	this.uR = null;				// -> Trapezoid: upper right neighbor
+//	this.dL = null;				// -> Trapezoid: lower left neighbor
+//	this.dR = null;				// -> Trapezoid: lower right neighbor
+
 //	this.sink = null;			// link to corresponding SINK-Node in QueryStructure
-		
+
 //	this.usave = null;			// temp: uL/uR, preserved for next step
 //	this.uleft = null;			// temp: from uL? (true) or uR (false)
-	
+
 	this.depth = -1;			// no depth assigned yet
-	
+
 	this.monoDone = false;		// monotonization: done with trying to split this trapezoid ?
-	
+
 };
 
 PNLTRI.Trapezoid.prototype = {
@@ -826,33 +831,33 @@ PNLTRI.Trapezoid.prototype = {
 
 	clone: function () {
 		var newTrap = new PNLTRI.Trapezoid( this.vHigh, this.vLow, this.lseg, this.rseg );
-		
+
 		newTrap.uL = this.uL;
 		newTrap.uR = this.uR;
-		
+
 		newTrap.dL = this.dL;
 		newTrap.dR = this.dR;
-		
+
 		newTrap.sink = this.sink;
 
 		return	newTrap;
 	},
 
-	
+
 	splitOffLower: function ( inSplitPt ) {
 		var trLower = this.clone();				// new lower trapezoid
-		
+
 		this.vLow = trLower.vHigh = inSplitPt;
-		
+
 		// L/R unknown, anyway changed later
 		this.dL = trLower;		// setBelow
 		trLower.uL = this;		// setAbove
 		this.dR = trLower.uR = null;
-		
+
 		// setAbove
 		if ( trLower.dL )	trLower.dL.uL = trLower;	// dL always connects to uL
 		if ( trLower.dR )	trLower.dR.uR = trLower;	// dR always connects to uR
-		
+
 		return	trLower;
 	},
 
@@ -919,8 +924,8 @@ PNLTRI.QueryStructure.prototype = {
 	getRoot: function () {
 		return this.root;
 	},
-		
-	
+
+
 	appendTrapEntry: function ( inTrapezoid ) {
 		inTrapezoid.trapID = this.trapArray.length;			// for Debug
 		this.trapArray.push( inTrapezoid );
@@ -930,8 +935,8 @@ PNLTRI.QueryStructure.prototype = {
 		this.appendTrapEntry( trap );
 		return	trap;
 	},
-	
-	
+
+
 	splitNodeAtPoint: function ( inNode, inPoint, inReturnUpper ) {
 		// inNode: SINK-Node with trapezoid containing inPoint
 		var trUpper = inNode.trap;							// trUpper: trapezoid includes the point
@@ -939,14 +944,14 @@ PNLTRI.QueryStructure.prototype = {
 		if (trUpper.vLow == inPoint)	return	inNode;				// (ERROR) inPoint is already inserted
 		var trLower = trUpper.splitOffLower( inPoint );		// trLower: new lower trapezoid
 		this.appendTrapEntry( trLower );
-		
+
 		// SINK-Node -> Y-Node
 		inNode.yval = inPoint;
 		inNode.trap = null;
-		
+
 		inNode.right = new PNLTRI.QsNode( trUpper );		// Upper trapezoid sink
 		inNode.left = new PNLTRI.QsNode( trLower );			// Lower trapezoid sink
-		
+
 		return	inReturnUpper ? trUpper.sink : trLower.sink;
 	},
 
@@ -959,7 +964,7 @@ PNLTRI.QueryStructure.prototype = {
 		 return		Math.abs( inNum0 - inNum1 ) < PNLTRI.Math.EPSILON_P;
 	},
 
-	
+
 	// Checks, whether the vertex inPt is to the left of line segment inSeg.
 	//	Returns:
 	//		>0: inPt is left of inSeg,
@@ -967,7 +972,7 @@ PNLTRI.QueryStructure.prototype = {
 	//		=0: inPt is co-linear with inSeg
 	//
 	//	ATTENTION: always viewed from -y, not as if moving along the segment chain !!
-	 
+
 	is_left_of: function ( inSeg, inPt, inBetweenY ) {
 		var	retVal, retVal2;
 		var dXfrom = inSeg.vFrom.x - inPt.x;
@@ -997,18 +1002,18 @@ PNLTRI.QueryStructure.prototype = {
 	/*
 	 * Query structure main methods
 	 */
-	
+
 	//	This method finds the Node in the QueryStructure corresponding
 	//   to the trapezoid that contains inPt, starting from Node inQsNode.
 	//  If inPt lies on a border (y-line or segment) inPtOther is used
 	//	 to determine on which side.
-	
+
 	// TODO: may need to prevent infinite loop in case of messed up
 	//	trapezoid structure (s. test_add_segment_spezial_6)
-	
+
 	ptNode: function ( inPt, inPtOther, inQsNode ) {
 		var compPt, compRes;
-		
+
 		var	qsNode = inQsNode;
 		while ( qsNode ) {
 			if ( qsNode.yval ) {			// Y-Node: horizontal line
@@ -1092,13 +1097,13 @@ PNLTRI.QueryStructure.prototype = {
 	// - or the other way round:
 	//	 the existing trapezoid is restricted to the right of the new segment
 	//		and on the left side the trapezoid from above is extended downwards
-	
+
 	add_segment: function ( inSegment ) {
 		var scope = this;
-		
+
 		// functions handling the relationship to the upper neighbors (uL, uR)
 		//	of trNewLeft and trNewRight
-		
+
 		function fresh_seg_or_upward_cusp() {
 			// trCurrent has at most 1 upper neighbor
 			//	and should also have at least 1, since the high-point trapezoid
@@ -1112,7 +1117,7 @@ PNLTRI.QueryStructure.prototype = {
 				// ATTENTION: the decision whether trNewLeft or trNewRight is the
 				//	triangle trapezoid formed by the two segments has already been taken
 				//	when selecting trCurrent as the left or right lower neighbor to trUpper !!
-				
+
 				if ( trCurrent == trUpper.dL ) {
 					//	*** Case: FUC_UC_LEFT; prev: ----
 					// console.log( "fresh_seg_or_upward_cusp: upward cusp, new seg to the left!" );
@@ -1150,7 +1155,7 @@ PNLTRI.QueryStructure.prototype = {
 				trUpper.dR = trNewRight;		// setBelow; trUpper.dL unchanged, set by "splitOffLower"
 			}
  		}
-		
+
 		function continue_chain_from_above() {
 			// trCurrent has at least 2 upper neighbors
 			if ( trCurrent.usave ) {
@@ -1226,12 +1231,12 @@ PNLTRI.QueryStructure.prototype = {
 
 				if ( meetsLowAdjSeg ) {
 					// downward cusp: bottom forms a triangle
-		
+
 					// ATTENTION: the decision whether trNewLeft and trNewRight are to the
 					//	left or right of the already inserted segment the new one meets here
 					//	has already been taken when selecting trLast to the left or right
 					//	of that already inserted segment !!
-		
+
 					if ( trCurrent.dL ) {
 						//	*** Case: 1B_DC_LEFT; next: ----
 						// console.log( "only_one_trap_below: downward cusp, new seg from the left!" );
@@ -1241,7 +1246,7 @@ PNLTRI.QueryStructure.prototype = {
 						//		   + /
 						//   -------*-------
 						//	   C.dL = next
-						
+
 						// setAbove
 						inTrNext.uL = trNewLeft;	// uR: unchanged, NEVER null
 						// setBelow part 1
@@ -1256,7 +1261,7 @@ PNLTRI.QueryStructure.prototype = {
 						//		   \ +
 						//   -------*-------
 						//	   C.dR = next
-						
+
 						// setAbove
 						inTrNext.uR = trNewRight;	// uL: unchanged, NEVER null
 						// setBelow part 1
@@ -1271,7 +1276,7 @@ PNLTRI.QueryStructure.prototype = {
 					//			+
 					//   ------*-------
 					//		  next
-					
+
 					// setAbove
 					inTrNext.uL = trNewLeft;									// trNewLeft must
 					inTrNext.uR = trNewRight;		// must
@@ -1283,7 +1288,7 @@ PNLTRI.QueryStructure.prototype = {
 				trNewLeft.dR = trNewRight.dL = null;
 			} else {
 				// NOT final part of segment
-				
+
 				if ( inTrNext.uL && inTrNext.uR ) {
 					// inTrNext has two upper neighbors
 					// => a segment ends on the upper Y-line of inTrNext
@@ -1324,7 +1329,7 @@ PNLTRI.QueryStructure.prototype = {
 							// ERROR: should not happen
 							// console.log( "ERR add_segment: Trapezoid Loop left", inTrNext, trCurrent, trNewLeft, trNewRight, inSegment, this );
 //						}
-					}		    
+					}
 				//} else {
 					//	*** Case: 1B_1UN_CONT; next: CC_2UN
 					// console.log( "only_one_trap_below: simple case, new seg continues down" );
@@ -1334,7 +1339,7 @@ PNLTRI.QueryStructure.prototype = {
 					//   ------+-------
 					//	 	  +
 					//		next
-					
+
 					// L/R for one side undefined, which one is not fixed
 					//	but that one will be extended down and changed anyway
 					// for the other side, vLow must lie at the opposite end
@@ -1348,7 +1353,7 @@ PNLTRI.QueryStructure.prototype = {
 				trNewLeft.dL = trNewRight.dR = null;
 			}
 		}
-	
+
 		function two_trap_below() {
 			// Find out which one (dL,dR) is intersected by this segment and
 			//	continue down that one
@@ -1362,7 +1367,7 @@ PNLTRI.QueryStructure.prototype = {
 				//   ------*-------
 				//	 		\  C.dR
 				//	  C.dL	 \
-				
+
 				// setAbove
 				trCurrent.dL.uL = trNewLeft;
 				trCurrent.dR.uR = trNewRight;
@@ -1370,13 +1375,13 @@ PNLTRI.QueryStructure.prototype = {
 				trNewLeft.dL = trCurrent.dL;
 				trNewRight.dR = trCurrent.dR;
 				trNewLeft.dR = trNewRight.dL = null;
-				
+
 				trNext = null;	      	// segment finished
 			} else {
 				// setAbove part 1
 				trCurrent.dL.uL = trNewLeft;
 				trCurrent.dR.uR = trNewRight;
-				
+
 				// passes left or right of an already inserted NOT connected segment
 				//	trCurrent.vLow: high-end of existing segment
 				var compRes = scope.is_left_of( inSegment, trCurrent.vLow, true );
@@ -1439,24 +1444,24 @@ PNLTRI.QueryStructure.prototype = {
 				}
 				// setBelow part 2
 				trNewLeft.dR = trNewRight.dL = trNext;
-			}	    
-			
+			}
+
  			return	trNext;
 		}
 
 		//
 		//	main function body
 		//
-		
+
 /*		if ( ( inSegment.sprev.vTo != inSegment.vFrom ) || ( inSegment.vTo != inSegment.snext.vFrom ) ) {
 			console.log( "add_segment: inconsistent point order of adjacent segments: ",
 						 inSegment.sprev.vTo, inSegment.vFrom, inSegment.vTo, inSegment.snext.vFrom );
 			return;
 		}		*/
-		
+
 		var segHighVert, segHighRoot, meetsHighAdjSeg;		// y-max vertex
 		var segLowVert , segLowRoot, meetsLowAdjSeg;		// y-min vertex
-		
+
 		if ( inSegment.upward ) {
 			segLowVert	= inSegment.vFrom;
 			segHighVert	= inSegment.vTo;
@@ -1474,7 +1479,7 @@ PNLTRI.QueryStructure.prototype = {
 			meetsLowAdjSeg	= inSegment.snext.is_inserted;
 			meetsHighAdjSeg	= inSegment.sprev.is_inserted;
 		}
-			
+
 		//	insert higher vertex into QueryStructure
 		//		Get the top-most intersecting trapezoid
 		var qsNodeSinkWithPt = this.ptNode( segHighVert, segLowVert, segHighRoot );
@@ -1498,7 +1503,7 @@ PNLTRI.QueryStructure.prototype = {
 			qsNodeSinkWithPt = this.splitNodeAtPoint( qsNodeSinkWithPt, segLowVert, true );
 		}
 		var trLast = qsNodeSinkWithPt.trap;			// bottom-most trapezoid for this segment
-		
+
 		//
 		// Thread the segment into the query "tree" from top to bottom.
 		// All the trapezoids which are intersected by inSegment are "split" into two.
@@ -1511,9 +1516,9 @@ PNLTRI.QueryStructure.prototype = {
 		//
 
 		var trCurrent = trFirst;
-		
+
 		var trNewLeft, trNewRight, trPrevLeft, trPrevRight;
-		
+
 		var counter = this.trapArray.length + 2;		// just to prevent infinite loop
 		var trNext;
 		while ( trCurrent ) {
@@ -1526,7 +1531,7 @@ PNLTRI.QueryStructure.prototype = {
 				console.log( "ERR add_segment: missing successors", trCurrent, inSegment, this );
 				return;
 			}
-			
+
 			var qs_trCurrent = trCurrent.sink;
 			// SINK-Node -> X-Node
 			qs_trCurrent.seg = inSegment;
@@ -1565,14 +1570,14 @@ PNLTRI.QueryStructure.prototype = {
 				qs_trCurrent.left = new PNLTRI.QsNode( trNewLeft );			// trCurrent -> left SINK-Node
 				qs_trCurrent.right = new PNLTRI.QsNode( trNewRight );		// new clone -> right SINK-Node
 			}
-					
+
 			// handle neighbors above
 			if ( trCurrent.uL && trCurrent.uR )	{
 				continue_chain_from_above();
 			} else {
 				fresh_seg_or_upward_cusp();
 			}
-		
+
 			// handle neighbors below
 			if ( trCurrent.dL && trCurrent.dR ) {
 				trNext = two_trap_below();
@@ -1586,7 +1591,7 @@ PNLTRI.QueryStructure.prototype = {
 				}
 				only_one_trap_below( trNext );
 			}
-      
+
 			if ( trNewLeft.rseg )	trNewLeft.rseg.trLeft = trNewRight;
 			if ( trNewRight.lseg )	trNewRight.lseg.trRight = trNewLeft;
 			trNewLeft.rseg = trNewRight.lseg  = inSegment;
@@ -1597,13 +1602,13 @@ PNLTRI.QueryStructure.prototype = {
 			if ( trCurrent.vLow != trLast.vLow ) {
 				trPrevLeft = trNewLeft;
 				trPrevRight = trNewRight;
-				
+
 				trCurrent = trNext;
 			} else {
 				trCurrent = null;
 			}
 		}	// end while
-		
+
 		inSegment.is_inserted = true;
 		// console.log( "add_segment: ###### DONE ######" );
 	},
@@ -1615,7 +1620,7 @@ PNLTRI.QueryStructure.prototype = {
 	assignDepths: function ( inPolyData ) {
 		var thisDepth = [ this.trapArray[0] ];
 		var nextDepth = [];
-		
+
 		var thisTrap, borderSeg, curDepth = 0;
 		do {
 			// rseg should exactely go upward on trapezoids inside the polygon (odd depth)
@@ -1642,11 +1647,11 @@ PNLTRI.QueryStructure.prototype = {
 			curDepth++;
 		} while ( thisDepth.length > 0 );
 	},
-	
+
 
 	// Find one triangular trapezoid which lies inside the polygon
 	// !! does NOT depend on the orientation of segments CCW/CW !!
-	
+
 	find_first_inside: function () {
 		var thisTrap;
 		for (var i=0, j=this.trapArray.length; i<j; i++) {
@@ -1660,7 +1665,7 @@ PNLTRI.QueryStructure.prototype = {
 		return	null;
 	},
 
-	
+
 };
 
 
@@ -1673,21 +1678,21 @@ PNLTRI.Trapezoider = function ( inPolygonData ) {
 
 	this.polyData		= inPolygonData;
 	this.queryStructure	= new PNLTRI.QueryStructure( this.polyData );
-	
+
 };
 
 PNLTRI.Trapezoider.prototype = {
 
 	constructor: PNLTRI.Trapezoider,
-	
+
 	find_first_inside: function () {
 		return	 this.queryStructure.find_first_inside();
 	},
-	
+
 	/*
 	 * Mathematics helper methods
 	 */
-	
+
 	optimise_randomlist: function ( inOutSegListArray ) {
 		// makes sure that the first N segments are one from each of the N polygon chains
 		var mainIdx = 0;
@@ -1715,14 +1720,14 @@ PNLTRI.Trapezoider.prototype = {
 	//  and returns one triangular trapezoid which lies inside the polygon.
 	// All other inside trapezoids can be reached from this one using the
 	//	neighbor links.
-	
+
 	trapezoide_polygon: function () {							// <<<< public
 		var randSegListArray = this.polyData.getSegments().concat();
 //		console.log( "Polygon Chains: ", dumpSegmentList( randSegListArray ) );
 		PNLTRI.Math.array_shuffle( randSegListArray );
 		this.optimise_randomlist( randSegListArray );
 //		console.log( "Random Segment Sequence: ", dumpRandomSequence( randSegListArray ) );
-		
+
 		var nbSegs = randSegListArray.length;
 		var myQs = this.queryStructure;
 
@@ -1747,7 +1752,7 @@ PNLTRI.Trapezoider.prototype = {
 				segment.rootTo	 = this.queryStructure.ptNode( segment.vTo, segment.vFrom, segment.rootTo );
 			}
 		}
-		
+
 		myQs.assignDepths( this.polyData );
 		// cleanup
 		for (i = 0; i < nbSegs; i++) { randSegListArray[i].trLeft = randSegListArray[i].trRight = null; }
