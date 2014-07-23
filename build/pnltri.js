@@ -275,6 +275,7 @@ PNLTRI.PolygonData.prototype = {
 
 		function verts_colinear_chain( inVert1, inVert2, inVert3 ) {
 			if ( Math.abs( PNLTRI.Math.ptsCrossProd( inVert2, inVert1, inVert3 ) ) > PNLTRI.Math.EPSILON_P )	return false;
+//			return true;
 			// only real sequences, not direction reversals
 			var low, middle, high;
 			if ( Math.abs( inVert1.y - inVert2.y ) < PNLTRI.Math.EPSILON_P ) {
@@ -1138,8 +1139,8 @@ PNLTRI.QueryStructure.prototype = {
 						} else {
 							// co-linear: inSegment and qsNode.seg
 							//	includes case with inPtOther connected to qsNode.seg
-							inPtOther = inUseFrom ? inSegment.sprev.vFrom : inSegment.snext.vTo;
-							compRes = this.is_left_of( qsNode.seg, inPtOther, false );
+							var tmpPtOther = inUseFrom ? inSegment.sprev.vFrom : inSegment.snext.vTo;
+							compRes = this.is_left_of( qsNode.seg, tmpPtOther, false );
 							if ( compRes > 0 ) {
 								// test_ptNode_colinear_1A
 								qsNode = qsNode.left;
@@ -1654,6 +1655,10 @@ PNLTRI.QueryStructure.prototype = {
 		// check for robustness		// TODO: prevent
 		if ( !trFirst.uL && !trFirst.uR ) {
 			console.log("ERR add_segment: missing trFirst.uX: ", trFirst );
+			return;
+		}
+		if ( trFirst.vHigh != segHighVert ) {
+			console.log("ERR add_segment: trFirstHigh != segHigh: ", trFirst );
 			return;
 		}
 

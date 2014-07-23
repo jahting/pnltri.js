@@ -1882,7 +1882,7 @@ function test_QueryStructure() {
 			{ x:14, y:38 }, { x:10, y: 6 },
 			{ x:63, y:26 }, { x:58, y:18 },
 			] ] );
-		var segListArray = myPolygonData.getSegments().concat();
+		var segListArray = myPolygonData.getSegments();
 //		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
 		//
@@ -1896,6 +1896,38 @@ function test_QueryStructure() {
 		myQs.add_segment_consistently( segListArray[ 2], 'Spec_6 #5' );
 		// endless loop, if in only_one_trap_below.1B_1UN_END inTrNext.uL and trNewLeft is not set
 		myQs.add_segment_consistently( segListArray[ 4], 'Spec_6 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+	}
+
+	function test_add_segment_special_7() {
+
+		var myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:10, y:34 }, { x:36, y:12 }, { x:32, y:20 }, { x:28, y:24 },
+			{ x:27, y:30 }, { x:38, y: 8 }, { x:40, y:32 },
+			] ] );
+		var segListArray = myPolygonData.getSegments();
+//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
+//		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
+		//
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7 #1' );
+		myQs.add_segment_consistently( segListArray[2], 'Spec_7 #2' );
+		// selects wrong trapezoid for upper point, if tmpPoint overrides inPtOther
+		myQs.add_segment_consistently( segListArray[1], 'Spec_7 Main' );
+
+		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_7: neighbors trap0" );
+		myQs.check_trapezoid_neighbors(  1, 0, null, 4, 6, "Spec_7: neighbors trap1" );
+		myQs.check_trapezoid_neighbors(  2, 7, 3, null, null, "Spec_7: neighbors trap2" );
+		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "Spec_7: neighbors trap3" );
+		myQs.check_trapezoid_neighbors(  4, 1, null, 5, null, "Spec_7: neighbors trap4" );
+		myQs.check_trapezoid_neighbors(  5, 4, null, 7, null, "Spec_7: neighbors trap5" );
+		myQs.check_trapezoid_neighbors(  6, null, 1, null, 8, "Spec_7: neighbors trap6" );
+		myQs.check_trapezoid_neighbors(  7, 5, 8, 2, null, "Spec_7: neighbors trap7" );
+		myQs.check_trapezoid_neighbors(  8, null, 6, null, 7, "Spec_7: neighbors trap8" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 1 );
@@ -1941,7 +1973,7 @@ function test_QueryStructure() {
 		ok( myPolygonData.allSegsInQueryStructure(), "add_segment_NEW: all segments inserted" );
 		console.log("add_segment_NEW: Number of Trapezoids: ", myQs.nbTrapezoids() );
 		myQs.assignDepths(myPolygonData);			// marks outside trapezoids
-		equal( myQs.minDepth(), -1, "add_segment_NEW: Min depth == -1 (closed polygon)" );
+		equal( myQs.minDepth(), 0, "add_segment_NEW: Min depth == 0 (closed polygon)" );
 		//
 //		showDataStructure( myQsRoot );
 		drawTrapezoids( myQsRoot, false, 1 );
@@ -1983,6 +2015,7 @@ function test_QueryStructure() {
 		test_add_segment_special_4();
 //		test_add_segment_special_5();		// co-linear removed on input
 		test_add_segment_special_6();
+		test_add_segment_special_7();
 		// for testing new polygons
 //		test_add_segment_NEW();
 //		test_add_segment_Error();
@@ -2197,6 +2230,7 @@ function test_Trapezoider() {
 		test_trapezoide_polygon( "xy_bad_saw", 39, 79, 14, 1, [ true ], 0 );		// 2: very inconvenient contour in X- and Y-direction
 		//
 		test_trapezoide_polygon( "hole_short_path", 10, 21, 6, 2, [ false, false ], 0 );	// 0.8; shortest path to hole is outside polygon
+		test_trapezoide_polygon( "colinear#1", 13, 27, 6, 1, [ true ], 0 );				// 1; 4 touching co-linear lines
 		//
 		test_trapezoide_polygon( "three_error#1", 73, 147, 72, 1, [ false ], 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
 		test_trapezoide_polygon( "three_error#2", 51, 103, 5, 1, [ false ], 0 );		// 0.7; 2.Error, integrating into Three.js (letter "1")

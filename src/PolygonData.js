@@ -158,6 +158,7 @@ PNLTRI.PolygonData.prototype = {
 
 		function verts_colinear_chain( inVert1, inVert2, inVert3 ) {
 			if ( Math.abs( PNLTRI.Math.ptsCrossProd( inVert2, inVert1, inVert3 ) ) > PNLTRI.Math.EPSILON_P )	return false;
+//			return true;
 			// only real sequences, not direction reversals
 			var low, middle, high;
 			if ( Math.abs( inVert1.y - inVert2.y ) < PNLTRI.Math.EPSILON_P ) {

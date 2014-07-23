@@ -77,6 +77,7 @@ function test_Triangulator() {
 		test_triangulate_polygon_details( "unregular_hole", 6, 0 );				// 10; unregular hole
 		test_triangulate_polygon_details( "with_unregular_hole", 2, 0 );		// 0.7; square with unregular hole
 		test_triangulate_polygon_details( "with_unreg_and_star_hole", 9, 0 );	// 0.7; square with unregular and star hole
+		test_triangulate_polygon_details( "colinear#1", 2, 0 );					// 1; 4 touching co-linear lines
 		test_triangulate_polygon_details( "tree_error#1", 4, 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
 		test_triangulate_polygon_details( "tree_full", 183, 0 );				// 0.22; from	Triangulation Error of Tree (TODO: Source)
 		//
@@ -104,5 +105,19 @@ function test_Triangulator() {
 		test_triangulate_polygon( "hole_short_path", false, false, [ false, false ], 0 );	// 0.8; holes => uses Trapezoidation in any case
 		test_triangulate_polygon( "hole_short_path", true, false, [ false, false ], 0 );	// 0.8; holes => uses Trapezoidation in any case
 	});
+}
+
+
+function compute_Triangulator( inResultTarget ) {
+		var polygonChains = [ [
+			{ x:10, y:34 }, { x:36, y:12 }, { x:32, y:20 }, { x:28, y:24 },
+			{ x:27, y:30 }, { x:38, y: 8 }, { x:40, y:32 },
+			] ];
+		//
+		var myTriangulator = new PNLTRI.Triangulator();
+		var triangList = myTriangulator.triangulate_polygon( polygonChains, true );		// sorted results !!
+		//
+		var myPolygonData = myTriangulator.lastPolyData;
+		drawPolygonLayers( { "poly": polygonChains, "triang": myPolygonData.triangles_2_polygons( triangList ) }, 1 );
 }
 

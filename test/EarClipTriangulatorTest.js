@@ -9,7 +9,7 @@ function test_EarClipTriangulator() {
 	function test_triangulate_polygon_no_holes_basic() {
 
 		var myPolygonData, myTriangulator, myMonoChain, triangList;
-		
+
 		// Helper function
 		function initSeglistMonoChain( inPtList ) {
 			myPolygonData = new PNLTRI.PolygonData( [ inPtList ] );
@@ -132,7 +132,7 @@ function test_EarClipTriangulator() {
 		}
 	}
 
-	
+
 	test( "Ear-Clipping Triangulator for Polygons without Holes", function() {
 		test_triangulate_polygon_no_holes_basic();
 		//
@@ -148,6 +148,7 @@ function test_EarClipTriangulator() {
 		//
 		test_triangulate_polygon_no_holes_full( "star_eight", true, 0 );				// 10; symmetric 8-pointed star
 		test_triangulate_polygon_no_holes_full( "unregular_hole", true, 0 );			// 10; unregular hole
+		test_triangulate_polygon_no_holes_full( "colinear#1", true, 0 );				// 1; 4 touching co-linear lines
 		//
 		test_triangulate_polygon_no_holes_full( "three_error#1", false, 0 );			// 1; 1.Error, integrating into Three.js (letter "t")
 		test_triangulate_polygon_no_holes_full( "three_error#2", false, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
