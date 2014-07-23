@@ -3,7 +3,7 @@
  */
 
 function test_Triangulator() {
-	
+
 	var	testData = new PolygonTestdata();
 
 	function test_triangulate_polygon_details( inDataName, inExpectedMonoChains, inDebug ) {
@@ -38,7 +38,7 @@ function test_Triangulator() {
 		}
 	}
 
-	
+
 	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inPolyLeftArr, inDebug ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
 		var	expectedTriangList = testData.get_triangles( inDataName, inBasicAlgorithm );
@@ -59,7 +59,7 @@ function test_Triangulator() {
 		}
 	}
 
-	
+
 	test( "Triangulator for Simple Polygons with Holes", function() {
 		test_triangulate_polygon_details( "article_poly", 12, 0 );				// 1.5; from article [Sei91]
 		test_triangulate_polygon_details( "square_3triangholes", 2, 0 );		// 5; from	"Narkhede A. and Manocha D.", data_1
@@ -84,7 +84,7 @@ function test_Triangulator() {
 		test_triangulate_polygon_details( "three_error#2", 12, 0 );				// 0.7; 2.Error, integrating into Three.js (letter "1")
 		test_triangulate_polygon_details( "three_error#3", 28, 0 );				// 3000; 3.Error, integrating into Three.js (logbuffer)
 		test_triangulate_polygon_details( "three_error#4", 32, 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
-		test_triangulate_polygon_details( "three_error#4b", 32, 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_triangulate_polygon_details( "three_error#4b", 32, 0 );			// 0.05; 4.Error, integrating into Three.js (USA Maine)
 		test_triangulate_polygon_details( "hole_first", 7, 0 );					// 0.5; 5.Error, integrating into Three.js ("R")
 		test_triangulate_polygon_details( "two_polygons#1", 14, 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
 		test_triangulate_polygon_details( "two_polygons#2", 2, 0 );				// 1; my#6: two trivial polygons

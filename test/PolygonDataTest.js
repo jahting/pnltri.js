@@ -8,7 +8,7 @@
 
 
 /*	Base class extensions - for testing only */
-	
+
 PNLTRI.PolygonData.prototype.getVertices = function () {
 	return	this.vertices;
 };
@@ -52,7 +52,7 @@ PNLTRI.PolygonData.prototype.addPolygonChain_consistently = function ( inRawPoin
 PNLTRI.PolygonData.prototype.replaceMonoChains = function ( inListIdxList, inMonoSubPolyStartsList ) {
 	var i, startIdx;
 	var j, jPrev, jNext;
-	
+
 	// replace monoChains
 	this.segments = [];
 	for (i=0; i<inListIdxList.length; i++) {
@@ -69,7 +69,7 @@ PNLTRI.PolygonData.prototype.replaceMonoChains = function ( inListIdxList, inMon
 		this.segments[i].mprev = this.segments[this.segments[i].mprev];	// replace index with link
 		this.segments[i].mnext = this.segments[this.segments[i].mnext];	// replace index with link
 	}
-	
+
 	// replace monoChainStarts
 	this.monoSubPolyChains = [];
 	for (i=0; i<inMonoSubPolyStartsList.length; i++) {
@@ -80,12 +80,12 @@ PNLTRI.PolygonData.prototype.replaceMonoChains = function ( inListIdxList, inMon
 PNLTRI.PolygonData.prototype.getTriangles = function () {
 	//	sorts triangles before returning them
 	//	 for comparable test results !!
-	
+
 	function left0pad( inNumber, inDigits ) {
 		var fullString = '000000000000000000000000000000000000000000' + inNumber;
 		return	fullString.slice(fullString.length - inDigits);
 	}
-	
+
 	var sortedList = [];
 	var sortStrList = [];
 	var	first, middle, last;
@@ -140,12 +140,12 @@ PNLTRI.PolygonData.prototype.checkMonoChainVertexIDs = function ( chainIdx, inVe
 		}
 		monoChainCur = monoChainCur.mnext;
 	}
-	
+
 	if ( monoChainCur != monoChainStart ) {
 		resultOk = false;
 		resultStr += "Length differs!";
 	}
-	
+
 	if ( resultOk )		return	null;
 	return	resultStr;
 };
@@ -236,7 +236,7 @@ PNLTRI.PolygonData.prototype.polygon_area = function ( inContour ) {
 
 
 function test_PolygonData() {
-	
+
 	var	testData = new PolygonTestdata();
 
 	function test_polygon_area() {
@@ -304,8 +304,249 @@ function test_PolygonData() {
 			strictEqual( mySegArray[i].vFrom, myVertices[i], "addPolygonChain_ok: segList["+i+"].vFrom == vertices["+i+"]" );
 			strictEqual( mySegArray[i].vTo, mySegArray[i].snext.vFrom, "addPolygonChain_ok: segList["+i+"].vTo == segList["+i+"].snext.vFrom" );
 		}
-		
+
 		// TODO: Test "upward"
+	}
+
+	function test_addPolygonChain_zero_length() {
+		var testPolygon, myPolygonData;
+		var myVertices, mySegArray;
+		
+		// middle point double
+		testPolygon = [ { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 20, y: 10 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_zero_length #1");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_zero_length: Number of Vertices #1" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_zero_length: Number of Segments #1" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_zero_length: Number of Polygon Chains #1" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_zero_length #1: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[1], "addPolygonChain_zero_length #1: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[1], "addPolygonChain_zero_length #1: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[3], "addPolygonChain_zero_length #1: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[3], "addPolygonChain_zero_length #1: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_zero_length #1: Seg#2.vTo" );
+		//
+		// end point double
+		testPolygon = [ { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 30, y: 40 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_zero_length #2");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_zero_length: Number of Vertices #2" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_zero_length: Number of Segments #2" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_zero_length: Number of Polygon Chains #2" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_zero_length #2: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[1], "addPolygonChain_zero_length #2: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[1], "addPolygonChain_zero_length #2: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[2], "addPolygonChain_zero_length #2: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[2], "addPolygonChain_zero_length #2: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_zero_length #2: Seg#2.vTo" );
+		//
+		testPolygon = [ { x: 10, y: 30 }, { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		// first point double
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_zero_length #3");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_zero_length: Number of Vertices #3" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_zero_length: Number of Segments #3" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_zero_length: Number of Polygon Chains #3" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_zero_length #3: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[2], "addPolygonChain_zero_length #3: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[2], "addPolygonChain_zero_length #3: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[3], "addPolygonChain_zero_length #3: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[3], "addPolygonChain_zero_length #3: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_zero_length #3: Seg#2.vTo" );
+		//
+//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
+//		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
+	}
+
+	function test_addPolygonChain_colinear_real() {
+		var testPolygon, myPolygonData;
+		var myVertices, mySegArray;
+		
+		// co-linear: 3 points on a line -> skip middle point
+		testPolygon = [ { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 25, y: 25 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_real #1");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_real: Number of Vertices #1" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_colinear_real: Number of Segments #1" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_real: Number of Polygon Chains #1" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_colinear_real #1: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[1], "addPolygonChain_colinear_real #1: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[1], "addPolygonChain_colinear_real #1: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[3], "addPolygonChain_colinear_real #1: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[3], "addPolygonChain_colinear_real #1: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_colinear_real #1: Seg#2.vTo" );
+		//
+		// co-linear: 3 points on a line: end point -> skip end point
+		testPolygon = [ { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 30, y: 40 }, { x: 20, y: 35 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_real #2");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_real: Number of Vertices #2" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_colinear_real: Number of Segments #2" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_real: Number of Polygon Chains #2" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_colinear_real #2: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[1], "addPolygonChain_colinear_real #2: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[1], "addPolygonChain_colinear_real #2: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[2], "addPolygonChain_colinear_real #2: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[2], "addPolygonChain_colinear_real #2: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_colinear_real #2: Seg#2.vTo" );
+		//
+		// co-linear: 3 points on a line: first point -> skip first point
+		testPolygon = [ { x: 20, y: 35 }, { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_real #3");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_real: Number of Vertices #3" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_colinear_real: Number of Segments #3" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_real: Number of Polygon Chains #3" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[1], "addPolygonChain_colinear_real #3: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[2], "addPolygonChain_colinear_real #3: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[2], "addPolygonChain_colinear_real #3: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[3], "addPolygonChain_colinear_real #3: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[3], "addPolygonChain_colinear_real #3: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[1], "addPolygonChain_colinear_real #3: Seg#2.vTo" );
+		//
+		// co-linear: 5 points on a line -> skip intermediate points
+		testPolygon = [ { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 22.5, y: 17.5 }, { x: 25, y: 25 }, { x: 27.5, y: 32.5 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_real #4");
+		equal( myPolygonData.getVertices().length, 6, "addPolygonChain_colinear_real: Number of Vertices #4" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_colinear_real: Number of Segments #4" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_real: Number of Polygon Chains #4" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_colinear_real #4: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[1], "addPolygonChain_colinear_real #4: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[1], "addPolygonChain_colinear_real #4: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[5], "addPolygonChain_colinear_real #4: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[5], "addPolygonChain_colinear_real #4: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_colinear_real #4: Seg#2.vTo" );
+		//
+		// co-linear: 5 points on a line over end/start -> skip intermediate points
+		testPolygon = [ { x: 15, y: 32.5 }, { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 30, y: 40 }, { x: 25, y: 37.5 }, { x: 20, y: 35 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_real #5");
+		equal( myPolygonData.getVertices().length, 6, "addPolygonChain_colinear_real: Number of Vertices #5" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_colinear_real: Number of Segments #5" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_real: Number of Polygon Chains #5" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[1], "addPolygonChain_colinear_real #5: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[2], "addPolygonChain_colinear_real #5: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[2], "addPolygonChain_colinear_real #5: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[3], "addPolygonChain_colinear_real #5: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[3], "addPolygonChain_colinear_real #5: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[1], "addPolygonChain_colinear_real #5: Seg#2.vTo" );
+		
+		// co-linear (horizontal UPwards): 3 points on a line -> skip middle point
+		testPolygon = [ { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 25, y: 10 }, { x: 30, y: 10 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_real #6");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_real: Number of Vertices #6" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_colinear_real: Number of Segments #6" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_real: Number of Polygon Chains #6" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_colinear_real #6: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[1], "addPolygonChain_colinear_real #6: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[1], "addPolygonChain_colinear_real #6: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[3], "addPolygonChain_colinear_real #6: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[3], "addPolygonChain_colinear_real #6: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_colinear_real #6: Seg#2.vTo" );
+		
+		// co-linear (horizontal DOWNwards): 3 points on a line -> skip middle point
+		testPolygon = [ { x: 10, y: 30 }, { x: 30, y: 10 }, { x: 25, y: 10 }, { x: 20, y: 10 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_real #7");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_real: Number of Vertices #7" );
+		equal( myPolygonData.nbSegments(), 3, "addPolygonChain_colinear_real: Number of Segments #7" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_real: Number of Polygon Chains #7" );
+		//
+		myVertices = myPolygonData.getVertices();
+		mySegArray = myPolygonData.getSegments();
+		strictEqual( mySegArray[0].vFrom, myVertices[0], "addPolygonChain_colinear_real #7: Seg#0.vFrom" );
+		strictEqual( mySegArray[0].vTo, myVertices[1], "addPolygonChain_colinear_real #7: Seg#0.vTo" );
+		strictEqual( mySegArray[1].vFrom, myVertices[1], "addPolygonChain_colinear_real #7: Seg#1.vFrom" );
+		strictEqual( mySegArray[1].vTo, myVertices[3], "addPolygonChain_colinear_real #7: Seg#1.vTo" );
+		strictEqual( mySegArray[2].vFrom, myVertices[3], "addPolygonChain_colinear_real #7: Seg#2.vFrom" );
+		strictEqual( mySegArray[2].vTo, myVertices[0], "addPolygonChain_colinear_real #7: Seg#2.vTo" );
+		//
+//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
+//		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
+	}
+
+	function test_addPolygonChain_colinear_false() {
+		// co-linear: 3 points on a line, with reversal -> DONT skip middle point
+		var testPolygon, myPolygonData;
+		var myVertices, mySegArray;
+		
+		// UPwards
+		testPolygon = [ { x: 10, y: 30 }, { x: 25, y: 25 }, { x: 20, y: 10 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_false #1");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_false: Number of Vertices #1" );
+		equal( myPolygonData.nbSegments(), 4, "addPolygonChain_colinear_false: Number of Segments #1" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_false: Number of Polygon Chains #1" );
+		//
+		// DOWNwards
+		testPolygon = [ { x: 10, y: 30 }, { x: 20, y: 10 }, { x: 20, y: 35 }, { x: 30, y: 40 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_false #2");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_false: Number of Vertices #2" );
+		equal( myPolygonData.nbSegments(), 4, "addPolygonChain_colinear_false: Number of Segments #2" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_false: Number of Polygon Chains #2" );
+		//
+		// horizontal UPwards
+		testPolygon = [ { x: 10, y: 30 }, { x: 25, y: 10 }, { x: 20, y: 10 }, { x: 30, y: 10 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_false #3");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_false: Number of Vertices #3" );
+		equal( myPolygonData.nbSegments(), 4, "addPolygonChain_colinear_false: Number of Segments #3" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_false: Number of Polygon Chains #3" );
+		//
+		// horizontal DOWNwards
+		testPolygon = [ { x: 10, y: 30 }, { x: 25, y: 10 }, { x: 30, y: 10 }, { x: 20, y: 10 } ];
+		myPolygonData = new PNLTRI.PolygonData();
+		//
+		myPolygonData.addPolygonChain_consistently( testPolygon, "addPolygonChain_colinear_false #4");
+		equal( myPolygonData.getVertices().length, 4, "addPolygonChain_colinear_false: Number of Vertices #4" );
+		equal( myPolygonData.nbSegments(), 4, "addPolygonChain_colinear_false: Number of Segments #4" );
+		equal( myPolygonData.nbPolyChains(), 1, "addPolygonChain_colinear_false: Number of Polygon Chains #4" );
+		//
+//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
+//		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 	}
 
 	function test_allSegsInQueryStructure() {
@@ -385,7 +626,7 @@ function test_PolygonData() {
 //		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
 	}
 
-	
+
 	function test_splitPolygonChain1() {			// from article, with holes
 		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "square_3triangholes" ) );
 		var myVertices = myPolygonData.getVertices();
@@ -563,7 +804,7 @@ function test_PolygonData() {
 			ok( false, "splitPolygonChain3: "+checkResult );
 //		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, 4 );
 	}
-	
+
 	function test_splitPolygonChain4_CCW() {			// correct winding order: contour: CCW, hole: CW
 		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "hole_short_path" ) );
 		var myVertices = myPolygonData.getVertices();
@@ -634,7 +875,7 @@ function test_PolygonData() {
 			ok( false, "splitPolygonChain4_CCW: "+checkResult );
 //		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, 0.8 );
 	}
-	
+
 	function test_splitPolygonChain4_CW() {			// wrong winding order: contour: CW, hole: CCW
 		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "hole_short_path" ) );
 		var myVertices = myPolygonData.getVertices();
@@ -679,7 +920,7 @@ function test_PolygonData() {
 			ok( false, "splitPolygonChain4_CW: "+checkResult );
 //		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, 0.8 );
 	}
-	
+
 
 	function test_unique_monotone_chains_max() {
 		var myPolygonData, polyChains, myMonoChain;
@@ -719,16 +960,19 @@ function test_PolygonData() {
 		uniqueMonoChainsMax = myPolygonData.unique_monotone_chains_max();
 		deepEqual( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains: square_3triangholes" );
 	}
-	
-	
+
+
 	test( "Polygon Data", function() {
 		test_polygon_area();
-			
+
 		test_addPolygonChain_errors();
 		test_addPolygonChain_ok();
+		test_addPolygonChain_zero_length();
+		test_addPolygonChain_colinear_real();
+		test_addPolygonChain_colinear_false();
 
 		test_allSegsInQueryStructure();
-		
+
 		test_vertices_monoChain();
 		// test_mapAngle();
 		test_splitPolygonChain1();

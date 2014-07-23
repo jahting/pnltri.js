@@ -1634,7 +1634,7 @@ function test_QueryStructure() {
 		// CCW-Ordering (Shapes)
 		var myPolygonData = new PNLTRI.PolygonData( [ [
 				{ x: 28, y: 33 }, { x: 20, y: 20 }, { x: 10, y: 10 }, { x: 60, y: 22 }, { x: 35, y: 40 }, { x: 26, y: 36 },
-				{ x: 30, y: 45 }, { x: 15, y: 30 }, 
+				{ x: 30, y: 45 }, { x: 15, y: 30 },
 				// segment_lefttop, segment_leftbot, segment_bottom, segment_right, segment_indebot, segment_indetop,
 				// segment_nosetop, segment_nosebot
 			] ] );
@@ -1981,7 +1981,7 @@ function test_QueryStructure() {
 		test_add_segment_special_2();
 		test_add_segment_special_3();
 		test_add_segment_special_4();
-		test_add_segment_special_5();
+//		test_add_segment_special_5();		// co-linear removed on input
 		test_add_segment_special_6();
 		// for testing new polygons
 //		test_add_segment_NEW();
@@ -2198,11 +2198,11 @@ function test_Trapezoider() {
 		//
 		test_trapezoide_polygon( "hole_short_path", 10, 21, 6, 2, [ false, false ], 0 );	// 0.8; shortest path to hole is outside polygon
 		//
-		test_trapezoide_polygon( "three_error#1", 92, 185, 27, 1, [ false ], 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
+		test_trapezoide_polygon( "three_error#1", 73, 147, 72, 1, [ false ], 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
 		test_trapezoide_polygon( "three_error#2", 51, 103, 5, 1, [ false ], 0 );		// 0.7; 2.Error, integrating into Three.js (letter "1")
 		test_trapezoide_polygon( "three_error#3", 91, 183, 41, 1, [ false ], 0 );		// 3000; 3.Error, integrating into Three.js (logbuffer)
-		test_trapezoide_polygon( "three_error#4", 102, 205, 15, 1, [ true ], 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
-		test_trapezoide_polygon( "three_error#4b", 102, 205, 6, 1, [ false ], 0 );		// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_trapezoide_polygon( "three_error#4", 91, 183, 51, 1, [ true ], 0 );		// 1; 4.Error, integrating into Three.js (USA Maine)
+		test_trapezoide_polygon( "three_error#4b", 91, 183, 9, 1, [ false ], 0 );		// 0.04; 4.Error, integrating into Three.js (USA Maine)
 		test_trapezoide_polygon( "hole_first", 19, 39, 13, 2, [ false, false ], 0 );	// 0.5; 5.Error, integrating into Three.js ("R")
 		test_trapezoide_polygon( "two_polygons#1", 20, 41, 3, 1, [ true, false ], 0 );	// 0.5; 6.Error, integrating into Three.js ("i")
 		test_trapezoide_polygon( "two_polygons#2", 6, 13, 3, 1, [ true, false ], 0 );	// 1; my#6: two trivial polygons

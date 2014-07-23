@@ -135,24 +135,24 @@ PNLTRI.PolygonData = function ( inPolygonChainList ) {
 	//	uni-y-monotone polygons (s. this.monoSubPolyChains)
 	//	doubly linked by: snext, sprev
 	this.segments = [];
-	
+
 	// for the ORIGINAL polygon chains
 	this.idNextPolyChain = 0;
 	//	for each original chain: lies the polygon inside to the left?
 	//	"true": winding order is CCW for a contour or CW for a hole
 	//	"false": winding order is CW for a contour or CCW for a hole
 	this.PolyLeftArr = [];
-	
+
 	// indices into this.segments: at least one for each monoton chain for the polygon
 	//  these subdivide the polygon into uni-y-monotone polygons, that is
 	//  polygons that have only one segment between ymax and ymin on one side
 	//  and the other side has monotone increasing y from ymin to ymax
 	// the monoSubPolyChains are doubly linked by: mnext, mprev
 	this.monoSubPolyChains = [];
-	
+
 	// list of triangles: each 3 indices into this.vertices
 	this.triangles = [];
-	
+
 	// initialize optional polygon chains
 	if ( inPolygonChainList ) {
 		for (var i=0, j=inPolygonChainList.length; i<j; i++) {
@@ -166,10 +166,10 @@ PNLTRI.PolygonData = function ( inPolygonChainList ) {
 PNLTRI.PolygonData.prototype = {
 
 	constructor: PNLTRI.PolygonData,
-	
-	
+
+
 	/*	Accessors  */
-	
+
 	getSegments: function () {
 		return	this.segments;
 	},
@@ -186,7 +186,7 @@ PNLTRI.PolygonData.prototype = {
 	nbPolyChains: function () {
 		return	this.idNextPolyChain;
 	},
-	
+
 	// for the polygon data AFTER triangulation
 	//	returns an Array of flags, one flag for each polygon chain:
 	//		lies the inside of the polygon to the left?
@@ -198,7 +198,7 @@ PNLTRI.PolygonData.prototype = {
 		this.PolyLeftArr[inChainId] = false;
 	},
 
-		
+
 	/*	Helper  */
 
 	// checks winding order by calculating the area of the polygon
@@ -211,9 +211,9 @@ PNLTRI.PolygonData.prototype = {
 		return	( doubleArea < 0 );
 	},
 
-	
+
 	/*	Operations  */
-	
+
 	appendVertexEntry: function ( inVertexX, inVertexY ) {			// private
 		var vertex = {
 				id: this.vertices.length,	// vertex id, representing input sequence
@@ -259,52 +259,96 @@ PNLTRI.PolygonData.prototype = {
 			marked: false,			// already visited during unique monoChain identification ?
 		};
 	},
-	
+
 	appendSegmentEntry: function ( inSegment ) {				// private
 		this.segments.push( inSegment );
 		return	inSegment;
 	},
-	
+
 
 	addVertexChain: function ( inRawPointList ) {			// private
-		
+
 		function verts_equal( inVert1, inVert2 ) {
 			return ( ( Math.abs(inVert1.x - inVert2.x) < PNLTRI.Math.EPSILON_P ) &&
 					 ( Math.abs(inVert1.y - inVert2.y) < PNLTRI.Math.EPSILON_P ) );
 		}
-		
+
+		function verts_colinear_chain( inVert1, inVert2, inVert3 ) {
+			if ( Math.abs( PNLTRI.Math.ptsCrossProd( inVert2, inVert1, inVert3 ) ) > PNLTRI.Math.EPSILON_P )	return false;
+			// only real sequences, not direction reversals
+			var low, middle, high;
+			if ( Math.abs( inVert1.y - inVert2.y ) < PNLTRI.Math.EPSILON_P ) {
+				// horizontal line
+				middle = inVert2.x;
+				if ( inVert1.x < inVert3.x ) {
+					low = inVert1.x;
+					high = inVert3.x;
+				} else {
+					low = inVert3.x;
+					high = inVert1.x;
+				}
+			} else {
+				middle = inVert2.y;
+				if ( inVert1.y < inVert3.y ) {
+					low = inVert1.y;
+					high = inVert3.y;
+				} else {
+					low = inVert3.y;
+					high = inVert1.y;
+				}
+			}
+			return	( ( ( low - middle ) < PNLTRI.Math.EPSILON_P ) && ( ( middle - high ) < PNLTRI.Math.EPSILON_P ) );
+		}
+
 		var newVertices = [];
-		var newVertex, acceptVertex, prevIdx;
+		var newVertex, acceptVertex, lastIdx;
 		for ( var i=0; i < inRawPointList.length; i++ ) {
 			newVertex = this.appendVertexEntry( inRawPointList[i].x, inRawPointList[i].y );
 			// suppresses zero-length segments
 			acceptVertex = true;
-			prevIdx = newVertices.length-1;
-			if ( ( prevIdx >= 0 ) &&
-				 verts_equal( newVertex, newVertices[prevIdx] ) ) {
-			 	acceptVertex = false;
+			lastIdx = newVertices.length-1;
+			if ( lastIdx >= 0 ) {
+				if ( verts_equal( newVertex, newVertices[lastIdx] ) ) {
+					acceptVertex = false;
+				} else if ( lastIdx > 0 ) {
+					if ( verts_colinear_chain( newVertices[lastIdx-1], newVertices[lastIdx], newVertex ) ) {
+						newVertices.pop();
+					}
+				}
 			}
 			if ( acceptVertex )	newVertices.push( newVertex );
 		}
-		// compare last vertex to first: suppresses zero-length segment
-		if ( ( newVertices.length > 1 ) &&
-			 verts_equal( newVertices[newVertices.length-1], newVertices[0] ) ) {
+		// compare last vertices to first: suppresses zero-length and co-linear segments
+		lastIdx = newVertices.length - 1;
+		if ( ( lastIdx > 0 ) &&
+			 verts_equal( newVertices[lastIdx], newVertices[0] ) ) {
 			newVertices.pop();
+			lastIdx--;
 		}
-		
+		if ( lastIdx > 1 ) {
+			if ( verts_colinear_chain( newVertices[lastIdx-1], newVertices[lastIdx], newVertices[0] ) ) {
+				newVertices.pop();
+				lastIdx--;
+			}
+			if ( ( lastIdx > 1 ) &&
+				 verts_colinear_chain( newVertices[lastIdx], newVertices[0], newVertices[1] ) ) {
+				newVertices.shift();
+			}
+		}
+
 		return	newVertices;
 	},
-	
+
 
 	addPolygonChain: function ( inRawPointList ) {			// <<<<<< public
-		
+
 		// vertices
 		var newVertices = this.addVertexChain( inRawPointList );
 		if ( newVertices.length < 3 ) {
 			console.log( "Polygon has < 3 vertices!", newVertices );
 			return	0;
 		}
-		
+
 		// segments
 		var	saveSegListLength = this.segments.length;
 		//
@@ -327,7 +371,7 @@ PNLTRI.PolygonData.prototype = {
 		this.appendSegmentEntry( segment );
 		firstSeg.sprev = segment;
 		segment.snext = firstSeg;
-		
+
 		this.PolyLeftArr[this.idNextPolyChain++] = true;
 		return	this.segments.length - saveSegListLength;
 	},
@@ -485,7 +529,7 @@ PNLTRI.PolygonData.prototype = {
 
 			frontMono.marked = true;
 			frontMono = frontMono.mnext;
-			
+
 			var processed = false;
 			while ( (frontPt = frontMono.vFrom) != firstPt ) {
 				if (frontMono.marked) {
