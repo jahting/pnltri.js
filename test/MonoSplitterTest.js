@@ -18,7 +18,7 @@ PNLTRI.MonoSplitter.prototype.alyTrap_check = function ( inTrap, inFromUp, inFro
 	ok( inTrap.monoDone, inTestName );
 };
 PNLTRI.MonoSplitter.prototype.mockSetup = function () {
-	
+
 	function mock_doSplit_check( inChain, inVertLow, inVertHigh, inLow2High ) {
 		if ( mockDoChecks )		return	mock_check( [ inChain, inVertLow, inVertHigh, inLow2High ] );
 		return	null;
@@ -30,12 +30,12 @@ PNLTRI.MonoSplitter.prototype.mockSetup = function () {
 	this.doSplit = mock_doSplit_check;
 	mock_check_off();
 };
-	
+
 function test_MonoSplitter() {
-	
+
 	/* 4 Cases for "high points", mirror them for "low points"
-	
-	/*   L 
+
+	/*   L
 	 *							  /
 	 *   -----*------------------/
 	 *		   \      Trap		/
@@ -69,16 +69,16 @@ function test_MonoSplitter() {
 	 *	TR_BR, TR_BLR: no diag
 	 *
 	 *	TM_BL, TM_BM, TM_BR, TM_BLR: diag
-	 *  
+	 *
 	 *	TLR_BL, TLR_BR: no diag
 	 *	TLR_BM: diag
 	 *
 	 *	TLR_BLR: not possible
 	 */
-	
+
 	/**************************************************************************/
-	 
-	/*    
+
+	/*
 	 *						  /
 	 *	------*--------------/
 	 *		   \      		/
@@ -121,8 +121,8 @@ function test_MonoSplitter() {
 		mock_set_expected( [ [ myTrap.uR, false, false, 0 ] ] );
 		myMono.alyTrap_check( myTrap, false, false, "TL_BL: from dR, no diag" );
 	}
-	
-	/*    
+
+	/*
 	 *	 \
 	 *	  \--------------*----
 	 *	   \      		/
@@ -162,8 +162,8 @@ function test_MonoSplitter() {
 		myMono.alyTrap_check( myTrap, false, true, "TR_BR: from dL, no diag" );
 	}
 
-	/*    
-	 *				 /	
+	/*
+	 *				 /
 	 *	------*-----/
 	 *		   \   /
 	 *			\ /
@@ -200,7 +200,7 @@ function test_MonoSplitter() {
 		myMono.alyTrap_check( myTrap, true, false, "TL_BLR: from uR, no diag" );
 	}
 
-	/*    
+	/*
 	 *		 \
 	 *	      \-----*-----
 	 *		   \   /
@@ -237,8 +237,8 @@ function test_MonoSplitter() {
 		mock_set_expected( [ [ myTrap.uL, false, true, 0 ] ] );
 		myMono.alyTrap_check( myTrap, true, true, "TR_BLR: from uL, no diag" );
 	}
-	
-	/*    
+
+	/*
 	 *
 	 *	--------*------
 	 *		   / \
@@ -275,8 +275,8 @@ function test_MonoSplitter() {
 		mock_set_expected( [ [ myTrap.dR, true, false, 0 ] ] );
 		myMono.alyTrap_check( myTrap, false, false, "TLR_BL: from dR, no diag" );
 	}
-	
-	/*    
+
+	/*
 	 *
 	 *	--------*------
 	 *		   / \
@@ -313,8 +313,8 @@ function test_MonoSplitter() {
 		mock_set_expected( [ [ myTrap.dL, true, true, 0 ] ] );
 		myMono.alyTrap_check( myTrap, false, true, "TLR_BR: from dL, no diag" );
 	}
-	
-	/*    
+
+	/*
 	 *							  /
 	 *	------*------------------/
 	 *		   \      			/
@@ -357,8 +357,8 @@ function test_MonoSplitter() {
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TL_BR: from dL, diag: vLow(right)->vHigh(left)" );
 	}
-	
-	/*    
+
+	/*
 	 *	 \
 	 *	  \------------------*-----
 	 *	   \      			/
@@ -401,8 +401,8 @@ function test_MonoSplitter() {
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TR_BL: from dR, diag: vHigh(right)->vLow(left)" );
 	}
-	
-	/*    
+
+	/*
 	 *		 					  /
 	 *	------*------------------/
 	 *		   \      			/
@@ -455,8 +455,8 @@ function test_MonoSplitter() {
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TL_BM: from dL, diag: vLow(middle)->vHigh(left)" );
 	}
-	
-	/*    
+
+	/*
 	 *	 \
 	 *	  \------------------*----
 	 *	   \      			/
@@ -509,8 +509,8 @@ function test_MonoSplitter() {
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TR_BM: from dR, diag: vHigh(right)->vLow(middle)" );
 	}
-	
-	/*    
+
+	/*
 	 *	 \		  \ /		  /
 	 *	  \--------*---------/
 	 *	   \      			/
@@ -563,8 +563,8 @@ function test_MonoSplitter() {
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TM_BL: from dR, diag: vHigh(middle)->vLow(left)" );
 	}
-	
-	/*    
+
+	/*
 	 *	 \		  \ /		  /
 	 *	  \--------*---------/
 	 *	   \      			/
@@ -617,8 +617,8 @@ function test_MonoSplitter() {
 								[ myTrap.uR, false, false, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, true, "TM_BR: from dL, diag: vLow(right)->vHigh(middle)" );
 	}
-	
-	/*    
+
+	/*
 	 *	 \		  \ /		  /
 	 *	  \--------*---------/
 	 *	   \      			/
@@ -685,7 +685,7 @@ function test_MonoSplitter() {
 		myMono.alyTrap_check( myTrap, false, false, "TM_BM: from dR, diag: vHigh(middle)->vLow(middle)" );
 	}
 
-	/*    
+	/*
 	 *	------*-------
 	 *		 / \
 	 *		/	\
@@ -733,8 +733,8 @@ function test_MonoSplitter() {
 								[ myTrap.dL, true, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TLR_BM: from dR, diag: vHigh->vLow(middle)" );
 	}
-	
-	/*    
+
+	/*
 	 *	   \  \ /  /
 	 *		\--*--/
 	 *		 \	 /
@@ -782,10 +782,10 @@ function test_MonoSplitter() {
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, true, false, "TM_BLR: from uR, diag: vHigh(middle)->vLow" );
 	}
-	
+
 	/**************************************************************************/
 
-	/*    
+	/*
 	 *	 \
 	 *	  \------------------*----
 	 *	   \      			/
@@ -845,7 +845,7 @@ function test_MonoSplitter() {
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TR_BM__c_CCW_h_CW: from dR, diag: vHigh(right)->vLow(middle)" );
 	}
-	
+
 	 function test_TR_BM__c_CW_h_CCW() {
 		var myPolygonData = new PNLTRI.PolygonData( [
 				[	// contour: CW
@@ -898,7 +898,7 @@ function test_MonoSplitter() {
 								[ myTrap.uL, false, true, 7 ] ], [	7 ] );
 		myMono.alyTrap_check( myTrap, false, false, "TR_BM__c_CW_h_CCW: from dR, diag: vHigh(right)->vLow(middle)" );
 	}
-	
+
 	/**************************************************************************/
 
 	var	testData = new PolygonTestdata();
@@ -932,7 +932,7 @@ function test_MonoSplitter() {
 		}
 	}
 
-		
+
 	test( "Polygon Monotone Splitter", function() {
 		// contour: CCW; no hole
 		//	no diagonal

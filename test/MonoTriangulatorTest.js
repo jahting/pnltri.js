@@ -6,11 +6,11 @@ function test_MonoTriangulator() {
 
 	var	testData = new PolygonTestdata();
 
-	
+
 	/***************************************************************************
 	 *	Tests
 	 **************************************************************************/
-	
+
 	function test_triangulate_all_polygons( inDataName, inDrawScale ) {
 		var baseData = testData.get_polygon_with_holes( inDataName );
 		var expectedTriangList	= testData.get_triangles( inDataName );
@@ -56,7 +56,7 @@ function test_MonoTriangulator() {
 	function test_triangulate_monotone_polygon() {
 
 		var myPolygonData, myMonoTriang, myMonoChain, triangList;
-		
+
 		// Helper function
 		function initSeglistMonoChain( inPtList ) {
 			myPolygonData = new PNLTRI.PolygonData( [ inPtList ] );
@@ -140,11 +140,45 @@ function test_MonoTriangulator() {
 		equal( triangList.length, 0, "No Triangle from 1 vertex" );
 	}
 
-	
+	function test_triangulate_monotone_polygon_colinear() {
+
+		var myPolygonData, myMonoTriang, myMonoChain, triangList;
+
+		// Helper function
+		function initSeglistMonoChain( inPtList ) {
+			myPolygonData = new PNLTRI.PolygonData( [ inPtList ] );
+			myPolygonData.initMonoChains();
+			myMonoTriang = new PNLTRI.MonoTriangulator( myPolygonData );
+			//
+			myMonoChain = myPolygonData.getSegments();
+			triangList = myPolygonData.getTriangleList();		// unsorted results !!
+		}
+
+		var myVertices;
+		//
+		// co-linear reversal
+		myVertices = [ { x:30,y:30 }, { x:10,y:10 }, { x:25,y:14 }, { x:20,y:20 } ];
+		initSeglistMonoChain( myVertices );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[0] );
+		equal( triangList.length, 2, "co-linear reversal #1: number" );
+		deepEqual(	triangList, [ [ 1, 2, 3 ], [ 1, 3, 0 ] ], "co-linear reversal #1: Triangles" );
+//		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
+		//
+		// co-linear reversal
+		myVertices = [ { x:40,y:40 }, { x:29,y:37 }, { x:30,y:30 }, { x:20,y:20 } ];
+		initSeglistMonoChain( myVertices );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[0] );
+		equal( triangList.length, 2, "co-linear reversal #2: number" );			// TODO: Error
+		deepEqual(	triangList, [ [ 2, 3, 0 ], [ 1, 2, 0 ] ], "co-linear reversal #2: Triangles" );
+//		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
+	}
+
+
 	test( "Triangulator for uni-Y-monotone Polygons", function() {
 		test_triangulate_all_polygons( "square_3triangholes", 5 );
 		test_triangulate_all_polygons( "pt_3_diag_max", 4 );
 		test_triangulate_monotone_polygon();
+		test_triangulate_monotone_polygon_colinear();
 	});
 }
 

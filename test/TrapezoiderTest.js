@@ -800,18 +800,14 @@ function test_QueryStructure() {
 		ok( ( myQs.ptNode( { vFrom: secondPoint, vTo: { x: 4, y: 1 }, rootFrom: qsLR }, true ) == qs_tr3 ), "ptNode B: X-Node(qsLR), =vTo, horiz -> qs_tr3" );
 	}
 
+	/**************************************************************************/
+
 	//
 	//	Cases of endpoints touching other segments
 	//	The touched segment is already inserted, now the endpoint of another segment,
 	//	 which lies ON the first segment shall be located with ptNode()
 	//	This is the opposite case to "test_add_segment_touching_N"
 	//
-
-		// TODO: test all mirrored cases !!!
-		//	if going back co-linear direction
-		//	should be checked with the preceding segment
-		// ATTENTION: this needs to be looped since the
-		//	preceeding segment can also be co-linear ...
 
 	function test_ptNode_touching() {
 
@@ -846,7 +842,7 @@ function test_QueryStructure() {
 		ok( ( testSegment.rootTo == qs_tr3 ), "ptNode_touching: up reverse, right -> qs_tr3" );
 	}
 
-	function test_ptNode_colinear_1() {		// TODO: with vertical lines
+	function test_ptNode_colinear_inside() {
 
 		// fully left side, CCW
 		//
@@ -874,16 +870,16 @@ function test_QueryStructure() {
 
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[3] );
-		ok( ( segListArray[3].rootFrom == qs_tr1 ), "ptNode_colinear#1 A: prev, left -> qs_tr1" );
-		ok( ( segListArray[3].rootTo == qs_tr1 ), "ptNode_colinear#1 A: prev reverse, left -> qs_tr1" );
+		ok( ( segListArray[3].rootFrom == qs_tr1 ), "ptNode_colinear_inside A: prev, left -> qs_tr1" );
+		ok( ( segListArray[3].rootTo == qs_tr1 ), "ptNode_colinear_inside A: prev reverse, left -> qs_tr1" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[4] );
-		ok( ( segListArray[4].rootFrom == qs_tr1 ), "ptNode_colinear#1 A: co-lin, left -> qs_tr1" );
-		ok( ( segListArray[4].rootTo == qs_tr1 ), "ptNode_colinear#1 A: co-lin reverse, left -> qs_tr1" );
+		ok( ( segListArray[4].rootFrom == qs_tr1 ), "ptNode_colinear_inside A: co-lin, left -> qs_tr1" );
+		ok( ( segListArray[4].rootTo == qs_tr1 ), "ptNode_colinear_inside A: co-lin reverse, left -> qs_tr1" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[5] );
-		ok( ( segListArray[5].rootFrom == qs_tr1 ), "ptNode_colinear#1 A: next, left -> qs_tr1" );
-		ok( ( segListArray[5].rootTo == qs_tr1 ), "ptNode_colinear#1 A: next reverse, left -> qs_tr1" );
+		ok( ( segListArray[5].rootFrom == qs_tr1 ), "ptNode_colinear_inside A: next, left -> qs_tr1" );
+		ok( ( segListArray[5].rootTo == qs_tr1 ), "ptNode_colinear_inside A: next reverse, left -> qs_tr1" );
 
 		//
 		// horizontal lines
@@ -903,25 +899,60 @@ function test_QueryStructure() {
 
 		//	prev(prev(co-linear)) segment
 		myQs.segNodes( segListArray[2] );
-		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear#1 B: prev-prev, left -> qs_tr0" );
-		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear#1 B: prev-prev reverse, left -> qs_tr0" );
+		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear_inside B: prev-prev, left -> qs_tr0" );
+		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear_inside B: prev-prev reverse, left -> qs_tr0" );
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[3] );
-		ok( ( segListArray[3].rootFrom == qs_tr0 ), "ptNode_colinear#1 B: prev, left -> qs_tr1" );
-		ok( ( segListArray[3].rootTo == qs_tr1 ), "ptNode_colinear#1 B: prev reverse, left -> qs_tr1" );
+		ok( ( segListArray[3].rootFrom == qs_tr0 ), "ptNode_colinear_inside B: prev, left -> qs_tr0" );
+		ok( ( segListArray[3].rootTo == qs_tr1 ), "ptNode_colinear_inside B: prev reverse, left -> qs_tr1" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[4] );
-		ok( ( segListArray[4].rootFrom == qs_tr1 ), "ptNode_colinear#1 B: co-lin, left -> qs_tr1" );
-		ok( ( segListArray[4].rootTo == qs_tr1 ), "ptNode_colinear#1 B: co-lin reverse, left -> qs_tr1" );
+		ok( ( segListArray[4].rootFrom == qs_tr1 ), "ptNode_colinear_inside B: co-lin, left -> qs_tr1" );
+		ok( ( segListArray[4].rootTo == qs_tr1 ), "ptNode_colinear_inside B: co-lin reverse, left -> qs_tr1" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[5] );
-		ok( ( segListArray[5].rootFrom == qs_tr1 ), "ptNode_colinear#1 B: next, left -> qs_tr1" );
-		ok( ( segListArray[5].rootTo == qs_tr0 ), "ptNode_colinear#1 B: next reverse, left -> qs_tr1" );
+		ok( ( segListArray[5].rootFrom == qs_tr1 ), "ptNode_colinear_inside B: next, left -> qs_tr1" );
+		ok( ( segListArray[5].rootTo == qs_tr0 ), "ptNode_colinear_inside B: next reverse, left -> qs_tr0" );
 		//	next(next(co-linear)) segment
 		myQs.segNodes( segListArray[0] );
-		ok( ( segListArray[0].rootFrom == qs_tr0 ), "ptNode_colinear#1 B: next-next, left -> qs_tr0" );
-		ok( ( segListArray[0].rootTo == qs_tr1 ), "ptNode_colinear#1 B: next-next reverse, left -> qs_tr1" );
+		ok( ( segListArray[0].rootFrom == qs_tr0 ), "ptNode_colinear_inside B: next-next, left -> qs_tr0" );
+		ok( ( segListArray[0].rootTo == qs_tr1 ), "ptNode_colinear_inside B: next-next reverse, left -> qs_tr1" );
 
+		//
+		// vertical lines
+		var testPolygon = [ { x: 15, y: 15 }, { x: 30, y: 10 }, { x: 30, y: 40 },
+							{ x: 25, y: 35 }, { x: 30, y: 30 }, { x: 30, y: 20 } ];
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
+
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+
+		myQs.add_segment( segListArray[1] );		// touch line, 2nd touch line: segListArray[4]
+		var qs_tr1 = myQs.getTrapByIdx(1).sink;
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false );
+
+		//	prev(prev(co-linear)) segment
+		myQs.segNodes( segListArray[2] );
+		ok( ( segListArray[2].rootFrom == qs_tr1 ), "ptNode_colinear_inside C: prev-prev, left -> qs_tr1" );
+		ok( ( segListArray[2].rootTo == qs_tr1 ), "ptNode_colinear_inside C: prev-prev reverse, left -> qs_tr1" );
+		//	prev(co-linear) segment
+		myQs.segNodes( segListArray[3] );
+		ok( ( segListArray[3].rootFrom == qs_tr1 ), "ptNode_colinear_inside C: prev, left -> qs_tr1" );
+		ok( ( segListArray[3].rootTo == qs_tr1 ), "ptNode_colinear_inside C: prev reverse, left -> qs_tr1" );
+		//	co-linear segment
+		myQs.segNodes( segListArray[4] );
+		ok( ( segListArray[4].rootFrom == qs_tr1 ), "ptNode_colinear_inside C: co-lin, left -> qs_tr1" );
+		ok( ( segListArray[4].rootTo == qs_tr1 ), "ptNode_colinear_inside C: co-lin reverse, left -> qs_tr1" );
+		//	next(co-linear) segment
+		myQs.segNodes( segListArray[5] );
+		ok( ( segListArray[5].rootFrom == qs_tr1 ), "ptNode_colinear_inside C: next, left -> qs_tr1" );
+		ok( ( segListArray[5].rootTo == qs_tr1 ), "ptNode_colinear_inside C: next reverse, left -> qs_tr1" );
+		//	next(next(co-linear)) segment
+		myQs.segNodes( segListArray[0] );
+		ok( ( segListArray[0].rootFrom == qs_tr1 ), "ptNode_colinear_inside C: next-next, left -> qs_tr1" );
+		ok( ( segListArray[0].rootTo == qs_tr1 ), "ptNode_colinear_inside C: next-next reverse, left -> qs_tr1" );
 
 		// fully right side, CW
 		//
@@ -949,16 +980,16 @@ function test_QueryStructure() {
 
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[3] );
-		ok( ( segListArray[3].rootFrom == qs_tr3 ), "ptNode_colinear#1 C: prev, right -> qs_tr3" );
-		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear#1 C: prev reverse, right -> qs_tr3" );
+		ok( ( segListArray[3].rootFrom == qs_tr3 ), "ptNode_colinear_inside D: prev, right -> qs_tr3" );
+		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear_inside D: prev reverse, right -> qs_tr3" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[4] );
-		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear#1 C: co-lin, right -> qs_tr3" );
-		ok( ( segListArray[4].rootTo == qs_tr3 ), "ptNode_colinear#1 C: co-lin reverse, right -> qs_tr3" );
+		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear_inside D: co-lin, right -> qs_tr3" );
+		ok( ( segListArray[4].rootTo == qs_tr3 ), "ptNode_colinear_inside D: co-lin reverse, right -> qs_tr3" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[5] );
-		ok( ( segListArray[5].rootFrom == qs_tr3 ), "ptNode_colinear#1 C: next, right -> qs_tr3" );
-		ok( ( segListArray[5].rootTo == qs_tr3 ), "ptNode_colinear#1 C: next reverse, right -> qs_tr3" );
+		ok( ( segListArray[5].rootFrom == qs_tr3 ), "ptNode_colinear_inside D: next, right -> qs_tr3" );
+		ok( ( segListArray[5].rootTo == qs_tr3 ), "ptNode_colinear_inside D: next reverse, right -> qs_tr3" );
 
 		//
 		// horizontal lines
@@ -978,27 +1009,63 @@ function test_QueryStructure() {
 
 		//	prev(prev(co-linear)) segment
 		myQs.segNodes( segListArray[2] );
-		ok( ( segListArray[2].rootFrom == qs_tr3 ), "ptNode_colinear#1 D: prev-prev, right -> qs_tr3" );
-		ok( ( segListArray[2].rootTo == qs_tr2 ), "ptNode_colinear#1 D: prev-prev reverse, right -> qs_tr2" );
+		ok( ( segListArray[2].rootFrom == qs_tr3 ), "ptNode_colinear_inside E: prev-prev, right -> qs_tr3" );
+		ok( ( segListArray[2].rootTo == qs_tr2 ), "ptNode_colinear_inside E: prev-prev reverse, right -> qs_tr2" );
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[3] );
-		ok( ( segListArray[3].rootFrom == qs_tr2 ), "ptNode_colinear#1 D: prev, right -> qs_tr2" );
-		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear#1 D: prev reverse, right -> qs_tr3" );
+		ok( ( segListArray[3].rootFrom == qs_tr2 ), "ptNode_colinear_inside E: prev, right -> qs_tr2" );
+		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear_inside E: prev reverse, right -> qs_tr3" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[4] );
-		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear#1 D: co-lin, right -> qs_tr3" );
-		ok( ( segListArray[4].rootTo == qs_tr3 ), "ptNode_colinear#1 D: co-lin reverse, right -> qs_tr3" );
+		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear_inside E: co-lin, right -> qs_tr3" );
+		ok( ( segListArray[4].rootTo == qs_tr3 ), "ptNode_colinear_inside E: co-lin reverse, right -> qs_tr3" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[5] );
-		ok( ( segListArray[5].rootFrom == qs_tr3 ), "ptNode_colinear#1 D: next, right -> qs_tr3" );
-		ok( ( segListArray[5].rootTo == qs_tr2 ), "ptNode_colinear#1 D: next reverse, right -> qs_tr2" );
+		ok( ( segListArray[5].rootFrom == qs_tr3 ), "ptNode_colinear_inside E: next, right -> qs_tr3" );
+		ok( ( segListArray[5].rootTo == qs_tr2 ), "ptNode_colinear_inside E: next reverse, right -> qs_tr2" );
 		//	next(next(co-linear)) segment
 		myQs.segNodes( segListArray[0] );
-		ok( ( segListArray[0].rootFrom == qs_tr2 ), "ptNode_colinear#1 D: next-next, right -> qs_tr2" );
-		ok( ( segListArray[0].rootTo == qs_tr2 ), "ptNode_colinear#1 D: next-next reverse, right -> qs_tr2" );
+		ok( ( segListArray[0].rootFrom == qs_tr2 ), "ptNode_colinear_inside E: next-next, right -> qs_tr2" );
+		ok( ( segListArray[0].rootTo == qs_tr2 ), "ptNode_colinear_inside E: next-next reverse, right -> qs_tr2" );
+
+		//
+		// vertical lines
+		var testPolygon = [ { x: 45, y: 15 }, { x: 30, y: 10 }, { x: 30, y: 40 },
+							{ x: 35, y: 35 }, { x: 30, y: 30 }, { x: 30, y: 20 } ];
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
+
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+
+		myQs.add_segment( segListArray[1] );		// touch line, 2nd touch line: segListArray[4]
+		var qs_tr3 = myQs.getTrapByIdx(3).sink;
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false );
+
+		//	prev(prev(co-linear)) segment
+		myQs.segNodes( segListArray[2] );
+		ok( ( segListArray[2].rootFrom == qs_tr3 ), "ptNode_colinear_inside F: prev-prev, left -> qs_tr3" );
+		ok( ( segListArray[2].rootTo == qs_tr3 ), "ptNode_colinear_inside F: prev-prev reverse, left -> qs_tr3" );
+		//	prev(co-linear) segment
+		myQs.segNodes( segListArray[3] );
+		ok( ( segListArray[3].rootFrom == qs_tr3 ), "ptNode_colinear_inside F: prev, left -> qs_tr3" );
+		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear_inside F: prev reverse, left -> qs_tr3" );
+		//	co-linear segment
+		myQs.segNodes( segListArray[4] );
+		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear_inside F: co-lin, left -> qs_tr3" );
+		ok( ( segListArray[4].rootTo == qs_tr3 ), "ptNode_colinear_inside F: co-lin reverse, left -> qs_tr3" );
+		//	next(co-linear) segment
+		myQs.segNodes( segListArray[5] );
+		ok( ( segListArray[5].rootFrom == qs_tr3 ), "ptNode_colinear_inside F: next, left -> qs_tr3" );
+		ok( ( segListArray[5].rootTo == qs_tr3 ), "ptNode_colinear_inside F: next reverse, left -> qs_tr3" );
+		//	next(next(co-linear)) segment
+		myQs.segNodes( segListArray[0] );
+		ok( ( segListArray[0].rootFrom == qs_tr3 ), "ptNode_colinear_inside F: next-next, left -> qs_tr3" );
+		ok( ( segListArray[0].rootTo == qs_tr3 ), "ptNode_colinear_inside F: next-next reverse, left -> qs_tr3" );
 	}
 
-	function test_ptNode_colinear_2() {
+	function test_ptNode_colinear_overlapping() {
 
 		// overlapping left low, right high, CCW
 		//
@@ -1010,7 +1077,7 @@ function test_QueryStructure() {
 		//         +__     2
 		//
 		var testPolygon = [ { x: 25, y: 14 }, { x: 20, y: 20 }, { x: 40, y: 40 },
-							{ x: 35, y: 37 }, { x: 30, y: 30 }, { x: 10, y: 10 } ];
+							{ x: 29, y: 37 }, { x: 30, y: 30 }, { x: 10, y: 10 } ];
 		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
 		var segListArray = myPolygonData.getSegments();
 
@@ -1025,16 +1092,16 @@ function test_QueryStructure() {
 
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[3] );
-		ok( ( segListArray[3].rootFrom == qs_tr1 ), "ptNode_colinear#2 A: prev, left -> qs_tr1" );
-		ok( ( segListArray[3].rootTo == qs_tr1 ), "ptNode_colinear#2 A: prev reverse, left -> qs_tr1" );
+		ok( ( segListArray[3].rootFrom == qs_tr1 ), "ptNode_colinear_overlapping A: prev, left -> qs_tr1" );
+		ok( ( segListArray[3].rootTo == qs_tr1 ), "ptNode_colinear_overlapping A: prev reverse, left -> qs_tr1" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[4] );
-		ok( ( segListArray[4].rootFrom == qs_tr1 ), "ptNode_colinear#2 A: co-lin, left -> qs_tr1" );
-		ok( ( segListArray[4].rootTo == qs_tr2 ), "ptNode_colinear#2 A: co-lin reverse, left -> qs_tr2" );
+		ok( ( segListArray[4].rootFrom == qs_tr1 ), "ptNode_colinear_overlapping A: co-lin, left -> qs_tr1" );
+		ok( ( segListArray[4].rootTo == qs_tr2 ), "ptNode_colinear_overlapping A: co-lin reverse, left -> qs_tr2" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[5] );
-		ok( ( segListArray[5].rootFrom == qs_tr2 ), "ptNode_colinear#2 A: next, left -> qs_tr2" );
-		ok( ( segListArray[5].rootTo == qs_tr2 ), "ptNode_colinear#2 A: next reverse, left -> qs_tr2" );
+		ok( ( segListArray[5].rootFrom == qs_tr2 ), "ptNode_colinear_overlapping A: next, left -> qs_tr2" );
+		ok( ( segListArray[5].rootTo == qs_tr2 ), "ptNode_colinear_overlapping A: next reverse, left -> qs_tr2" );
 
 		//
 		// other sequence
@@ -1052,16 +1119,16 @@ function test_QueryStructure() {
 
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[0] );
-		ok( ( segListArray[0].rootFrom == qs_tr3 ), "ptNode_colinear#2 B: prev, right -> qs_tr3" );
-		ok( ( segListArray[0].rootTo == qs_tr3 ), "ptNode_colinear#2 B: prev reverse, right -> qs_tr3" );
+		ok( ( segListArray[0].rootFrom == qs_tr3 ), "ptNode_colinear_overlapping B: prev, right -> qs_tr3" );
+		ok( ( segListArray[0].rootTo == qs_tr3 ), "ptNode_colinear_overlapping B: prev reverse, right -> qs_tr3" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[1] );
-		ok( ( segListArray[1].rootFrom == qs_tr3 ), "ptNode_colinear#2 B: co-lin, right -> qs_tr3" );
-		ok( ( segListArray[1].rootTo == qs_tr0 ), "ptNode_colinear#1 B: co-lin reverse, right -> qs_tr0" );
+		ok( ( segListArray[1].rootFrom == qs_tr3 ), "ptNode_colinear_overlapping B: co-lin, right -> qs_tr3" );
+		ok( ( segListArray[1].rootTo == qs_tr0 ), "ptNode_colinear_overlapping B: co-lin reverse, right -> qs_tr0" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[2] );
-		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear#2 B: next, right -> qs_tr0" );
-		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear#1 B: next reverse, right -> qs_tr0" );
+		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear_overlapping B: next, right -> qs_tr0" );
+		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear_overlapping B: next reverse, right -> qs_tr0" );
 
 
 		// overlapping right low, left high, CW
@@ -1089,16 +1156,16 @@ function test_QueryStructure() {
 
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[3] );
-		ok( ( segListArray[3].rootFrom == qs_tr3 ), "ptNode_colinear#2 C: prev, right -> qs_tr3" );
-		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear#2 C: prev reverse, right -> qs_tr3" );
+		ok( ( segListArray[3].rootFrom == qs_tr3 ), "ptNode_colinear_overlapping C: prev, right -> qs_tr3" );
+		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear_overlapping C: prev reverse, right -> qs_tr3" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[4] );
-		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear#2 C: co-lin, right -> qs_tr3" );
-		ok( ( segListArray[4].rootTo == qs_tr2 ), "ptNode_colinear#1 C: co-lin reverse, right -> qs_tr2" );
+		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear_overlapping C: co-lin, right -> qs_tr3" );
+		ok( ( segListArray[4].rootTo == qs_tr2 ), "ptNode_colinear_overlapping C: co-lin reverse, right -> qs_tr2" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[5] );
-		ok( ( segListArray[5].rootFrom == qs_tr2 ), "ptNode_colinear#2 C: next, right -> qs_tr2" );
-		ok( ( segListArray[5].rootTo == qs_tr2 ), "ptNode_colinear#1 C: next reverse, right -> qs_tr2" );
+		ok( ( segListArray[5].rootFrom == qs_tr2 ), "ptNode_colinear_overlapping C: next, right -> qs_tr2" );
+		ok( ( segListArray[5].rootTo == qs_tr2 ), "ptNode_colinear_overlapping C: next reverse, right -> qs_tr2" );
 
 		//
 		// other sequence
@@ -1116,17 +1183,148 @@ function test_QueryStructure() {
 
 		//	prev(co-linear) segment
 		myQs.segNodes( segListArray[0] );
-		ok( ( segListArray[0].rootFrom == qs_tr1 ), "ptNode_colinear#2 D: prev, left -> qs_tr1" );
-		ok( ( segListArray[0].rootTo == qs_tr1 ), "ptNode_colinear#2 D: prev reverse, left -> qs_tr1" );
+		ok( ( segListArray[0].rootFrom == qs_tr1 ), "ptNode_colinear_overlapping D: prev, left -> qs_tr1" );
+		ok( ( segListArray[0].rootTo == qs_tr1 ), "ptNode_colinear_overlapping D: prev reverse, left -> qs_tr1" );
 		//	co-linear segment
 		myQs.segNodes( segListArray[1] );
-		ok( ( segListArray[1].rootFrom == qs_tr1 ), "ptNode_colinear#2 D: co-lin, left -> qs_tr1" );
-		ok( ( segListArray[1].rootTo == qs_tr0 ), "ptNode_colinear#1 D: co-lin reverse, left -> qs_tr0" );
+		ok( ( segListArray[1].rootFrom == qs_tr1 ), "ptNode_colinear_overlapping D: co-lin, left -> qs_tr1" );
+		ok( ( segListArray[1].rootTo == qs_tr0 ), "ptNode_colinear_overlapping D: co-lin reverse, left -> qs_tr0" );
 		//	next(co-linear) segment
 		myQs.segNodes( segListArray[2] );
-		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear#2 D: next, left -> qs_tr0" );
-		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear#1 D: next reverse, left -> qs_tr0" );
+		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear_overlapping D: next, left -> qs_tr0" );
+		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear_overlapping D: next reverse, left -> qs_tr0" );
 	}
+
+	function test_ptNode_colinear_reversal() {
+
+		// overlapping left low, right high, CCW
+		//
+		//					0
+		//   -----------*---------------	myQsRoot
+		//  		 + /
+		//  	1	 +/        3
+		//  		+/
+		//   -------*-------------------	qsL
+		//			     2
+		//
+		var testPolygon = [ { x: 20, y: 20 }, { x: 40, y: 40 },
+							{ x: 29, y: 37 }, { x: 30, y: 30 } ];
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
+
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+
+		myQs.add_segment( segListArray[0] );		// touch line, 2nd touch line: segListArray[3]
+		var qs_tr1 = myQs.getTrapByIdx(1).sink;
+		var qs_tr3 = myQs.getTrapByIdx(3).sink;
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false );
+
+		//	prev(co-linear) segment
+		myQs.segNodes( segListArray[2] );
+		ok( ( segListArray[2].rootFrom == qs_tr1 ), "ptNode_colinear_reversal A: prev, left -> qs_tr1" );
+		ok( ( segListArray[2].rootTo == qs_tr1 ), "ptNode_colinear_reversal A: prev reverse, left -> qs_tr1" );
+		//	co-linear segment
+		myQs.segNodes( segListArray[3] );
+		ok( ( segListArray[3].rootFrom == qs_tr1 ), "ptNode_colinear_reversal A: co-lin, left -> qs_tr1" );
+		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear_reversal A: co-lin reverse, left -> qs_tr1" );		// TODO Error
+		//	next(base) segment
+		myQs.segNodes( segListArray[1] );
+		ok( ( segListArray[1].rootFrom == qs_tr1 ), "ptNode_colinear_reversal A: next(base), left -> qs_tr1" );
+		ok( ( segListArray[1].rootTo == qs_tr1 ), "ptNode_colinear_reversal A: next(base) reverse, left -> qs_tr1" );
+
+		//
+/*		// other sequence
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
+
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+
+		myQs.add_segment( segListArray[4] );		// touch line, 2nd touch line: segListArray[1]
+		var qs_tr0 = myQs.getTrapByIdx(0).sink;
+		var qs_tr3 = myQs.getTrapByIdx(3).sink;
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false );
+
+		//	prev(co-linear) segment
+		myQs.segNodes( segListArray[0] );
+		ok( ( segListArray[0].rootFrom == qs_tr3 ), "ptNode_colinear_reversal B: prev, right -> qs_tr3" );
+		ok( ( segListArray[0].rootTo == qs_tr3 ), "ptNode_colinear_reversal B: prev reverse, right -> qs_tr3" );
+		//	co-linear segment
+		myQs.segNodes( segListArray[1] );
+		ok( ( segListArray[1].rootFrom == qs_tr3 ), "ptNode_colinear_reversal B: co-lin, right -> qs_tr3" );
+		ok( ( segListArray[1].rootTo == qs_tr0 ), "ptNode_colinear_reversal B: co-lin reverse, right -> qs_tr0" );
+		//	next(co-linear) segment
+		myQs.segNodes( segListArray[2] );
+		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear_reversal B: next, right -> qs_tr0" );
+		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear_reversal B: next reverse, right -> qs_tr0" );
+
+
+		// overlapping right low, left high, CW
+		//
+		//					0
+		//   ------------*--------------	myQsRoot
+		//  			/
+		//  	1	   /++       3
+		//   ---------*+					qsL
+		// 			  +     2
+		//			+
+		var testPolygon = [ { x:  5, y: 14 }, { x: 20, y: 20 }, { x: 40, y: 40 },
+							{ x: 45, y: 37 }, { x: 30, y: 30 }, { x: 10, y: 10 } ];
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
+
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+
+		myQs.add_segment( segListArray[1] );		// touch line, 2nd touch line: segListArray[4]
+		var qs_tr2 = myQs.getTrapByIdx(2).sink;
+		var qs_tr3 = myQs.getTrapByIdx(3).sink;
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false );
+
+		//	prev(co-linear) segment
+		myQs.segNodes( segListArray[3] );
+		ok( ( segListArray[3].rootFrom == qs_tr3 ), "ptNode_colinear_reversal C: prev, right -> qs_tr3" );
+		ok( ( segListArray[3].rootTo == qs_tr3 ), "ptNode_colinear_reversal C: prev reverse, right -> qs_tr3" );
+		//	co-linear segment
+		myQs.segNodes( segListArray[4] );
+		ok( ( segListArray[4].rootFrom == qs_tr3 ), "ptNode_colinear_reversal C: co-lin, right -> qs_tr3" );
+		ok( ( segListArray[4].rootTo == qs_tr2 ), "ptNode_colinear_reversal C: co-lin reverse, right -> qs_tr2" );
+		//	next(co-linear) segment
+		myQs.segNodes( segListArray[5] );
+		ok( ( segListArray[5].rootFrom == qs_tr2 ), "ptNode_colinear_reversal C: next, right -> qs_tr2" );
+		ok( ( segListArray[5].rootTo == qs_tr2 ), "ptNode_colinear_reversal C: next reverse, right -> qs_tr2" );
+
+		//
+		// other sequence
+		var myPolygonData = new PNLTRI.PolygonData( [ testPolygon ] );
+		var segListArray = myPolygonData.getSegments();
+
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+
+		myQs.add_segment( segListArray[4] );		// touch line, 2nd touch line: segListArray[1]
+		var qs_tr0 = myQs.getTrapByIdx(0).sink;
+		var qs_tr1 = myQs.getTrapByIdx(1).sink;
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false );
+
+		//	prev(co-linear) segment
+		myQs.segNodes( segListArray[0] );
+		ok( ( segListArray[0].rootFrom == qs_tr1 ), "ptNode_colinear_reversal D: prev, left -> qs_tr1" );
+		ok( ( segListArray[0].rootTo == qs_tr1 ), "ptNode_colinear_reversal D: prev reverse, left -> qs_tr1" );
+		//	co-linear segment
+		myQs.segNodes( segListArray[1] );
+		ok( ( segListArray[1].rootFrom == qs_tr1 ), "ptNode_colinear_reversal D: co-lin, left -> qs_tr1" );
+		ok( ( segListArray[1].rootTo == qs_tr0 ), "ptNode_colinear_reversal D: co-lin reverse, left -> qs_tr0" );
+		//	next(co-linear) segment
+		myQs.segNodes( segListArray[2] );
+		ok( ( segListArray[2].rootFrom == qs_tr0 ), "ptNode_colinear_reversal D: next, left -> qs_tr0" );
+		ok( ( segListArray[2].rootTo == qs_tr0 ), "ptNode_colinear_reversal D: next reverse, left -> qs_tr0" );
+*/	}
 
 	/**************************************************************************/
 
@@ -1839,42 +2037,6 @@ function test_QueryStructure() {
 	function test_add_segment_special_5() {
 
 		var myPolygonData = new PNLTRI.PolygonData( [ [
-			{ x: 105, y: 100.4 },
-			{ x: 104, y: 100.39999999999998 },
-			{ x: 103, y: 100.40000000000003 },
-			{ x: 102, y: 100.4 },
-			{ x: 101, y: 100.40000000000002 },
-			] ] );
-		var segListArray = myPolygonData.getSegments();
-//		showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
-//		showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext' ] );
-		//
-		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		//
-		myQs.add_segment_consistently( segListArray[0], 'Spec_5 #1' );
-		myQs.add_segment_consistently( segListArray[1], 'Spec_5 #2' );
-		// complex case: EPSILON > rounding effect on coordinates
-		myQs.add_segment_consistently( segListArray[3], 'Spec_5 Main' );
-		equal( myQs.nbTrapezoids(), 9, "Spec_5: Number of Trapezoids" );
-
-		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_5: neighbors trap0" );
-		myQs.check_trapezoid_neighbors(  1, 0, null, 2, null, "Spec_5: neighbors trap1" );
-		myQs.check_trapezoid_neighbors(  2, 1, null, 4, null, "Spec_5: neighbors trap2" );
-		myQs.check_trapezoid_neighbors(  3, null, 0, null, 5, "Spec_5: neighbors trap3" );
-		myQs.check_trapezoid_neighbors(  4, 2, 5, 6, 8, "Spec_5: neighbors trap4" );
-		myQs.check_trapezoid_neighbors(  5, null, 3, null, 4, "Spec_5: neighbors trap5" );
-		myQs.check_trapezoid_neighbors(  6, 4, null, 7, null, "Spec_5: neighbors trap6" );
-		myQs.check_trapezoid_neighbors(  7, 6, 8, null, null, "Spec_5: neighbors trap7" );
-		myQs.check_trapezoid_neighbors(  8, null, 4, null, 7, "Spec_5: neighbors trap8" );
-
-//		var myQsRoot = myQs.getRoot();
-//		showDataStructure( myQsRoot );
-//		drawTrapezoids( myQsRoot, false, 0.4 );
-	}
-
-	function test_add_segment_special_6() {
-
-		var myPolygonData = new PNLTRI.PolygonData( [ [
 			{ x:43, y:31 }, { x:41, y:29 },
 			{ x:42, y:40 }, { x:36, y:24 },
 			{ x:34, y:16 }, { x:23, y:34 },
@@ -1901,7 +2063,7 @@ function test_QueryStructure() {
 //		drawTrapezoids( myQsRoot, false, 1 );
 	}
 
-	function test_add_segment_special_7() {
+	function test_add_segment_special_6() {
 
 		var myPolygonData = new PNLTRI.PolygonData( [ [
 			{ x:10, y:34 }, { x:36, y:12 }, { x:32, y:20 }, { x:28, y:24 },
@@ -1990,8 +2152,9 @@ function test_QueryStructure() {
 		//
 		test_ptNode();
 		test_ptNode_touching();
-		test_ptNode_colinear_1();
-		test_ptNode_colinear_2();
+		test_ptNode_colinear_inside();
+		test_ptNode_colinear_overlapping();
+		test_ptNode_colinear_reversal();
 		//
 		test_assign_depths();
 		//
@@ -2013,9 +2176,8 @@ function test_QueryStructure() {
 		test_add_segment_special_2();
 		test_add_segment_special_3();
 		test_add_segment_special_4();
-//		test_add_segment_special_5();		// co-linear removed on input
+		test_add_segment_special_5();
 		test_add_segment_special_6();
-		test_add_segment_special_7();
 		// for testing new polygons
 //		test_add_segment_NEW();
 //		test_add_segment_Error();
