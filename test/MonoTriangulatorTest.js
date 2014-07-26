@@ -157,19 +157,36 @@ function test_MonoTriangulator() {
 		var myVertices;
 		//
 		// co-linear reversal
-		myVertices = [ { x:30,y:30 }, { x:10,y:10 }, { x:25,y:14 }, { x:20,y:20 } ];
+		// reversal high, right triang low
+		myVertices = [ { x:30,y:30 }, { x:10,y:10 }, { x:28,y:23 }, { x:20,y:20 } ];
 		initSeglistMonoChain( myVertices );
 		myMonoTriang.triangulate_monotone_polygon( myMonoChain[0] );
-		equal( triangList.length, 2, "co-linear reversal #1: number" );
-		deepEqual(	triangList, [ [ 1, 2, 3 ], [ 1, 3, 0 ] ], "co-linear reversal #1: Triangles" );
+		equal( triangList.length, 2, "LHS, co-linear reversal high: number" );
+		deepEqual(	triangList, [ [ 1, 2, 3 ], [ 1, 3, 0 ] ], "LHS, co-linear reversal high: Triangles" );
 //		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
 		//
-		// co-linear reversal
-		myVertices = [ { x:40,y:40 }, { x:29,y:37 }, { x:30,y:30 }, { x:20,y:20 } ];
+		// reversal high, left triang low
+		myVertices = [ { x:30,y:30 }, { x:20,y:20 }, { x:8,y:22 }, { x:10,y:10 } ];
 		initSeglistMonoChain( myVertices );
 		myMonoTriang.triangulate_monotone_polygon( myMonoChain[0] );
-		equal( triangList.length, 2, "co-linear reversal #2: number" );			// TODO: Error
-		deepEqual(	triangList, [ [ 2, 3, 0 ], [ 1, 2, 0 ] ], "co-linear reversal #2: Triangles" );
+		equal( triangList.length, 2, "RHS, co-linear reversal high: number" );
+		deepEqual(	triangList, [ [ 1, 2, 3 ], [ 1, 3, 0 ] ], "RHS, co-linear reversal high: Triangles" );
+//		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
+		//
+		// reversal low, right triang high
+		myVertices = [ { x:40,y:40 }, { x:20,y:20 }, { x:30,y:30 }, { x:41,y:29 } ];
+		initSeglistMonoChain( myVertices );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[0] );
+		equal( triangList.length, 2, "LHS, co-linear reversal low: number" );			// TODO: Error
+		deepEqual(	triangList, [ [ 2, 3, 0 ], [ 1, 2, 0 ] ], "LHS, co-linear reversal low: Triangles" );
+//		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
+		//
+		// reversal low, left triang high
+		myVertices = [ { x:40,y:40 }, { x:23,y:28 }, { x:30,y:30 }, { x:20,y:20 } ];
+		initSeglistMonoChain( myVertices );
+		myMonoTriang.triangulate_monotone_polygon( myMonoChain[0] );
+		equal( triangList.length, 2, "RHS, co-linear reversal low: number" );
+		deepEqual(	triangList, [ [ 2, 3, 0 ], [ 1, 2, 0 ] ], "RHS, co-linear reversal low: Triangles" );
 //		drawPolygonLayers( { "poly": [ myVertices ], "triang": myPolygonData.triangles_2_polygons() } );
 	}
 
