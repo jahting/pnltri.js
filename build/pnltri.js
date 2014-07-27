@@ -1019,18 +1019,19 @@ PNLTRI.QueryStructure.prototype = {
 	//	ATTENTION: always viewed from -y, not as if moving along the segment chain !!
 
 	is_left_of: function ( inSeg, inPt, inBetweenY ) {
-		var	retVal, retVal2;
+		var retVal;
 		var dXfrom = inSeg.vFrom.x - inPt.x;
 		var dXto = inSeg.vTo.x - inPt.x;
 		var dYfromZero = ( Math.abs( inSeg.vFrom.y - inPt.y ) < PNLTRI.Math.EPSILON_P );
 		if ( Math.abs( inSeg.vTo.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
-			if ( dYfromZero )	return 0;
-			retVal = dXto; retVal2 = dXfrom;
+			if ( dYfromZero )	return 0;		// all points on a horizontal line
+			retVal = dXto;
 		} else if ( dYfromZero ) {
-			retVal = dXfrom; retVal2 = dXto;
-//		} else if ( inBetweenY && ( dXfrom * dXto > 0 ) ) {
+			retVal = dXfrom;
+/*		} else if ( inBetweenY && ( dXfrom * dXto > 0 ) ) {
 			// both x-coordinates of inSeg are on the same side of inPt
-//			retVal = dXto; retVal2 = dXfrom;
+			if ( Math.abs( dXto ) >= PNLTRI.Math.EPSILON_P )	return	dXto;
+			retVal = dXfrom;	*/
 		} else {
 			if ( inSeg.upward ) {
 				return	PNLTRI.Math.ptsCrossProd( inSeg.vFrom, inSeg.vTo, inPt );
@@ -1038,10 +1039,7 @@ PNLTRI.QueryStructure.prototype = {
 				return	PNLTRI.Math.ptsCrossProd( inSeg.vTo, inSeg.vFrom, inPt );
 			}
 		}
-		if ( Math.abs( retVal ) < PNLTRI.Math.EPSILON_P ) {
-			if ( Math.abs( retVal2 ) < PNLTRI.Math.EPSILON_P )	return	0;
-			return	retVal2;
-		}
+		if ( Math.abs( retVal ) < PNLTRI.Math.EPSILON_P )		return	0;
 		return	retVal;
 	},
 
@@ -1085,7 +1083,7 @@ PNLTRI.QueryStructure.prototype = {
 					console.log("ptNode: Pts too close together#1: ", compPt, qsNode.yval );
 				}		*/
 				qsNode = ( compRes == -1 ) ? qsNode.left : qsNode.right;		// below : above
-			} else if ( qsNode.seg ) {		// X-Node: segment (vertical line)
+			} else if ( qsNode.seg ) {		// X-Node: segment (~vertical line)
 											// 0.8 to 1.5 times as often as SINK-Node
 				if ( ( inPt == qsNode.seg.vFrom ) ||						// the point is already inserted.
 					 ( inPt == qsNode.seg.vTo ) ) {
@@ -1106,14 +1104,36 @@ PNLTRI.QueryStructure.prototype = {
 							// now as we have two consecutive co-linear segments we have to avoid a cross-over
 							//	for this we need the far point on the "next" segment to the shorter of our two
 							//	segments to avoid that "next" segment to cross the longer of our two segments
+							var isInSegmentShorter;
+							// TODO: what about horizontal segments ?? maybe use of: PNLTRI.Math.compare_pts_yx, or just segment-length
 							if ( inPt == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
 //								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vFrom", inPt, inPtOther, qsNode );
-								qsNode = qsNode.right;				// ??? TODO: for test_add_segment_special_4B !!
+								isInSegmentShorter = qsNode.seg.upward ?
+										( inPtOther.y <  qsNode.seg.vTo.y ) :
+										( inPtOther.y >= qsNode.seg.vTo.y );
+								compRes = isInSegmentShorter ?
+										this.is_left_of( qsNode.seg, inSegment.sprev.vFrom, false ) :
+										-this.is_left_of( qsNode.seg, qsNode.seg.snext.vTo, false );
 							} else {
 								// connected at qsNode.seg.vTo
 //								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vTo", inPt, inPtOther, qsNode );
-								qsNode = qsNode.left;				// ??? TODO: for test_add_segment_special_4A !!
+								isInSegmentShorter = qsNode.seg.upward ?
+										( inPtOther.y >= qsNode.seg.vFrom.y ) :
+										( inPtOther.y <  qsNode.seg.vFrom.y );
+								compRes = isInSegmentShorter ?
+										this.is_left_of( qsNode.seg, inSegment.snext.vTo, false ) :
+										-this.is_left_of( qsNode.seg, qsNode.seg.sprev.vFrom, false );
+							}
+							if ( compRes > 0 ) {
+								qsNode = qsNode.left;
+							} else if ( compRes < 0 ) {
+								qsNode = qsNode.right;
+							} else {
+								// ???	TODO - not reached with current tests
+								return qsNode;
+								// qsNode = qsNode.left;		// left
+								// qsNode = qsNode.right;		// right
 							}
 						}
 					}
@@ -1142,16 +1162,15 @@ PNLTRI.QueryStructure.prototype = {
 							var tmpPtOther = inUseFrom ? inSegment.sprev.vFrom : inSegment.snext.vTo;
 							compRes = this.is_left_of( qsNode.seg, tmpPtOther, false );
 							if ( compRes > 0 ) {
-								// test_ptNode_colinear_1A
 								qsNode = qsNode.left;
 							} else if ( compRes < 0 ) {
-								// test_ptNode_colinear_1B
-								// test_add_segment_special_4B
 								qsNode = qsNode.right;
 							} else {
-								// ???	TODO
+								// ???	TODO - not reached with current tests
+								//				possible at all ?
+								return qsNode;
 								// qsNode = qsNode.left;		// left
-								qsNode = qsNode.right;		// right
+								// qsNode = qsNode.right;		// right
 							}
 						}
 					}
@@ -1527,7 +1546,7 @@ PNLTRI.QueryStructure.prototype = {
 						//    - - -*-------
 						//	 	  +	\  C.dR
 						//	  C.dL	 \
-						trNext = trCurrent.dL;				// TODO: for test_add_segment_special_4A -> like intersecting dL
+						trNext = trCurrent.dL;				// TODO: -> like intersecting dL
 						// setAbove part 2
 						trCurrent.dL.uR = trNewRight;
 						// setBelow part 1
@@ -1568,6 +1587,9 @@ PNLTRI.QueryStructure.prototype = {
 							trNewRight.dR = trCurrent.dR;
 							trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
 						} else {							// otherPt lies ON inSegment
+							
+							/*	SHOULD BE UNREACHABLE */
+							
 /*							//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
 							// console.log( "two_trap_below: vLow ON new segment, touching from right" );
 							//		 +
@@ -1592,7 +1614,7 @@ PNLTRI.QueryStructure.prototype = {
 							//    - - -*-------
 							//	 	  +	\  C.dR
 							//	  C.dL	 \
-							trNext = trCurrent.dL;				// TODO: for test_add_segment_special_4A -> like intersecting dL
+							trNext = trCurrent.dL;				// TODO: -> like intersecting dL
 							// setAbove part 2
 							trCurrent.dL.uR = trNewRight;
 							// setBelow part 1

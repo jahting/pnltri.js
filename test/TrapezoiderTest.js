@@ -902,14 +902,12 @@ function test_QueryStructure() {
 		// horizontal lines
 		var testPolygon = [ { x: 15, y: 15 }, { x: 10, y: 10 }, { x: 40, y: 10 },
 							{ x: 35, y: 20 }, { x: 30, y: 10 }, { x: 20, y: 10 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "lh", testPolygon, 1,
 			[ [ 0, 1 ], null, [ 0, 0 ], [ 0, 1 ], [ 1, 1 ], [ 1, 0 ] ] );		// 0, 1: base, 2, 3, 4: co-linear, 5
 
 		// vertical lines
 		var testPolygon = [ { x: 15, y: 15 }, { x: 30, y: 10 }, { x: 30, y: 40 },
 							{ x: 25, y: 35 }, { x: 30, y: 30 }, { x: 30, y: 20 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "lv", testPolygon, 1,
 			[ [ 1, 1 ], null, [ 1, 1 ], [ 1, 1 ], [ 1, 1 ], [ 1, 1 ] ] );		// 0, 1: base, 2, 3, 4: co-linear, 5
 
@@ -930,19 +928,15 @@ function test_QueryStructure() {
 		check_one_case( "rg", testPolygon, 1,
 			[ null, null, null, [ 3, 3 ], [ 3, 3 ], [ 3, 3 ] ] );		// 0:-, 1: base, 2:-, 3, 4: co-linear, 5
 
-		//
 		// horizontal lines
 		var testPolygon = [ { x: 15, y: 30 }, { x: 10, y: 40 }, { x: 40, y: 40 },
 							{ x: 35, y: 35 }, { x: 30, y: 40 }, { x: 20, y: 40 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "rh", testPolygon, 1,
 			[ [ 2, 2 ], null, [ 3, 2 ], [ 2, 3 ], [ 3, 3 ], [ 3, 2 ] ] );		// 0, 1: base, 2, 3, 4: co-linear, 5
 
-		//
 		// vertical lines
 		var testPolygon = [ { x: 45, y: 15 }, { x: 30, y: 10 }, { x: 30, y: 40 },
 							{ x: 35, y: 35 }, { x: 30, y: 30 }, { x: 30, y: 20 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "rv", testPolygon, 1,
 			[ [ 3, 3 ], null, [ 3, 3 ], [ 3, 3 ], [ 3, 3 ], [ 3, 3 ] ] );		// 0, 1: base, 2, 3, 4: co-linear, 5
 	}
@@ -1018,16 +1012,12 @@ function test_QueryStructure() {
 							{ x: 23, y: 28 }, { x: 30, y: 30 } ];
 //		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "llCCWa", testPolygon, 0,
-//						[ null, [ 1, 1 ], [ 1, 1 ], [ 1, 1 ] ] );	// 0: base, 1, 2, 3: co-linear
-						[ null, [ 1, 1 ], [ 1, 1 ], [ 1, 3 ] ] );	// 0: base, 1, 2, 3: co-linear		// TODO Error
+						[ null, [ 1, 1 ], [ 1, 1 ], [ 1, 1 ] ] );	// 0: base, 1, 2, 3: co-linear
 		check_one_case( "llCCWb", testPolygon, 3,
-//						[ [ 3, 0 ], [ 0, 1 ], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base
-						[ [ 1, 0 ], [ 0, 1 ], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base		// TODO Error
-
+						[ [ 3, 0 ], [ 0, 1 ], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base
 		// CW
 		var testPolygon = [ { x: 40, y: 40 }, { x: 20, y: 20 },
 							{ x: 30, y: 30 }, { x: 23, y: 28 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "llCWa", testPolygon, 0,
 						[ null, [ 1, 1 ], [ 1, 1 ], [ 1, 1 ] ] );	// 0: base, 1: co-linear, 2, 3
 		check_one_case( "llCWb", testPolygon, 1,
@@ -1049,18 +1039,14 @@ function test_QueryStructure() {
 							{ x: 30, y: 30 }, { x: 41, y: 29 } ];
 //		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "lrCCWa", testPolygon, 0,
-//						[ null, [ 3, 3 ], [ 3, 3 ], [ 3, 3 ] ] );	// 0: base, 1: co-linear, 2, 3
-						[ null, [ 1, 1 ], [ 3, 3 ], [ 3, 3 ] ] );	// 0: base, 1: co-linear, 2, 3			// TODO Error
+						[ null, [ 3, 3 ], [ 3, 3 ], [ 3, 3 ] ] );	// 0: base, 1: co-linear, 2, 3
 		check_one_case( "lrCCWb", testPolygon, 1,
-//						[ [ 0, 1 ], null, [ 3, 3 ], [ 3, 0 ] ] );	// 0: co-linear, 1: base, 2, 3
-						[ [ 0, 3 ], null, [ 3, 3 ], [ 3, 0 ] ] );	// 0: co-linear, 1: base, 2, 3			// TODO Error
+						[ [ 0, 1 ], null, [ 3, 3 ], [ 3, 0 ] ] );	// 0: co-linear, 1: base, 2, 3
 		// CW
 		var testPolygon = [ { x: 40, y: 40 }, { x: 41, y: 29 },
 							{ x: 30, y: 30 }, { x: 20, y: 20 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "lrCWa", testPolygon, 3,
-//						[ [ 3, 3 ], [ 3, 3 ], [ 3, 3 ], null ] );	// 0, 1, 2: co-linear, 3: base
-						[ [ 3, 3 ], [ 3, 3 ], [ 1, 3 ], null ] );	// 0, 1, 2: co-linear, 3: base			// TODO Error
+						[ [ 3, 3 ], [ 3, 3 ], [ 3, 3 ], null ] );	// 0, 1, 2: co-linear, 3: base
 		check_one_case( "lrCWb", testPolygon, 2,
 						[ [ 0, 3 ], [ 3, 3 ], null, [ 1, 0 ] ] );	// 0, 1, 2: base, 3: co-linear
 
@@ -1080,20 +1066,16 @@ function test_QueryStructure() {
 							{ x:  8, y: 22 }, { x: 10, y: 10 } ];
 //		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "hlCCWa", testPolygon, 3,
-//						[ [ 1, 1 ], [ 1, 1], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base
-						[ [ 1, 3 ], [ 1, 1], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base			// TODO Error
+						[ [ 1, 1 ], [ 1, 1], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base
 		check_one_case( "hlCCWb", testPolygon, 0,
 						[ null, [ 1, 1 ], [ 1, 2 ], [ 2, 3 ] ] );	// 0: base, 1, 2, 3: co-linear
 		// CW
 		var testPolygon = [ { x: 30, y: 30 }, { x: 10, y: 10 },
 							{ x:  8, y: 22 }, { x: 20, y: 20 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "hlCWa", testPolygon, 0,
-//						[ null, [ 1, 1 ], [ 1, 1 ], [ 1, 1 ] ] );	// 0: base, 1, 2, 3: co-linear
-						[ null, [ 1, 1 ], [ 1, 1 ], [ 3, 3 ] ] );	// 0: base, 1, 2, 3: co-linear			// TODO Error
+						[ null, [ 1, 1 ], [ 1, 1 ], [ 1, 1 ] ] );	// 0: base, 1, 2, 3: co-linear
 		check_one_case( "hlCWb", testPolygon, 3,
-//						[ [ 3, 2 ], [ 2, 1 ], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base
-						[ [ 1, 2 ], [ 2, 1 ], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base			// TODO Error
+						[ [ 3, 2 ], [ 2, 1 ], [ 1, 1 ], null ] );	// 0: co-linear, 1, 2, 3: base
 
 
 		// reversal high, right triang low
@@ -1117,13 +1099,10 @@ function test_QueryStructure() {
 		// CW
 		var testPolygon = [ { x: 30, y: 30 }, { x: 20, y: 20 },
 							{ x: 28, y: 23 }, { x: 10, y: 10 } ];
-//		drawPolygonLayers( { "poly": [ testPolygon ] } );
 		check_one_case( "hrCWa", testPolygon, 3,
-//						[ [ 3, 3 ], [ 3, 3 ], [ 3, 3 ], null ] );	// 0: co-linear, 1, 2, 3: base
-						[ [ 1, 3 ], [ 3, 3 ], [ 3, 3 ], null ] );	// 0: co-linear, 1, 2, 3: base			// TODO Error
+						[ [ 3, 3 ], [ 3, 3 ], [ 3, 3 ], null ] );	// 0: co-linear, 1, 2, 3: base
 		check_one_case( "hrCWb", testPolygon, 0,
-//						[ null, [ 3, 3 ], [ 3, 2 ], [ 2, 1 ] ] );	// 0: base, 1, 2, 3: co-linear
-						[ null, [ 3, 3 ], [ 3, 2 ], [ 2, 3 ] ] );	// 0: base, 1, 2, 3: co-linear			// TODO Error
+						[ null, [ 3, 3 ], [ 3, 2 ], [ 2, 1 ] ] );	// 0: base, 1, 2, 3: co-linear
 	}
 
 	/**************************************************************************/
@@ -1775,17 +1754,14 @@ function test_QueryStructure() {
 //		drawTrapezoids( myQsRoot, false, 2 );
 	}
 
-	function test_add_segment_special_4() {			// TODO: test all mirrored cases !!!
-													//	if going back co-linear direction
-													//	should be checked with the preceding segment
-													// ATTENTION: this needs to be looped since the
-													//	preceeding segment can also be co-linear ...
+	function test_add_segment_special_4() {			// TODO: replace with direct tests
 
 		var testPolygon = [ [
 			{ x: 2, y: 1 },
 			{ x: 1, y: 3 }, { x: 1, y: 2 }, { x: 1, y: 4 },		// goes back on same x-line
 			{ x: 0, y: 0 },
 			] ];
+//		drawPolygonLayers( { "poly": testPolygon }, 10 );
 		//
 		//	Test A
 		var myPolygonData = new PNLTRI.PolygonData( testPolygon );
@@ -1808,28 +1784,6 @@ function test_QueryStructure() {
 		myQs.add_segment_consistently( segListArray[2], 'Spec_4a Main' );
 		equal( myQs.nbTrapezoids(), 8, "Spec_4a: Number of Trapezoids" );
 
-//		showDataStructure( myQsRoot );
-//		drawTrapezoids( myQsRoot, false, 10 );
-		//
-		//	Test B
-		myPolygonData = new PNLTRI.PolygonData( testPolygon );
-		segListArray = myPolygonData.getSegments();
-
-		myQs = new PNLTRI.QueryStructure( myPolygonData );
-		myQsRoot = myQs.getRoot();
-
-		myQs.add_segment_consistently( segListArray[2], 'Spec_4b #1' );
-		myQs.add_segment_consistently( segListArray[1], 'Spec_4b #2' );
-		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_4b #2, trap0" );
-		myQs.check_trapezoid_neighbors(  1, 0, null, 2, null, "Spec_4b #2, trap1" );
-		myQs.check_trapezoid_neighbors(  2, 1, 5, null, null, "Spec_4b #2, trap2" );
-		myQs.check_trapezoid_neighbors(  3, null, 0, 4, 5, "Spec_4b #2, trap3" );
-		myQs.check_trapezoid_neighbors(  4, 3, null, null, null, "Spec_4b #2, trap4" );
-		myQs.check_trapezoid_neighbors(  5, null, 3, null, 2, "Spec_4b #2, trap5" );
-		// complex case: attaching to the middle point of two co-linear segments
-		myQs.add_segment_consistently( segListArray[0], 'Spec_4b Main' );
-		equal( myQs.nbTrapezoids(), 8, "Spec_4b: Number of Trapezoids" );
-		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 10 );
 	}
