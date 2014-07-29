@@ -163,6 +163,14 @@ PNLTRI.MonoSplitter.prototype = {
 
 			if ( inOneStep )	return trapQueue;
 		}
+/*		// temporarily monoChains can contain the same point twice
+		//	usually when merging separate polygon chains (e.g. contour and hole)
+		// but in the end no monoChain may contain a vertex twice (could not be monotone)
+		var checkResult;
+		if ( checkResult = this.polyData.check_monoChains_noDoublePts() ) {
+			console.log("alyTrap: " + checkResult );
+		}		*/
+
 		return	[];
 	},
 

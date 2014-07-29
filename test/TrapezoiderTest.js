@@ -1850,9 +1850,64 @@ function test_QueryStructure() {
 	}
 
 
+	function test_equal_next_right_of() {
+		var inDebug = 1;
+
+		var example_data = [
+			[	// CCW
+				{ x: 5, y:35 }, { x:10, y:18 }, { x:31, y: 6 },
+				{ x:29, y:10 }, { x:27, y:18 }, { x:32, y:28 },
+			],
+			[ { x: 27.5, y: 19 }, { x: 25, y: 20.5 }, { x: 29, y: 22 } ],		// hole: CW
+							];
+		var myPolygonData = new PNLTRI.PolygonData( example_data );
+
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+		var segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[4], 'New#1' );
+		myQs.add_segment_consistently( segListArray[6], 'New#2' );
+		myQs.add_segment_consistently( segListArray[1], 'New#3' );
+		myQs.add_segment_consistently( segListArray[0], 'New#4' );
+		myQs.add_segment_consistently( segListArray[2], 'New#5' );
+		myQs.add_segment_consistently( segListArray[8], 'New#6' );
+		myQs.add_segment_consistently( segListArray[3], 'New#7' );
+		myQs.add_segment_consistently( segListArray[7], 'New#8' );
+		myQs.add_segment_consistently( segListArray[5], 'New#9' );
+
+		myQs.assignDepths(myPolygonData);			// marks outside trapezoids
+		equal( myQs.minDepth(), 0, "equal_next_right_of: Min depth == 0 (closed polygon)" );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, inDebug );
+		//
+		//	check following steps - OPTIONAL
+		var startTrap = myQs.find_first_inside();
+//		drawTrapezoids( startTrap.sink, false, inDebug );
+		//
+		var myMono = new PNLTRI.MonoSplitter( myPolygonData );
+		myPolygonData.initMonoChains();
+		myMono.alyTrap(	myPolygonData.newMonoChain( startTrap.lseg ), startTrap, null, null, null );
+		equal( myPolygonData.normalize_monotone_chains(), 4, "equal_next_right_of: Number of monotone chains" );
+		var checkResult;
+		if ( checkResult = myPolygonData.check_monoChains_noDoublePts() )
+			ok( false, "equal_next_right_of: " + checkResult );
+		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )
+			ok( false, "equal_next_right_of: " + checkResult );
+//		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
+		//
+		var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
+		myTriangulator.triangulate_all_polygons();
+		var triangList = myPolygonData.getTriangles();		// sorted results !!
+//		drawPolygonLayers( { "poly": example_data, "triang": myPolygonData.triangles_2_polygons() }, inDebug );
+	}
+
+
 	// temporary method to test polygons-chains before adding them
 	//  to the PolygonTestdata
 	function test_add_segment_NEW() {
+		var inDebug = 1;
 
 //		var	testData = new PolygonTestdata();
 //		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "three_error#3" ) );
@@ -1884,7 +1939,7 @@ function test_QueryStructure() {
 /*			var info = document.createElement( 'div' );
 			info.innerHTML = i;
 			document.body.appendChild( info );
-			drawTrapezoids( myQsRoot, false, 1 );		*/
+			drawTrapezoids( myQsRoot, false, inDebug );		*/
 		}
 		ok( myPolygonData.allSegsInQueryStructure(), "add_segment_NEW: all segments inserted" );
 		console.log("add_segment_NEW: Number of Trapezoids: ", myQs.nbTrapezoids() );
@@ -1892,7 +1947,29 @@ function test_QueryStructure() {
 		equal( myQs.minDepth(), 0, "add_segment_NEW: Min depth == 0 (closed polygon)" );
 		//
 //		showDataStructure( myQsRoot );
-		drawTrapezoids( myQsRoot, false, 1 );
+		drawTrapezoids( myQsRoot, false, inDebug );
+		//
+		//	check following steps - OPTIONAL
+/*		var startTrap = myQs.find_first_inside();
+		drawTrapezoids( startTrap.sink, false, inDebug );
+		//
+		var myMono = new PNLTRI.MonoSplitter( myPolygonData );
+		myPolygonData.initMonoChains();
+		myMono.alyTrap(	myPolygonData.newMonoChain( startTrap.lseg ), startTrap, null, null, null );
+		var checkResult;
+		if ( checkResult = myPolygonData.check_monoChains_noDoublePts() )	console.log("add_segment_NEW: " + checkResult );
+		console.log( "MonoChains before normalization: ", testData.polygons_to_str( myPolygonData.monotone_chains_2_polygons() ) );
+		console.log( "MonoChains before normalization: ", myPolygonData.polygons_2_vertexIndexLists( myPolygonData.monotone_chains_2_polygons() ) );
+		console.log( "MonoChains before normalization: ", myPolygonData.monoChainStarts_2_vertexIndexLists() );
+		myPolygonData.normalize_monotone_chains();
+		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )		console.log("add_segment_NEW: " + checkResult );
+		myPolygonData.check_normedMonoChains_consistency( "add_segment_NEW" );
+		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
+		//
+		var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
+		myTriangulator.triangulate_all_polygons();
+		var triangList = myPolygonData.getTriangles();		// sorted results !!
+		drawPolygonLayers( { "poly": example_data, "triang": myPolygonData.triangles_2_polygons() }, inDebug );		*/
 	}
 
 
@@ -1932,6 +2009,8 @@ function test_QueryStructure() {
 		test_add_segment_special_4();
 		test_add_segment_special_5();
 		test_add_segment_special_6();
+		//
+		test_equal_next_right_of();
 		// for testing new polygons
 //		test_add_segment_NEW();
 //		test_add_segment_Error();
@@ -2145,8 +2224,9 @@ function test_Trapezoider() {
 		test_trapezoide_polygon( "pt_3_diag_max", 7, 15, 10, 1, [ true ], 0 );		// 4: vertex (6,6) with 3 additional diagonals (max)
 		test_trapezoide_polygon( "xy_bad_saw", 39, 79, 14, 1, [ true ], 0 );		// 2: very inconvenient contour in X- and Y-direction
 		//
-		test_trapezoide_polygon( "hole_short_path", 10, 21, 6, 2, [ false, false ], 0 );	// 0.8; shortest path to hole is outside polygon
-		test_trapezoide_polygon( "colinear#1", 13, 27, 6, 1, [ true ], 0 );				// 1; 4 touching co-linear lines
+		test_trapezoide_polygon( "hole_short_path", 10, 21, 6, 2, [ false, false ], 0 );			// 0.8; shortest path to hole is outside polygon
+		test_trapezoide_polygon( "colinear#1", 13, 27, 6, 1, [ true ], 0 );							// 1; 4 touching co-linear lines
+		test_trapezoide_polygon( "colinear#2", 26, 53, 2, 2, [ true, true, true, true, true ], 0 );	// 1; 4 touching co-linear lines & 4 touching colinear holes
 		//
 		test_trapezoide_polygon( "three_error#1", 73, 147, 72, 1, [ false ], 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
 		test_trapezoide_polygon( "three_error#2", 51, 103, 5, 1, [ false ], 0 );		// 0.7; 2.Error, integrating into Three.js (letter "1")

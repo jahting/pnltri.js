@@ -123,6 +123,71 @@ PNLTRI.PolygonData.prototype.getTriangles = function () {
 	return	sortedList;
 };
 //
+PNLTRI.PolygonData.prototype.check_monoChains_noDoublePts = function () {
+	var	resultStr = "check_monoChains_noDoublePts: ";
+	var	resultOk = true;
+
+	for (var mIdx=0; mIdx<this.monoSubPolyChains.length; mIdx++) {
+		var monoChain = this.monoSubPolyChains[mIdx];
+		resultStr += "monoChain#" + mIdx + " ";
+		//
+		var count = this.nbSegments() + 2;		// recognize infinite loops
+		var frontMono = monoChain;
+		var vertexMap = []
+		do {
+			if ( count-- < 0 ) {
+				resultOk = false; resultStr += "loop too long";
+				break;
+			}
+			vertexId = frontMono.vFrom.id;
+			if ( vertexMap[vertexId] ) {
+				resultOk = false; resultStr += vertexId + ", "
+			}
+			vertexMap[vertexId] = true;
+			frontMono = frontMono.mnext;
+		} while ( frontMono != monoChain );
+	}
+
+	if ( resultOk )		return	null;
+	return	resultStr;
+};
+PNLTRI.PolygonData.prototype.check_normedMonoChains_consistency = function () {
+	// assumes, that monoSubPolyChains already point to the ymax point of each monochain
+	var	resultStr = "check_normedMonoChains_consistency: ";
+	var	resultOk = true;
+
+	for (var mIdx=0; mIdx<this.monoSubPolyChains.length; mIdx++) {
+		var monoPosmax = this.monoSubPolyChains[mIdx];
+		var prevMono = monoPosmax.mprev;
+		var nextMono = monoPosmax.mnext;
+		// goes the chain down the mnext links to prevMono ?
+		var isNextChain = ( PNLTRI.Math.compare_pts_yx( nextMono.vFrom, prevMono.vFrom ) == 1 );
+		var monoPosmin = isNextChain ? prevMono : nextMono;
+		if ( PNLTRI.Math.compare_pts_yx( monoPosmax.vFrom, monoPosmin.vFrom ) != 1 ) {
+			resultOk = false;
+			resultStr += monoPosmax.vFrom.id + " (monoPosmax) <= " + monoPosmin.vFrom.id + " (monoPosmin), ";
+		}
+		//
+		var count = this.nbSegments() + 2;		// recognize infinite loops
+		prevMono = monoPosmax;
+		nextMono = monoPosmax;
+		do {
+			if ( count-- < 0 ) {
+				resultOk = false; resultStr += "loop too long";
+				break;
+			}
+			nextMono = isNextChain ? nextMono.mnext : nextMono.mprev;
+			if ( PNLTRI.Math.compare_pts_yx( prevMono.vFrom, nextMono.vFrom ) != 1 ) {
+				resultOk = false;
+				resultStr += prevMono.vFrom.id + " <= " + nextMono.vFrom.id + ", ";
+			}
+			prevMono = nextMono;
+		} while ( nextMono != monoPosmin );
+	}
+
+	if ( resultOk )		return	null;
+	return	resultStr;
+};
 PNLTRI.PolygonData.prototype.checkMonoChainVertexIDs = function ( chainIdx, inVertIdxList ) {
 	var monoChainStart = this.monoSubPolyChains[chainIdx];
 	if ( !monoChainStart )	return	"checkMonoChainVertexIDs: monoSubPolyChains["+chainIdx+"] is empty!";
@@ -149,6 +214,26 @@ PNLTRI.PolygonData.prototype.checkMonoChainVertexIDs = function ( chainIdx, inVe
 	if ( resultOk )		return	null;
 	return	resultStr;
 };
+//	for output of polygons as vertex index lists
+PNLTRI.PolygonData.prototype.polygons_2_vertexIndexLists = function ( inPolygons ) {
+	var polygons_str = '[ ';
+	for (var i=0; i<inPolygons.length; i++) {
+		var polygon_str = '[ ';
+		for (var j=0; j<inPolygons[i].length; j++) {
+			polygon_str += inPolygons[i][j].id + ', ';
+		}
+		polygons_str += polygon_str + '], ';
+	}
+	return	polygons_str + ']';
+};
+//	for output of monotone chain starts as vertex index list
+PNLTRI.PolygonData.prototype.monoChainStarts_2_vertexIndexLists = function () {
+	var monoChain_starts_str = '[ ';
+	for (var i=0; i<this.monoSubPolyChains.length; i++) {
+		monoChain_starts_str += this.monoSubPolyChains[i].vFrom.id + ', ';
+	}
+	return	monoChain_starts_str + ']';
+};
 //	for display of the monotone polygons
 PNLTRI.PolygonData.prototype.monotone_chain_2_polygon = function ( inMonoChain ) {
 	var monoChain, firstEntry;
@@ -161,8 +246,7 @@ PNLTRI.PolygonData.prototype.monotone_chain_2_polygon = function ( inMonoChain )
 	return	polygon;
 };
 PNLTRI.PolygonData.prototype.monotone_chains_2_polygons = function () {
-	var monoChain, firstEntry;
-	var polygon, polygons = [];
+	var polygons = [];
 	for (var i=0; i<this.monoSubPolyChains.length; i++) {
 		polygons.push( this.monotone_chain_2_polygon( this.monoSubPolyChains[i] ) );
 	}
@@ -923,11 +1007,22 @@ function test_PolygonData() {
 
 
 	function test_unique_monotone_chains_max() {
+
+		function equal_monotone_chains( inMonoStartIdxs, inExpectedMonoStartIdxs, inTestName ) {
+			if ( inMonoStartIdxs.length == inExpectedMonoStartIdxs.length ) {
+				for (var i = 0; i < inExpectedMonoStartIdxs.length; i++ ) {
+					ok( inMonoStartIdxs[i] == inExpectedMonoStartIdxs[i], inTestName + ": monoChainMax#"+i );
+				}
+			} else {
+				equal( inMonoStartIdxs.length, inExpectedMonoStartIdxs.length, inTestName + ": nb unique monoChains" );
+			}
+		}
+	
 		var myPolygonData, polyChains, myMonoChain;
 		var expectedMonoStartIdxs, uniqueMonoChainsMax;
 		var i;
 		//
-		//		1st Test
+		//		Test A
 		//
 		myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "pt_3_diag_max" ) );
 		myPolygonData.replaceMonoChains( [	[ 0, 1, 2 ], [ 0, 2, 6 ], [ 2, 4, 5, 6 ], [ 2, 3, 4 ] ],
@@ -939,9 +1034,9 @@ function test_PolygonData() {
 		expectedMonoStartIdxs = [ 2, 5, 8, 10 ].map( function (val) { return myMonoChain[val] } );
 		//
 		uniqueMonoChainsMax = myPolygonData.unique_monotone_chains_max();
-		deepEqual( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains: pt_3_diag_max" );
+		equal_monotone_chains( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains_max (pt_3_diag_max)" );
 		//
-		//		2nd Test
+		//		Test B
 		//
 		myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "square_3triangholes" ) );
 		myPolygonData.replaceMonoChains( [
@@ -958,7 +1053,26 @@ function test_PolygonData() {
 		expectedMonoStartIdxs = [ 1, 11 ].map( function (val) { return myMonoChain[val] } );
 		//
 		uniqueMonoChainsMax = myPolygonData.unique_monotone_chains_max();
-		deepEqual( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains: square_3triangholes" );
+		equal_monotone_chains( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains_max (square_3triangholes)" );
+		//
+		//		Test C:		buggy monoChains (double points)
+		//
+		myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( "colinear#2" ) );
+		myPolygonData.replaceMonoChains( [
+					[ 8, 12, 13, 19, 17, 12, 8, 11, 12, 17, 18, 19, 13, 0, 6, 7, ],
+					[ 16, 3, 4, 5, 6, 0, 1, 2, 14, 15, ],
+					[ 9, 21, 22, 20, 10, 11, 8, ],
+					[ 10, 20, 21, 9, ],
+					[ 14, 2, 3, 16, ] ],
+					[ 0, 16, 2, 9, 6, 26, 33, 35, 37, 39 ] );
+		//
+		// Main Test
+		//
+		myMonoChain = myPolygonData.getSegments();
+		expectedMonoStartIdxs = [ 15, 20, 32, 33, 38 ].map( function (val) { return myMonoChain[val] } );
+		//
+		uniqueMonoChainsMax = myPolygonData.unique_monotone_chains_max();
+		equal_monotone_chains( uniqueMonoChainsMax, expectedMonoStartIdxs, "test_unique_monotone_chains_max (colinear#2)" );
 	}
 
 

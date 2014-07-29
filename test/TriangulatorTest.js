@@ -16,6 +16,9 @@ function test_Triangulator() {
 		// Main Test
 		//
 		equal( myMono.monotonate_trapezoids(), inExpectedMonoChains, "triangulate_polygon_details ("+inDataName+"): Number of MonoChains" );
+		var checkResult;
+		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )
+			console.log("triangulate_polygon_details ("+inDataName+"): " + checkResult );
 		if ( inDebug > 0 ) {
 //			showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //			showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
@@ -78,6 +81,7 @@ function test_Triangulator() {
 		test_triangulate_polygon_details( "with_unregular_hole", 2, 0 );		// 0.7; square with unregular hole
 		test_triangulate_polygon_details( "with_unreg_and_star_hole", 9, 0 );	// 0.7; square with unregular and star hole
 		test_triangulate_polygon_details( "colinear#1", 2, 0 );					// 1; 4 touching co-linear lines
+		test_triangulate_polygon_details( "colinear#2", 8, 0 );					// 1; 4 touching co-linear lines & 4 touching colinear holes
 		test_triangulate_polygon_details( "tree_error#1", 4, 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
 		test_triangulate_polygon_details( "tree_full", 183, 0 );				// 0.22; from	Triangulation Error of Tree (TODO: Source)
 		//

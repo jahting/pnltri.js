@@ -918,6 +918,9 @@ function test_MonoSplitter() {
 		//
 		var nbMonoChains = myMono.monotonate_trapezoids();			// implicitly creates trapezoids
 		equal( nbMonoChains, inExpectedMonoChains, "monotonate_trapezoids ("+inDataName+"): Number of MonoChainIndices" );
+		var checkResult;
+		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )
+			console.log("monotonate_trapezoids ("+inDataName+"): " + checkResult );
 		if ( inDebug > 0 ) {
 //			showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //			showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
@@ -966,6 +969,7 @@ function test_MonoSplitter() {
 		test_monotonate_trapezoids( "xy_bad_saw", 11, 0 );				// 2: very inconvenient contour in X- and Y-direction
 
 		test_monotonate_trapezoids( "hole_short_path", 4, 0 );			// 0.8; shortest path to hole is outside polygon
+		test_monotonate_trapezoids( "colinear#2", 8, 0 );				// 1; 4 touching co-linear lines & 4 touching colinear holes
 
 		test_monotonate_trapezoids( "three_error#1", 18, 0 );			// 1; 1.Error, integrating into Three.js
 		test_monotonate_trapezoids( "three_error#2", 12, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")

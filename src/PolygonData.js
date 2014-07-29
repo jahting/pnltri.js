@@ -317,7 +317,8 @@ PNLTRI.PolygonData.prototype = {
 		var minAngle = 4.0;			// <=> 360 degrees
 		for (var i = 0; i < inVertFrom.outSegs.length; i++) {
 			tmpSeg = inVertFrom.outSegs[i]
-			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) < minAngle ) {
+			// TODO: handle == (co-linear):		Test case: colinear#2
+			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) <= minAngle ) {
 				minAngle = tmpAngle;
 				segNext = tmpSeg;
 			}
@@ -415,11 +416,15 @@ PNLTRI.PolygonData.prototype = {
 			frontMono = frontMono.mnext;
 
 			var processed = false;
-			while ( (frontPt = frontMono.vFrom) != firstPt ) {
+//			while ( (frontPt = frontMono.vFrom) != firstPt ) {
+			while ( frontPt = frontMono.vFrom ) {
 				if (frontMono.marked) {
-					processed = true;
+					if ( frontPt != firstPt )	processed = true;
 					break;	// from while
 				} else {
+/*					if ( frontPt == firstPt ) {			// check for robustness
+						console.log("ERR unique_monotone: point double", firstPt, frontMono );
+					}		*/
 					frontMono.marked = true;
 				}
 				if ( PNLTRI.Math.compare_pts_yx( frontPt, ymaxPt ) == 1 ) {

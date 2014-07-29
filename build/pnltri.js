@@ -434,7 +434,8 @@ PNLTRI.PolygonData.prototype = {
 		var minAngle = 4.0;			// <=> 360 degrees
 		for (var i = 0; i < inVertFrom.outSegs.length; i++) {
 			tmpSeg = inVertFrom.outSegs[i]
-			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) < minAngle ) {
+			// TODO: handle == (co-linear):		Test case: colinear#2
+			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) <= minAngle ) {
 				minAngle = tmpAngle;
 				segNext = tmpSeg;
 			}
@@ -532,11 +533,15 @@ PNLTRI.PolygonData.prototype = {
 			frontMono = frontMono.mnext;
 
 			var processed = false;
-			while ( (frontPt = frontMono.vFrom) != firstPt ) {
+//			while ( (frontPt = frontMono.vFrom) != firstPt ) {
+			while ( frontPt = frontMono.vFrom ) {
 				if (frontMono.marked) {
-					processed = true;
+					if ( frontPt != firstPt )	processed = true;
 					break;	// from while
 				} else {
+/*					if ( frontPt == firstPt ) {			// check for robustness
+						console.log("ERR unique_monotone: point double", firstPt, frontMono );
+					}		*/
 					frontMono.marked = true;
 				}
 				if ( PNLTRI.Math.compare_pts_yx( frontPt, ymaxPt ) == 1 ) {
@@ -2115,6 +2120,14 @@ PNLTRI.MonoSplitter.prototype = {
 
 			if ( inOneStep )	return trapQueue;
 		}
+/*		// temporarily monoChains can contain the same point twice
+		//	usually when merging separate polygon chains (e.g. contour and hole)
+		// but in the end no monoChain may contain a vertex twice (could not be monotone)
+		var checkResult;
+		if ( checkResult = this.polyData.check_monoChains_noDoublePts() ) {
+			console.log("alyTrap: " + checkResult );
+		}		*/
+
 		return	[];
 	},
 
