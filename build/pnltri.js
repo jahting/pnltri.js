@@ -1885,6 +1885,65 @@ PNLTRI.Trapezoider.prototype = {
 		return	 this.queryStructure.find_first_inside();
 	},
 
+	create_visibility_map: function () {
+		var TR_UL = 0, TR_UM = 1, TR_ULR = 2, TR_UR = 3;
+		var TR_DR = 4, TR_DM = 5, TR_DLR = 6, TR_DL = 7;
+		
+		var myQs = this.queryStructure;
+		var myVertices = this.polyData.vertices;		// TODO: replace
+		
+		var myExternalNeighbors = new Array(myVertices.length);
+		var myVisibleNeighbors = [];
+		for ( var i=0; i<myVertices.length; i++ ) {
+			myVisibleNeighbors.push( {		// CCW
+					tr: new Array(TR_DL+1),
+					vList: [],
+				} );
+		}
+		for (var i=0,j=myQs.trapArray.length; i<j; i++) {
+			var thisTrap = myQs.trapArray[i];
+			var highPos = thisTrap.uL ?
+						( thisTrap.uR ? TR_DM : TR_DL ) :
+						( thisTrap.uR ? TR_DR : TR_DLR );
+			var lowPos = thisTrap.dL ?
+						( thisTrap.dR ? TR_UM : TR_UL ) :
+						( thisTrap.dR ? TR_UR : TR_ULR );
+
+			if ( ( thisTrap.depth % 2 ) == 1 ) {		// inside ?
+				if ( ( highPos == TR_DM ) || ( lowPos == TR_UM ) ||
+					 ( ( highPos == TR_DL ) && ( lowPos == TR_UR ) ) ||
+					 ( ( highPos == TR_DR ) && ( lowPos == TR_UL ) ) ) {
+					myVisibleNeighbors[thisTrap.vHigh.id].tr[highPos] = thisTrap.vLow;
+					myVisibleNeighbors[thisTrap.vLow.id].tr[lowPos] = thisTrap.vHigh;
+				}
+			} else {
+				if ( thisTrap.vHigh.id != null )	myExternalNeighbors[thisTrap.vHigh.id] = highPos;
+				if ( thisTrap.vLow.id != null )		myExternalNeighbors[thisTrap.vLow.id] = lowPos;
+			}
+		}
+		for ( i=0; i<myVisibleNeighbors.length; i++ ) {
+			var otherVertIds = [];
+			var thisVert = myVisibleNeighbors[i];
+			
+			var firstElem = myExternalNeighbors[i];
+			if ( firstElem == null ) {		// eg. skipped vertices (zero length, co-linear
+				// console.log( "ERR create_visibility_map: no external trapezoids for vertex "+i);
+				continue;
+			}
+			var	j = firstElem;
+			do {
+				if ( j++ > TR_DL )			j = TR_UL;
+				if ( thisVert.tr[j] )		thisVert.vList.push( thisVert.tr[j] );
+			} while ( j != firstElem )
+		}
+
+		var result = [];
+		for ( i=0; i<myVisibleNeighbors.length; i++ ) {
+			result[i] = myVisibleNeighbors[i].vList.map( function (vertex) { return vertex.id } );
+		}
+		return	result;
+	},
+
 	/*
 	 * Mathematics helper methods
 	 */

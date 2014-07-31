@@ -936,6 +936,147 @@ function test_MonoSplitter() {
 	}
 
 
+	function test_monotonate_trapezoids2( inDataName, inDebug ) {
+		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
+		// for random-error detection - default seed: 73
+//		PNLTRI.Math.myRandom( 1 );		// 3: 1 missing; 4,8: 2 missing; 10,11: nur weniger Chains
+//		PNLTRI.Math.random = PNLTRI.Math.myRandom;
+//		PNLTRI.Math.random = Math.random;
+		//
+		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( inDataName ) );
+		//
+		var	myMono = new PNLTRI.MonoSplitter( myPolygonData );
+		//
+		// Main Test
+		//
+		myMono.monotonate_trapezoids();			// implicitly creates trapezoids
+		if ( inDebug > 0 ) {
+//			showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
+//			showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
+//			showDataStructure( myPolygonData.getMonoSubPolys(), [ 'sprev', 'snext', 'mprev', 'vertTo', 'segOut' ] );
+			//
+//			showDataStructure( myPolygonData.monotone_chains_2_polygons() );
+			drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
+			//
+			var myQsRoot = myMono.getQsRoot();
+//			showDataStructure( myQsRoot );
+			drawTrapezoids( myQsRoot, false, inDebug );
+		}
+		
+		var myTrapezoider = myMono.trapezoider;
+		var vMap = myTrapezoider.create_visibility_map();
+
+		var myVertices = myPolygonData.getVertices();
+		for ( var i=0; i<myVertices.length; i++ ) {
+			var vertOutSegs = myVertices[i].outSegs;
+			if ( vertOutSegs.length == 0 )		continue;
+			var vertVisible = vMap[i];
+			equal( vertVisible.length+1, vertOutSegs.length, "monotonate_trapezoids2 ("+inDataName+"): equal length("+i+")" );
+			if ( vertVisible.length == 0 )		continue;
+			if ( vertVisible.length == 1 ) {
+				equal( vertVisible[0], vertOutSegs[1].vertTo.id, "monotonate_trapezoids2 ("+inDataName+"): equal id("+i+",0(1))" );
+			} else if ( vertVisible.length == 2 ) {
+				if ( vertVisible[0] != vertOutSegs[2].vertTo.id ) {
+					var tmp = vertOutSegs[2];
+					vertOutSegs[2] = vertOutSegs[1];
+					vertOutSegs[1] = tmp;
+				}
+				equal( vertVisible[0], vertOutSegs[2].vertTo.id, "monotonate_trapezoids2 ("+inDataName+"): equal id("+i+",0(2))" );
+				equal( vertVisible[1], vertOutSegs[1].vertTo.id, "monotonate_trapezoids2 ("+inDataName+"): equal id("+i+",1(2))" );
+			} else if ( vertVisible.length == 3 ) {
+				if ( vertVisible[0] != vertOutSegs[3].vertTo.id ) {
+					if ( vertVisible[0] != vertOutSegs[2].vertTo.id ) {
+						var tmp = vertOutSegs[3];
+						vertOutSegs[3] = vertOutSegs[1];
+						vertOutSegs[1] = tmp;
+					} else {
+						var tmp = vertOutSegs[3];
+						vertOutSegs[3] = vertOutSegs[2];
+						vertOutSegs[2] = tmp;
+					}
+				}
+				if ( vertVisible[1] != vertOutSegs[2].vertTo.id ) {
+					var tmp = vertOutSegs[2];
+					vertOutSegs[2] = vertOutSegs[1];
+					vertOutSegs[1] = tmp;
+				}
+				equal( vertVisible[0], vertOutSegs[3].vertTo.id, "monotonate_trapezoids2 ("+inDataName+"): equal id("+i+",0(3))" );
+				equal( vertVisible[1], vertOutSegs[2].vertTo.id, "monotonate_trapezoids2 ("+inDataName+"): equal id("+i+",1(3))" );
+				equal( vertVisible[2], vertOutSegs[1].vertTo.id, "monotonate_trapezoids2 ("+inDataName+"): equal id("+i+",2(3))" );
+			} else {
+				ok( false, "monotonate_trapezoids2 ("+inDataName+"): length("+i+") <= 3" );
+			}
+			var firstIdx = vertOutSegs.length-1;
+			var firstSegOut = vertOutSegs[firstIdx].segOut;
+			// pure mono segment
+			ok( !firstSegOut.snext, "monotonate_trapezoids2 ("+inDataName+"): no snext("+i+",first)" );
+			ok( !firstSegOut.sprev, "monotonate_trapezoids2 ("+inDataName+"): no sprev("+i+",first)" );
+			// prev segment is original polygon/hole segment
+			var prevSegOut = firstSegOut.mprev;
+			ok( ( prevSegOut.mnext == firstSegOut ), "monotonate_trapezoids2 ("+inDataName+"): mprev->mnext->this("+i+",first)" );
+			ok( prevSegOut.vFrom.outSegs[0].segOut == prevSegOut, "monotonate_trapezoids2 ("+inDataName+"): mprev.vertTo-> this("+i+",first)" );
+			ok( prevSegOut.vFrom.outSegs[0].vertTo == myVertices[i], "monotonate_trapezoids2 ("+inDataName+"): mprev.vertTo-> this("+i+",first)" );
+			// reverse mono segment
+			var reverseOutSeg = find_outseg_to( vertOutSegs[firstIdx].vertTo, myVertices[i] );
+			ok( reverseOutSeg, "monotonate_trapezoids2 ("+inDataName+"): reverseOutSeg("+i+",first)" );
+			var reverseSegOut = reverseOutSeg.segOut;
+			//
+			if ( --firstIdx == 0 ) {
+				var lastSegOut = vertOutSegs[0].segOut;
+				ok( ( reverseSegOut.mnext == lastSegOut ), "monotonate_trapezoids2 ("+inDataName+"): reverseSegOut.mnext->lastSegOut("+i+",first)" );
+				ok( ( reverseSegOut == lastSegOut.mprev ), "monotonate_trapezoids2 ("+inDataName+"): lastSegOut.mprev->reverseSegOut("+i+",first)" );
+			} else {
+				// second mono segment
+				var secondSegOut = vertOutSegs[firstIdx].segOut;
+				// pure mono segment
+				ok( !secondSegOut.snext, "monotonate_trapezoids2 ("+inDataName+"): no snext("+i+",second)" );
+				ok( !secondSegOut.sprev, "monotonate_trapezoids2 ("+inDataName+"): no sprev("+i+",second)" );
+				// prev mono segment is reverse( first segment )
+				ok( ( reverseSegOut.mnext == secondSegOut ), "monotonate_trapezoids2 ("+inDataName+"): reverseSegOut.mnext->this("+i+",second)" );
+				ok( ( reverseSegOut == secondSegOut.mprev ), "monotonate_trapezoids2 ("+inDataName+"): this.mprev->reverseSegOut("+i+",second)" );
+				// reverse mono segment
+				reverseOutSeg = find_outseg_to( vertOutSegs[firstIdx].vertTo, myVertices[i] );
+				ok( reverseOutSeg, "monotonate_trapezoids2 ("+inDataName+"): reverseOutSeg("+i+",second)" );
+				reverseSegOut = reverseOutSeg.segOut;
+				//
+				if ( --firstIdx == 0 ) {
+					var lastSegOut = vertOutSegs[0].segOut;
+					ok( ( reverseSegOut.mnext == lastSegOut ), "monotonate_trapezoids2 ("+inDataName+"): reverseSegOut.mnext->lastSegOut("+i+",second)" );
+					ok( ( reverseSegOut == lastSegOut.mprev ), "monotonate_trapezoids2 ("+inDataName+"): lastSegOut.mprev->reverseSegOut("+i+",second)" );
+				} else {
+					// third mono segment
+					var thirdSegOut = vertOutSegs[firstIdx].segOut;
+					// pure mono segment
+					ok( !thirdSegOut.snext, "monotonate_trapezoids2 ("+inDataName+"): no snext("+i+",third)" );
+					ok( !thirdSegOut.sprev, "monotonate_trapezoids2 ("+inDataName+"): no sprev("+i+",third)" );
+					// prev mono segment is reverse( first segment )
+					ok( ( reverseSegOut.mnext == thirdSegOut ), "monotonate_trapezoids2 ("+inDataName+"): reverseSegOut.mnext->this("+i+",third)" );
+					ok( ( reverseSegOut == thirdSegOut.mprev ), "monotonate_trapezoids2 ("+inDataName+"): this.mprev->reverseSegOut("+i+",third)" );
+					// reverse mono segment
+					reverseOutSeg = find_outseg_to( vertOutSegs[firstIdx].vertTo, myVertices[i] );
+					ok( reverseOutSeg, "monotonate_trapezoids2 ("+inDataName+"): reverseOutSeg("+i+",third)" );
+					reverseSegOut = reverseOutSeg.segOut;
+					//
+					if ( --firstIdx == 0 ) {
+						var lastSegOut = vertOutSegs[0].segOut;
+						ok( ( reverseSegOut.mnext == lastSegOut ), "monotonate_trapezoids2 ("+inDataName+"): reverseSegOut.mnext->lastSegOut("+i+",third)" );
+						ok( ( reverseSegOut == lastSegOut.mprev ), "monotonate_trapezoids2 ("+inDataName+"): lastSegOut.mprev->reverseSegOut("+i+",third)" );
+					} else {
+						ok( false, "monotonate_trapezoids2 ("+inDataName+"): no 4th segment("+i+")" );
+					}
+				}
+			}
+		}
+		
+		function find_outseg_to( inVertexFrom, inVertexTo ) {
+			for (var i=0; i<inVertexFrom.outSegs.length; i++) {
+				if ( inVertexFrom.outSegs[i].vertTo == inVertexTo )	return	inVertexFrom.outSegs[i];
+			}
+			return	null;
+		}
+	}
+
+
 	test( "Polygon Monotone Splitter", function() {
 		// contour: CCW; no hole
 		//	no diagonal
@@ -980,6 +1121,43 @@ function test_MonoSplitter() {
 		test_monotonate_trapezoids( "two_polygons#1", 14, 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
 		test_monotonate_trapezoids( "two_polygons#2", 2, 0 );			// 1; my#6: two trivial polygons
 		test_monotonate_trapezoids( "polygons_inside_hole", 5, 0 );		// 0.7; my#7: square with unregular hole with two polygons inside
+
+		//
+		
+		test_monotonate_trapezoids2( "article_poly", 0 );			// 1.5; from article Sei91
+		test_monotonate_trapezoids2( "square_3triangholes", 0 );	// 5; from	"Narkhede A. and Manocha D.", data_1
+		test_monotonate_trapezoids2( "trap_2up_2down", 0 );			// 4; trapezoid with 2 upper and 2 lower neighbors
+		test_monotonate_trapezoids2( "pt_3_diag_max", 0 );			// 4: vertex (6,6) with 3 additional diagonals (max)
+		test_monotonate_trapezoids2( "many_ears", 0 );				// 2; from slides3.pdf
+		test_monotonate_trapezoids2( "y_monotone", 0 );				// 2.5; from slides3.pdf
+		test_monotonate_trapezoids2( "for_sweep1", 0 );				// 2; from slides3.pdf
+		test_monotonate_trapezoids2( "for_sweep2", 0 );				// 2; from slides3.pdf
+		test_monotonate_trapezoids2( "for_sweep3", 0 );				// 2; from slides3.pdf
+		test_monotonate_trapezoids2( "xy_bad_saw", 0 );				// 2: very inconvenient contour in X- and Y-direction
+
+		test_monotonate_trapezoids2( "hole_short_path", 0 );			// 0.8; shortest path to hole is outside polygon
+		test_monotonate_trapezoids2( "star_eight", 0 );					// 10; symmetric 8-pointed star
+		test_monotonate_trapezoids2( "unregular_hole", 0 );				// 10; unregular hole
+		test_monotonate_trapezoids2( "with_unregular_hole", 0 );		// 0.7; square with unregular hole
+		test_monotonate_trapezoids2( "with_unreg_and_star_hole", 0 );	// 0.7; square with unregular and star hole
+		test_monotonate_trapezoids2( "colinear#1", 0 );					// 1; 4 touching co-linear lines
+		test_monotonate_trapezoids2( "colinear#2", 0 );					// 1; 4 touching co-linear lines & 4 touching colinear holes
+		test_monotonate_trapezoids2( "tree_error#1", 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
+		test_monotonate_trapezoids2( "tree_full", 0 );					// 0.22; from	Triangulation Error of Tree (TODO: Source)
+
+		test_monotonate_trapezoids2( "three_error#1", 0 );			// 1; 1.Error, integrating into Three.js
+		test_monotonate_trapezoids2( "three_error#2", 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
+		test_monotonate_trapezoids2( "three_error#3", 0 );			// 3000; 3.Error, integrating into Three.js (logbuffer)
+		test_monotonate_trapezoids2( "three_error#4", 0 );			// 1; 4.Error, integrating into Three.js (USA Maine)
+		test_monotonate_trapezoids2( "three_error#4b", 0 );			// 0.04; 4.Error, integrating into Three.js (USA Maine)
+		test_monotonate_trapezoids2( "hole_first", 0 );				// 0.5; 5.Error, integrating into Three.js ("R")
+		test_monotonate_trapezoids2( "two_polygons#1", 0 );			// 0.5; 6.Error, integrating into Three.js ("i")
+		test_monotonate_trapezoids2( "two_polygons#2", 0 );			// 1; my#6: two trivial polygons
+		test_monotonate_trapezoids2( "polygons_inside_hole", 0 );	// 0.7; my#7: square with unregular hole with two polygons inside
+		//
+		test_monotonate_trapezoids2( "squares_perftest_min", 0 );	// 1: 3x3 squares in square, performance test
+//		test_monotonate_trapezoids2( "squares_perftest_mid", 1 );	// 1: 15x15 squares in square, performance test
+//		test_monotonate_trapezoids2( "squares_perftest_max", 1 );	// 1: 40x40 squares in square, performance test
 	});
 }
 

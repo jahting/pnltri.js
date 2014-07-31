@@ -2212,6 +2212,78 @@ function test_Trapezoider() {
 	}
 
 
+	function test_visibility_map( inDataName, inDebug ) {
+		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
+		//
+		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( inDataName ) );
+		//
+		// Main Test
+		//
+		var myTrapezoider = new PNLTRI.Trapezoider( myPolygonData );
+		myTrapezoider.trapezoide_polygon();
+		//
+		var startTrap = myTrapezoider.find_first_inside();
+		ok( startTrap, "visibility_map ("+inDataName+"): Start-Trap found" );
+		//
+		if ( inDebug > 0 ) {
+//				drawTrapezoids( startTrap.sink, false, inDebug );
+			var myQsRoot = myTrapezoider.getQsRoot();
+//				showDataStructure( myQsRoot );
+//				drawTrapezoids( myQsRoot, true, inDebug );
+			drawTrapezoids( myQsRoot, false, inDebug );
+		}
+
+		var sollMaps = {
+			"article_poly": [
+				[], [ 3 ], [], [ 1, 17, 8 ],
+				[ 6 ], [], [ 4, 8 ], [],
+				[ 6, 3 ], [ 17, 16 ], [ 16, 15 ], [],
+				[ 15, 14 ], [], [ 12 ], [ 12, 10 ],
+				[ 10, 9 ], [ 9, 3 ], [], []
+							],
+			"square_3triangholes": [
+				// contour
+				[], [ 4 ], [], [ 8 ],
+				// 3 holes
+				[ 1 ],[ 12 ],[],	[ 11 ],[ 3 ],[],	[],[ 7 ],[ 5 ]
+									],
+			"trap_2up_2down": [ [], [ 4 ], [], [], [ 1 ], [] ],
+			"pt_3_diag_max": [ [ 2 ], [], [ 0, 6, 4 ], [], [ 2 ], [], [ 2 ] ],
+			
+			"colinear#2": [
+				// contour
+				[ 6 ], [], [ 14 ], [ 16 ], [ 23 ], [ 25 ], [ 0 ], [],
+				[ 12, 11 ], [ 21 ], [ 20 ], [ 8 ], [ 8, 17 ], [ 19 ],
+				// holes
+				[ 2 ], [], [ 3 ],		[ 12 ], [], [ 13 ],
+				[ 10 ], [ 9 ], [],		[ 4 ], [], [ 5 ]
+							],
+			
+			"three_error#1": [
+				[ 24 ], [], [], [], [],
+				[ 23 ], [ 23 ], [], [], [], [],
+				[ 22 ], [ 22 ], [], [],
+				[ 21 ], [ 21 ], [], [], [], [],
+				[ 15, 16 ], [ 11, 12 ], [ 5, 6 ], [ 0 ],
+				[], [], [], [], [], [], [], [], [], [], [], [],
+				[ 71 ], [ 58, 59 ], [ 52, 53 ], [ 51 ],
+				[ 50 ], [], [ 49 ], [ 47 ], [ 47 ], [],
+				[ 44, 45 ], [], [ 43 ], [ 41 ], [ 40 ], [ 39 ], [ 39 ],
+				[], [], [], [],
+				[ 38 ], [ 38 ],
+				[], [], [], [], [], [], [], [], [], [], [],
+				[ 37 ],
+				[], [], [], [], [], [], [], [], [], [], [],
+				[], [], [], [], [], [], [], [], []
+								],
+		};
+		
+		var vMap = myTrapezoider.create_visibility_map();
+		var sollVisibilityMap = sollMaps[inDataName];
+		deepEqual( vMap, sollVisibilityMap, "visibility_map ("+inDataName+")" );
+	}
+
+
 	test( "Trapezoider for (Simple) Polygons", function() {
 		test_math_logstar_stops();
 		test_optimise_randomlist();
@@ -2241,6 +2313,15 @@ function test_Trapezoider() {
 //		console.perform();
 		test_trapezoide_polygon( "squares_perftest_mid", 904, 1809, 399, 2, null, 0 );	// 1: 15x15 Squares in Squares Performance Test
 //		console.performEnd();
+
+		test_visibility_map( "article_poly", 0 );			// 1.5: from article [Sei91]
+		test_visibility_map( "square_3triangholes", 0 );	// 5; from	"Narkhede A. and Manocha D.", data_1
+		test_visibility_map( "trap_2up_2down", 0 );			// 4: trapezoid with 2 upper and 2 lower neighbors
+		test_visibility_map( "pt_3_diag_max", 0 );			// 4: vertex (6,6) with 3 additional diagonals (max)
+
+		test_visibility_map( "colinear#2", 0 );				// 1; 4 touching co-linear lines & 4 touching colinear holes
+
+		test_visibility_map( "three_error#1", 0 );			// 1; 1.Error, integrating into Three.js
 	});
 }
 
