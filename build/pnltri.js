@@ -2280,7 +2280,9 @@ PNLTRI.MonoTriangulator.prototype = {
 				var angle = PNLTRI.Math.ptsCrossProd( frontVert, vertBackLog[vertBackLogIdx-1], vertBackLog[vertBackLogIdx] );		// TODO !!
 				if ( Math.abs(angle) <= PNLTRI.Math.EPSILON_P ) {
 					// co-linear
-					if ( PNLTRI.Math.compare_pts_yx( frontVert, vertBackLog[vertBackLogIdx] ) != PNLTRI.Math.compare_pts_yx( vertBackLog[vertBackLogIdx], vertBackLog[vertBackLogIdx-1] ) ) {
+					if ( (frontVert == endVert) ||		// all remaining triangles are co-linear (180 degree)
+						 ( PNLTRI.Math.compare_pts_yx( frontVert, vertBackLog[vertBackLogIdx] ) !=
+						   PNLTRI.Math.compare_pts_yx( vertBackLog[vertBackLogIdx], vertBackLog[vertBackLogIdx-1] ) ) ) {
 //						console.log("triangulate_monotone_polygon: colinear", frontVert.x - vertBackLog[vertBackLogIdx].x, frontVert.y - vertBackLog[vertBackLogIdx].y,
 //													vertBackLog[vertBackLogIdx].x - vertBackLog[vertBackLogIdx-1].x, vertBackLog[vertBackLogIdx].y - vertBackLog[vertBackLogIdx-1].y,
 //													frontVert, vertBackLog[vertBackLogIdx], vertBackLog[vertBackLogIdx-1] );
