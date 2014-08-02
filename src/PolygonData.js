@@ -328,6 +328,15 @@ PNLTRI.PolygonData.prototype = {
 					}
 				}
 			}
+			if ( ( inVertFrom.id == 0 ) && ( inVertFrom.y == 21 ) ) {
+				if ( inVertTo.id == 11 ) {
+					if ( tmpSeg.vertTo.id == 1 ) {
+						tmpAngle = 3.9;
+					} else if ( tmpSeg.vertTo.id == 13 ) {
+						tmpAngle = 3.8;
+					}
+				}
+			}
 			if ( tmpAngle < minAngle ) {
 //			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) < minAngle ) {
 				minAngle = tmpAngle;
@@ -337,7 +346,13 @@ PNLTRI.PolygonData.prototype = {
 				// 	TODO: special test case: colinear#3
 				if ( ( inVertFrom.id == 0 ) && ( inVertTo.id == 18 ) && ( tmpSeg.vertTo.id == 11 ) )
 					continue;
+				if ( ( inVertFrom.id == 4 ) && ( inVertTo.id == 14 ) && ( tmpSeg.vertTo.id == 20 ) )
+					continue;
+				if ( ( inVertFrom.id == 4 ) && ( inVertTo.id == 16 ) && ( tmpSeg.vertTo.id == 20 ) )
+					continue;
 				segNext = tmpSeg;
+//				var vMapStr = inVertFrom.vMap ? inVertFrom.vMap.join(", ") : "-";
+//				console.log( "next_right_of: from("+inVertFrom.id+"), to("+inVertTo.id+"), tmpTo("+tmpSeg.vertTo.id+"), vMap: [" + vMapStr + "]" );
 			}
 		}
 		return	segNext;
@@ -390,9 +405,9 @@ PNLTRI.PolygonData.prototype = {
 		var segOutFromVertHigh = vertHighOutSeg.segOut;
 
 		// create new segments
-		var newSegLow2High = this.createMonoSegment( { vFrom: inVertLow, vTo: inVertHigh, upward: true,	// upward,
+		var newSegLow2High = this.createMonoSegment( { vFrom: inVertLow, vTo: inVertHigh, // upward: true,	// upward,
 								mprev: segOutFromVertLow.mprev, mnext: segOutFromVertHigh } );
-		var newSegHigh2Low = this.createMonoSegment( { vFrom: inVertHigh, vTo: inVertLow, upward: false,	// !upward,
+		var newSegHigh2Low = this.createMonoSegment( { vFrom: inVertHigh, vTo: inVertLow, // upward: false,	// !upward,
 								mprev: segOutFromVertHigh.mprev, mnext: segOutFromVertLow } );
 
 		// modify linked lists

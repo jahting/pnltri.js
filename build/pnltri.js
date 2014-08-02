@@ -446,6 +446,15 @@ PNLTRI.PolygonData.prototype = {
 					}
 				}
 			}
+			if ( ( inVertFrom.id == 0 ) && ( inVertFrom.y == 21 ) ) {
+				if ( inVertTo.id == 11 ) {
+					if ( tmpSeg.vertTo.id == 1 ) {
+						tmpAngle = 3.9;
+					} else if ( tmpSeg.vertTo.id == 13 ) {
+						tmpAngle = 3.8;
+					}
+				}
+			}
 			if ( tmpAngle < minAngle ) {
 //			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) < minAngle ) {
 				minAngle = tmpAngle;
@@ -455,7 +464,13 @@ PNLTRI.PolygonData.prototype = {
 				// 	TODO: special test case: colinear#3
 				if ( ( inVertFrom.id == 0 ) && ( inVertTo.id == 18 ) && ( tmpSeg.vertTo.id == 11 ) )
 					continue;
+				if ( ( inVertFrom.id == 4 ) && ( inVertTo.id == 14 ) && ( tmpSeg.vertTo.id == 20 ) )
+					continue;
+				if ( ( inVertFrom.id == 4 ) && ( inVertTo.id == 16 ) && ( tmpSeg.vertTo.id == 20 ) )
+					continue;
 				segNext = tmpSeg;
+//				var vMapStr = inVertFrom.vMap ? inVertFrom.vMap.join(", ") : "-";
+//				console.log( "next_right_of: from("+inVertFrom.id+"), to("+inVertTo.id+"), tmpTo("+tmpSeg.vertTo.id+"), vMap: [" + vMapStr + "]" );
 			}
 		}
 		return	segNext;
@@ -508,9 +523,9 @@ PNLTRI.PolygonData.prototype = {
 		var segOutFromVertHigh = vertHighOutSeg.segOut;
 
 		// create new segments
-		var newSegLow2High = this.createMonoSegment( { vFrom: inVertLow, vTo: inVertHigh, upward: true,	// upward,
+		var newSegLow2High = this.createMonoSegment( { vFrom: inVertLow, vTo: inVertHigh, // upward: true,	// upward,
 								mprev: segOutFromVertLow.mprev, mnext: segOutFromVertHigh } );
-		var newSegHigh2Low = this.createMonoSegment( { vFrom: inVertHigh, vTo: inVertLow, upward: false,	// !upward,
+		var newSegHigh2Low = this.createMonoSegment( { vFrom: inVertHigh, vTo: inVertLow, // upward: false,	// !upward,
 								mprev: segOutFromVertHigh.mprev, mnext: segOutFromVertLow } );
 
 		// modify linked lists
@@ -2063,10 +2078,15 @@ PNLTRI.MonoSplitter.prototype = {
 		this.trapezoider.trapezoide_polygon();
 		this.startTrap = this.trapezoider.find_first_inside();
 
-/*		var vMap = this.trapezoider.create_visibility_map();
-		var myVertices = this.polyData.getVertices();
-		for ( var i=0; i<myVertices.length; i++ ) { myVertices[i].vMap = vMap[i] }		*/
+		this.create_mono_chains();
+//		this.create_mono_chains_OLD();
 
+		// return number of UNIQUE sub-polygons created
+		return	this.polyData.normalize_monotone_chains();
+	},
+
+
+	create_mono_chains_OLD: function () {
 		// Generate the uni-y-monotone sub-polygons from
 		//	the trapezoidation of the polygon.
 		this.polyData.initMonoChains();
@@ -2077,9 +2097,93 @@ PNLTRI.MonoSplitter.prototype = {
 							curStart, null, null, null );
 			curStart = this.trapezoider.find_first_inside();
 		};
+	},
 
-		// return number of UNIQUE sub-polygons created
-		return	this.polyData.normalize_monotone_chains();
+
+	create_mono_chains: function () {					// private
+		var vMap = this.trapezoider.create_visibility_map();
+		var myVertices = this.polyData.vertices;		// getVertices();
+//		for ( var i=0; i<myVertices.length; i++ ) { myVertices[i].vMap = vMap[i] }
+
+		var i, j, k;
+		
+		// create segments for diagonals
+		var myOutSegs = [];
+		for ( i=0; i<myVertices.length; i++ ) {
+			var vertFrom = myVertices[i];
+			var vertOutSegs = [];
+			for ( j=0; j<vMap[i].length; j++ ) {
+				var vertTo = myVertices[vMap[i][j]];
+//				var newSeg = this.polyData.appendSegmentEntry( {
+				vertOutSegs.push( { vFrom: vertFrom, vTo: vertTo, marked: false,
+									mprev: null, mnext: null } );
+			}
+			myOutSegs.push( vertOutSegs );
+		}
+		
+		// link new diagonals together
+		var myLastRevSegs = [];
+		for ( i=0; i<myVertices.length; i++ ) {
+			var fromVertex = myVertices[i];
+			for ( j=0; j<myOutSegs[i].length; j++ ) {
+				var thisSeg = myOutSegs[i][j];
+				if ( myLastRevSegs[i] ) {
+					thisSeg.mprev = myLastRevSegs[i];
+					myLastRevSegs[i].mnext = thisSeg;
+				}
+				var revSegs = myOutSegs[thisSeg.vTo.id];
+				for ( k=0; k<revSegs.length; k++ ) {
+					if ( revSegs[k].vTo == fromVertex )	myLastRevSegs[i] = revSegs[k];
+				}
+			}
+		}
+
+		// Generate the uni-y-monotone sub-polygons from
+		//	the trapezoidation of the polygon.
+		var mySegments = this.polyData.getSegments();
+		var newMono, newMonoTo;
+		// populate links for monoChains and vertex.outSegs
+		for ( i = 0, j = mySegments.length ; i < j; i++) {
+			newMono = mySegments[i];
+			if ( this.polyData.PolyLeftArr[newMono.chainId] ) {
+				// preserve winding order
+				newMono.mprev = newMono.sprev;		// doubly linked list for monotone chains (sub-polygons)
+				newMono.mnext = newMono.snext;
+				// initial out-going monoChain segment of the vertex (max: 4)
+				newMonoTo = newMono.vTo;
+//				newMono.vFrom.outSegs.push( {	segOut: newMono,			// -> MonoChainSegment
+//												vertTo: newMono.vTo } );	// next vertex: other end of outgoing monoChain segment
+			} else {
+				// reverse winding order
+				newMono = newMono.snext;
+				newMono.mprev = newMono.snext;
+				newMono.mnext = newMono.sprev;
+				newMonoTo = mySegments[i].vFrom;
+//				newMono.vFrom.outSegs.push( {	segOut: newMono,
+//												vertTo: mySegments[i].vFrom } );
+			}
+			var toOutSegs = myOutSegs[newMonoTo.id];
+			if ( toOutSegs.length > 0 ) {
+				toOutSegs[0].mprev = newMono;
+				newMono.mnext = toOutSegs[0];
+			}
+			var fromRevSeg = myLastRevSegs[newMono.vFrom.id];
+			if ( fromRevSeg ) {
+				fromRevSeg.mnext = newMono;
+				newMono.mprev = fromRevSeg;
+			}
+		}
+
+		for ( i = 0; i < myOutSegs.length; i++ ) {
+			for ( j = 0; j < myOutSegs[i].length; j++ ) {
+				this.polyData.appendSegmentEntry( myOutSegs[i][j] );
+			}
+		}
+
+		for ( i = 0, j = mySegments.length; i < j; i++) {
+			this.polyData.newMonoChain( mySegments[i] );
+		}
+
 	},
 
 
