@@ -232,6 +232,7 @@ PNLTRI.QueryStructure.prototype = {
 			qsNode = inSegment.rootTo;
 		}
 		var compPt, compRes;
+		var isInSegmentShorter;
 
 		while ( qsNode ) {
 			if ( qsNode.yval ) {			// Y-Node: horizontal line
@@ -249,7 +250,49 @@ PNLTRI.QueryStructure.prototype = {
 					 ( inPt == qsNode.seg.vTo ) ) {
 					if ( this.fpEqual( inPt.y, inPtOther.y ) ) {
 						// horizontal segment
-						qsNode = ( inPtOther.x < inPt.x ) ? qsNode.left : qsNode.right;		// left : right
+						if ( !this.fpEqual( qsNode.seg.vFrom.y, qsNode.seg.vTo.y ) ) {
+							qsNode = ( inPtOther.x < inPt.x ) ? qsNode.left : qsNode.right;		// left : right
+						} else {	// co-linear horizontal reversal: test_add_segment_special_7
+							if ( inPt == qsNode.seg.vFrom ) {
+								// connected at qsNode.seg.vFrom
+								isInSegmentShorter = ( inPtOther.x > inPt.x ) ?
+										( inPtOther.x <  qsNode.seg.vTo.x ) :
+										( inPtOther.x >= qsNode.seg.vTo.x );
+							/*	if ( isInSegmentShorter ) {
+									if ( inSegment.sprev.upward )
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSeg: short & up", inUseFrom, inSegment, qsNode )
+									else
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSeg: short & down", inUseFrom, inSegment, qsNode );
+								} else {
+									if ( qsNode.seg.snext.upward )
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSegLong, qsSegUp", inUseFrom, inSegment, qsNode );
+									else
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSegLong, qsSegDown", inUseFrom, inSegment, qsNode );
+								}	*/
+								qsNode = isInSegmentShorter ?
+									( inSegment.sprev.upward  ? qsNode.right : qsNode.left ) :		// above : below
+									( qsNode.seg.snext.upward ? qsNode.right : qsNode.left );		// above : below
+							} else {
+								// connected at qsNode.seg.vTo
+								isInSegmentShorter = ( inPtOther.x > inPt.x ) ?
+										( inPtOther.x <  qsNode.seg.vFrom.x ) :
+										( inPtOther.x >= qsNode.seg.vFrom.x );
+							/*	if ( isInSegmentShorter ) {
+									if ( inSegment.sprev.upward )
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSeg: short & up", inUseFrom, inSegment, qsNode );
+									else
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSeg: short & down", inUseFrom, inSegment, qsNode );
+								} else {
+									if ( qsNode.seg.sprev.upward )
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSegLong, qsSegUp", inUseFrom, inSegment, qsNode );
+									else
+										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSegLong, qsSegDown", inUseFrom, inSegment, qsNode );
+								}		*/
+								qsNode = isInSegmentShorter ?
+									( inSegment.snext.upward  ? qsNode.left : qsNode.right ) :		// below : above
+									( qsNode.seg.sprev.upward ? qsNode.left : qsNode.right);		// below : above
+							}
+						}
 					} else {
 						compRes = this.is_left_of( qsNode.seg, inPtOther, false );
 						if ( compRes > 0 ) {
@@ -262,10 +305,8 @@ PNLTRI.QueryStructure.prototype = {
 							//  since the previous Y-node comparison would have led to a sink instead
 //							console.log("ptNode: co-linear, going back on previous segment", inPt, inPtOther, qsNode );
 							// now as we have two consecutive co-linear segments we have to avoid a cross-over
-							//	for this we need the far point on the "next" segment to the shorter of our two
+							//	for this we need the far point on the "next" segment to the SHORTER of our two
 							//	segments to avoid that "next" segment to cross the longer of our two segments
-							var isInSegmentShorter;
-							// TODO: what about horizontal segments ?? maybe use of: PNLTRI.Math.compare_pts_yx, or just segment-length
 							if ( inPt == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
 //								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vFrom", inPt, inPtOther, qsNode );
@@ -462,7 +503,7 @@ PNLTRI.QueryStructure.prototype = {
 				trNewRight.uR.dR = trNewRight;			// setBelow; dL == null, unchanged
 				trNewLeft.uR = trNewRight.uL = null;	// setAbove; trNewLeft.uL, trNewRight.uR unchanged
 			} else {
-				//	*** Case: CC_2UN; prev: 1B_1UN_CONT, 2B_NCON_RIGHT, 2B_NCON_LEFT, 2B_NCON_TOUCH
+				//	*** Case: CC_2UN; prev: 1B_1UN_CONT, 2B_NOCON_RIGHT/LEFT, 2B_TOUCH_RIGHT/LEFT, 2B_COLIN_RIGHT/LEFT
 				// console.log( "continue_chain_from_above: simple case, 2 upper neighbors (no usave, not fresh seg)" );
 				// !! trNewLeft XOR trNewRight will have been extended from above !!
 				//	  C.uL	 +  C.uR
@@ -472,7 +513,7 @@ PNLTRI.QueryStructure.prototype = {
 					// setAbove
 					trNewRight.uL = trNewRight.uR;
 					trNewRight.uR = null;
-					// setBelow; dR: unchanged, is NOT always null (prev: 2B_NCON_LEFT, 2B_NCON_TOUCH)
+					// setBelow; dR: unchanged, is NOT always null (prev: 2B_NOCON_LEFT, 2B_TOUCH_LEFT, 2B_COLIN_LEFT)
 					trNewRight.uL.dL = trNewRight;
 				} else {								// trNewRight has been extended from above
 					trNewLeft.uR = trNewLeft.uL;	// setAbove; first uR !!!
@@ -644,11 +685,12 @@ PNLTRI.QueryStructure.prototype = {
 				trCurrent.dL.uL = trNewLeft;
 				trCurrent.dR.uR = trNewRight;
 
+				var goDownRight;
 				// passes left or right of an already inserted NOT connected segment
 				//	trCurrent.vLow: high-end of existing segment
 				var compRes = scope.is_left_of( inSegment, trCurrent.vLow, true );
 				if ( compRes > 0 ) {				// trCurrent.vLow is left of inSegment
-					//	*** Case: 2B_NCON_RIGHT; next: CC_2UN
+					//	*** Case: 2B_NOCON_RIGHT; next: CC_2UN
 					// console.log( "two_trap_below: (intersecting dR)" );
 					//		 +
 					//	  NL  +  NR
@@ -656,14 +698,9 @@ PNLTRI.QueryStructure.prototype = {
 					//   ---*---+- - - -
 					//		 \	 +
 					//	 C.dL \	C.dR
-					trNext = trCurrent.dR;
-					// setAbove part 2
-					trCurrent.dR.uL = trNewLeft;
-					// setBelow part 1
-					trNewLeft.dL = trCurrent.dL;
-					trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway
+					goDownRight = true;
 				} else if ( compRes < 0 ) {			// trCurrent.vLow is right of inSegment
-					//	*** Case: 2B_NCON_LEFT; next: CC_2UN
+					//	*** Case: 2B_NOCON_LEFT; next: CC_2UN
 					// console.log( "two_trap_below: (intersecting dL)" );
 					//			  +
 					//		NL	 +  NR
@@ -671,19 +708,14 @@ PNLTRI.QueryStructure.prototype = {
 					//    - - -+---*-------
 					//	 	  +		\  C.dR
 					//	 	 C.dL	 \
-					trNext = trCurrent.dL;
-					// setAbove part 2
-					trCurrent.dL.uR = trNewRight;
-					// setBelow part 1
-					trNewRight.dR = trCurrent.dR;
-					trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
+					goDownRight = false;
 				} else {							// trCurrent.vLow lies ON inSegment
 					var vLowSeg = trCurrent.dL.rseg;
 					var directionIsUp = vLowSeg.upward;
 					var otherPt = directionIsUp ? vLowSeg.vFrom : vLowSeg.vTo;
 					compRes = scope.is_left_of( inSegment, otherPt, false );
 					if ( compRes > 0 ) {				// otherPt is left of inSegment
-						//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
+						//	*** Case: 2B_TOUCH_RIGHT; next: CC_2UN
 						// console.log( "two_trap_below: vLow ON new segment, touching from right" );
 						//		 +
 						//	  NL  +  NR
@@ -691,14 +723,9 @@ PNLTRI.QueryStructure.prototype = {
 						//   -------*- - - -
 						//		   / +
 						//	 C.dL /	C.dR
-						trNext = trCurrent.dR;				// TODO: -> like intersecting dR
-						// setAbove part 2
-						trCurrent.dR.uL = trNewLeft;
-						// setBelow part 1
-						trNewLeft.dL = trCurrent.dL;
-						trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway
+						goDownRight = true;		// like intersecting dR
 					} else if ( compRes < 0 ) {			// otherPt is right of inSegment
-						//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
+						//	*** Case: 2B_TOUCH_LEFT; next: CC_2UN
 						// console.log( "two_trap_below: vLow ON new segment, touching from left" );
 						//			  +
 						//		NL	 +  NR
@@ -706,82 +733,48 @@ PNLTRI.QueryStructure.prototype = {
 						//    - - -*-------
 						//	 	  +	\  C.dR
 						//	  C.dL	 \
-						trNext = trCurrent.dL;				// TODO: -> like intersecting dL
-						// setAbove part 2
-						trCurrent.dL.uR = trNewRight;
-						// setBelow part 1
-						trNewRight.dR = trCurrent.dR;
-						trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
+						goDownRight = false;	// like intersecting dL
 					} else {							// otherPt lies ON inSegment
 						vLowSeg = directionIsUp ? vLowSeg.snext : vLowSeg.sprev;		// other segment with trCurrent.vLow
 						otherPt = directionIsUp ? vLowSeg.vTo : vLowSeg.vFrom;
 						compRes = scope.is_left_of( inSegment, otherPt, false );
 						if ( compRes > 0 ) {				// otherPt is left of inSegment
-							//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
+							//	*** Case: 2B_COLIN_RIGHT; next: CC_2UN
 							// console.log( "two_trap_below: vLow ON new segment, touching from right" );
-							//		 +
-							//	  NL  +  NR
-							//		   +
-							//   -------*- - - -		// TODO
-							//		   / +
-							//	 C.dL /	C.dR
-							trNext = trCurrent.dR;				// TODO: -> like intersecting dR
-							// setAbove part 2
-							trCurrent.dR.uL = trNewLeft;
-							// setBelow part 1
-							trNewLeft.dL = trCurrent.dL;
-							trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway
-						} else if ( compRes < 0 ) {			// otherPt is right of inSegment
-							//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
-							// console.log( "two_trap_below: vLow ON new segment, touching from left" );
-							//			  +
-							//		NL	 +  NR
-							//			+
-							//    - - -*-------			// TODO
-							//	 	  +	\  C.dR
-							//	  C.dL	 \
-							trNext = trCurrent.dL;				// TODO: for test_add_segment_special_4A -> like intersecting dL
-							// setAbove part 2
-							trCurrent.dL.uR = trNewRight;
-							// setBelow part 1
-							trNewRight.dR = trCurrent.dR;
-							trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
-						} else {							// otherPt lies ON inSegment
-							
-							/*	SHOULD BE UNREACHABLE */
-							
-/*							//	*** Case: 2B_NCON_TOUCH_RIGHT; next: CC_2UN
-							// console.log( "two_trap_below: vLow ON new segment, touching from right" );
-							//		 +
-							//	  NL  +  NR
-							//		   +
+							//		  +
+							//	  NL   +  NR
 							//   -------*- - - -
-							//		   / +
-							//	 C.dL /	C.dR
-							trNext = trCurrent.dR;				// TODO: -> like intersecting dR
-							// setAbove part 2
-							trCurrent.dR.uL = trNewLeft;
-							// setBelow part 1
-							trNewLeft.dL = trCurrent.dL;
-							trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway		*/
-							//
-							// OR:			TODO
-							//	*** Case: 2B_NCON_TOUCH_LEFT; next: CC_2UN
+							//	  C.dL 	\+  C.dR
+							//			 \+
+							goDownRight = true;		// like intersecting dR
+					//	} else if ( compRes == 0 ) {		//	NOT POSSIBLE, since 3 points on a line is prevented during input of polychains
+					//		goDownRight = true;		// like intersecting dR
+						} else {							// otherPt is right of inSegment
+							//	*** Case: 2B_COLIN_LEFT; next: CC_2UN
 							// console.log( "two_trap_below: vLow ON new segment, touching from left" );
-							//			  +
-							//		NL	 +  NR
-							//			+
-							//    - - -*-------
-							//	 	  +	\  C.dR
-							//	  C.dL	 \
-							trNext = trCurrent.dL;				// TODO: -> like intersecting dL
-							// setAbove part 2
-							trCurrent.dL.uR = trNewRight;
-							// setBelow part 1
-							trNewRight.dR = trCurrent.dR;
-							trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
+							//			   +
+							//		NL	  +  NR
+							//    - - - -*-------
+							//	  C.dL	+/  C.dR
+							//		   +/
+							goDownRight = false;		// TODO: for test_add_segment_special_4 -> like intersecting dL
 						}
 					}
+				}
+				if ( goDownRight ) {
+					trNext = trCurrent.dR;
+					// setAbove part 2
+					trCurrent.dR.uL = trNewLeft;
+					// setBelow part 1
+					trNewLeft.dL = trCurrent.dL;
+					trNewRight.dR = null;	// L/R undefined, will be extended down and changed anyway
+				} else {
+					trNext = trCurrent.dL;
+					// setAbove part 2
+					trCurrent.dL.uR = trNewRight;
+					// setBelow part 1
+					trNewRight.dR = trCurrent.dR;
+					trNewLeft.dL = null;	// L/R undefined, will be extended down and changed anyway
 				}
 				// setBelow part 2
 				trNewLeft.dR = trNewRight.dL = trNext;

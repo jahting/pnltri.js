@@ -139,7 +139,7 @@ PNLTRI.PolygonData.prototype.check_monoChains_noDoublePts = function () {
 				resultOk = false; resultStr += "loop too long";
 				break;
 			}
-			vertexId = frontMono.vFrom.id;
+			var vertexId = frontMono.vFrom.id;
 			if ( vertexMap[vertexId] ) {
 				resultOk = false; resultStr += vertexId + ", "
 			}

@@ -1805,13 +1805,13 @@ function test_QueryStructure() {
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
 		//
-		myQs.add_segment_consistently( segListArray[ 0], 'Spec_6 #1' );
-		myQs.add_segment_consistently( segListArray[10], 'Spec_6 #2' );
-		myQs.add_segment_consistently( segListArray[ 6], 'Spec_6 #3' );
-		myQs.add_segment_consistently( segListArray[ 8], 'Spec_6 #4' );
-		myQs.add_segment_consistently( segListArray[ 2], 'Spec_6 #5' );
+		myQs.add_segment_consistently( segListArray[ 0], 'Spec_5 #1' );
+		myQs.add_segment_consistently( segListArray[10], 'Spec_5 #2' );
+		myQs.add_segment_consistently( segListArray[ 6], 'Spec_5 #3' );
+		myQs.add_segment_consistently( segListArray[ 8], 'Spec_5 #4' );
+		myQs.add_segment_consistently( segListArray[ 2], 'Spec_5 #5' );
 		// endless loop, if in only_one_trap_below.1B_1UN_END inTrNext.uL and trNewLeft is not set
-		myQs.add_segment_consistently( segListArray[ 4], 'Spec_6 Main' );
+		myQs.add_segment_consistently( segListArray[ 4], 'Spec_5 Main' );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 1 );
@@ -1830,20 +1830,285 @@ function test_QueryStructure() {
 		var myQs = new PNLTRI.QueryStructure( myPolygonData );
 		var myQsRoot = myQs.getRoot();
 
-		myQs.add_segment_consistently( segListArray[4], 'Spec_7 #1' );
-		myQs.add_segment_consistently( segListArray[2], 'Spec_7 #2' );
+		myQs.add_segment_consistently( segListArray[4], 'Spec_6 #1' );
+		myQs.add_segment_consistently( segListArray[2], 'Spec_6 #2' );
 		// selects wrong trapezoid for upper point, if tmpPoint overrides inPtOther
-		myQs.add_segment_consistently( segListArray[1], 'Spec_7 Main' );
+		myQs.add_segment_consistently( segListArray[1], 'Spec_6 Main' );
 
-		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_7: neighbors trap0" );
-		myQs.check_trapezoid_neighbors(  1, 0, null, 4, 6, "Spec_7: neighbors trap1" );
-		myQs.check_trapezoid_neighbors(  2, 7, 3, null, null, "Spec_7: neighbors trap2" );
-		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "Spec_7: neighbors trap3" );
-		myQs.check_trapezoid_neighbors(  4, 1, null, 5, null, "Spec_7: neighbors trap4" );
-		myQs.check_trapezoid_neighbors(  5, 4, null, 7, null, "Spec_7: neighbors trap5" );
-		myQs.check_trapezoid_neighbors(  6, null, 1, null, 8, "Spec_7: neighbors trap6" );
-		myQs.check_trapezoid_neighbors(  7, 5, 8, 2, null, "Spec_7: neighbors trap7" );
-		myQs.check_trapezoid_neighbors(  8, null, 6, null, 7, "Spec_7: neighbors trap8" );
+		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_6: neighbors trap0" );
+		myQs.check_trapezoid_neighbors(  1, 0, null, 4, 6, "Spec_6: neighbors trap1" );
+		myQs.check_trapezoid_neighbors(  2, 7, 3, null, null, "Spec_6: neighbors trap2" );
+		myQs.check_trapezoid_neighbors(  3, null, 0, null, 2, "Spec_6: neighbors trap3" );
+		myQs.check_trapezoid_neighbors(  4, 1, null, 5, null, "Spec_6: neighbors trap4" );
+		myQs.check_trapezoid_neighbors(  5, 4, null, 7, null, "Spec_6: neighbors trap5" );
+		myQs.check_trapezoid_neighbors(  6, null, 1, null, 8, "Spec_6: neighbors trap6" );
+		myQs.check_trapezoid_neighbors(  7, 5, 8, 2, null, "Spec_6: neighbors trap7" );
+		myQs.check_trapezoid_neighbors(  8, null, 6, null, 7, "Spec_6: neighbors trap8" );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+	}
+
+
+	function test_add_segment_special_7() {
+		// co-linear horizontal direction reversals
+
+		// reverse on high point
+		var myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:15, y:20 }, { x:10, y:20 },	{ x:30, y: 5 },
+			{ x:35, y:40 }, { x: 5, y:20 },
+			] ] );
+		//
+		var myQs = new PNLTRI.QueryStructure( myPolygonData );
+		var myQsRoot = myQs.getRoot();
+		var segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7a1 #1' );
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7a1 #2' );
+		myQs.check_trapezoid_neighbors(  0, null, null, 1, 3, "Spec_7a1: neighbors trap0" );
+		myQs.check_trapezoid_neighbors(  1, 0, null, 2, null, "Spec_7a1: neighbors trap1" );
+		myQs.check_trapezoid_neighbors(  2, 1, 5, null, null, "Spec_7a1: neighbors trap2" );
+		myQs.check_trapezoid_neighbors(  3, null, 0, 4, 5, "Spec_7a1: neighbors trap3" );
+		myQs.check_trapezoid_neighbors(  4, 3, null, null, null, "Spec_7a1: neighbors trap4" );
+		myQs.check_trapezoid_neighbors(  5, null, 3, null, 2, "Spec_7a1: neighbors trap5" );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSeg: short & up
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7a1 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7a2 #1' );
+		myQs.add_segment_consistently( segListArray[1], 'Spec_7a2 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSegLong, qsSegDown
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7a2 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+
+		// reverse on high point
+		// exchanged length of horizontal segments
+		myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:15, y:20 }, { x: 5, y:20 },	{ x:30, y: 5 },
+			{ x:35, y:40 }, { x:10, y:20 },
+			] ] );
+		//
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7b1 #1' );
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7b1 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSegLong, qsSegDown
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7b1 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7b2 #1' );
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7b2 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSeg: short & down
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7b2 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+
+		// reverse on low point
+		myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:20, y:20 }, { x:35, y:20 }, { x:15, y:40 },
+			{ x:10, y: 5 }, { x:40, y:20 },
+			] ] );
+		//
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7c1 #1' );
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7c1 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSeg: short & down
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7c1 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7c2 #1' );
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7c2 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSegLong, qsSegUp
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7c2 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+
+		// reverse on low point
+		// exchanged length of horizontal segments
+		myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:20, y:20 }, { x:40, y:20 }, { x:15, y:40 },
+			{ x:10, y: 5 }, { x:35, y:20 },
+			] ] );
+		//
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7d1 #1' );
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7d1 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSegLong, qsSegUp
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7d1 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7d2 #1' );
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7d2 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSeg: short & up
+		myQs.add_segment_consistently( segListArray[4], 'Spec_7d2 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+
+		//
+		// both horizontal segments continue in same direction: up
+		myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:15, y:20 }, { x:10, y:20 },	{ x:30, y:35 }, { x: 5, y:20 },
+			] ] );
+		//
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[2], 'Spec_7e1 #1' );
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7e1 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSeg: short & up
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7e1 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7e2 #1' );
+		myQs.add_segment_consistently( segListArray[1], 'Spec_7e2 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSegLong, qsSegUp
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7e2 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+
+		// both horizontal segments continue in same direction: up, CW
+		myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:15, y:20 }, { x: 5, y:20 },	{ x:30, y:35 }, { x:10, y:20 },
+			] ] );
+		//
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[2], 'Spec_7e1cw #1' );
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7e1cw #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSegLong, qsSegDown
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7e1cw Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7e2cw #1' );
+		myQs.add_segment_consistently( segListArray[1], 'Spec_7e2cw #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSeg: short & down
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7e2cw Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+
+		// both horizontal segments continue in same direction: down
+		myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:15, y:20 }, { x:10, y:20 },	{ x:30, y: 5 }, { x: 5, y:20 },
+			] ] );
+		//
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[2], 'Spec_7f1 #1' );
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7f1 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSeg: short & up
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7f1 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7f2 #1' );
+		myQs.add_segment_consistently( segListArray[1], 'Spec_7f2 #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSegLong, qsSegDown
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7f2 Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+
+		// both horizontal segments continue in same direction: down, CW
+		myPolygonData = new PNLTRI.PolygonData( [ [
+			{ x:15, y:20 }, { x: 5, y:20 },	{ x:30, y: 5 }, { x:10, y:20 },
+			] ] );
+		//
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[2], 'Spec_7f1cw #1' );
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7f1cw #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vTo, inSegLong, qsSegUp
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7f1cw Main' );
+		//
+//		showDataStructure( myQsRoot );
+//		drawTrapezoids( myQsRoot, false, 1 );
+
+		// other sequence
+		myQs = new PNLTRI.QueryStructure( myPolygonData );
+		myQsRoot = myQs.getRoot();
+		segListArray = myPolygonData.getSegments();
+		//
+		myQs.add_segment_consistently( segListArray[0], 'Spec_7f2cw #1' );
+		myQs.add_segment_consistently( segListArray[1], 'Spec_7f2cw #2' );
+		// horizontal co-linear segment: connected at qsNode.seg.vFrom, inSeg: short & up
+		myQs.add_segment_consistently( segListArray[3], 'Spec_7f2cw Main' );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 1 );
@@ -1963,7 +2228,6 @@ function test_QueryStructure() {
 		console.log( "MonoChains before normalization: ", myPolygonData.monoChainStarts_2_vertexIndexLists() );
 		myPolygonData.normalize_monotone_chains();
 		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )		console.log("add_segment_NEW: " + checkResult );
-		myPolygonData.check_normedMonoChains_consistency( "add_segment_NEW" );
 		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
 		//
 		var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
@@ -2009,6 +2273,7 @@ function test_QueryStructure() {
 		test_add_segment_special_4();
 		test_add_segment_special_5();
 		test_add_segment_special_6();
+		test_add_segment_special_7();
 		//
 		test_equal_next_right_of();
 		// for testing new polygons
@@ -2299,6 +2564,7 @@ function test_Trapezoider() {
 		test_trapezoide_polygon( "hole_short_path", 10, 21, 6, 2, [ false, false ], 0 );			// 0.8; shortest path to hole is outside polygon
 		test_trapezoide_polygon( "colinear#1", 13, 27, 6, 1, [ true ], 0 );							// 1; 4 touching co-linear lines
 		test_trapezoide_polygon( "colinear#2", 26, 53, 2, 2, [ true, true, true, true, true ], 0 );	// 1; 4 touching co-linear lines & 4 touching colinear holes
+		test_trapezoide_polygon( "colinear#3", 24, 49, 8, 2, [ true, true, true, true, true ], 0 );	// 1; touching co-linear horizontal lines
 		//
 		test_trapezoide_polygon( "three_error#1", 73, 147, 72, 1, [ false ], 0 );		// 1; 1.Error, integrating into Three.js (letter "t")
 		test_trapezoide_polygon( "three_error#2", 51, 103, 5, 1, [ false ], 0 );		// 0.7; 2.Error, integrating into Three.js (letter "1")

@@ -920,7 +920,7 @@ function test_MonoSplitter() {
 		equal( nbMonoChains, inExpectedMonoChains, "monotonate_trapezoids ("+inDataName+"): Number of MonoChainIndices" );
 		var checkResult;
 		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )
-			console.log("monotonate_trapezoids ("+inDataName+"): " + checkResult );
+			ok( false, "monotonate_trapezoids ("+inDataName+"): " + checkResult );
 		if ( inDebug > 0 ) {
 //			showDataStructure( myPolygonData.getVertices(), [ 'sprev', 'snext', 'vertTo', 'segOut' ] );
 //			showDataStructure( myPolygonData.getSegments(), [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
@@ -1111,6 +1111,7 @@ function test_MonoSplitter() {
 
 		test_monotonate_trapezoids( "hole_short_path", 4, 0 );			// 0.8; shortest path to hole is outside polygon
 		test_monotonate_trapezoids( "colinear#2", 8, 0 );				// 1; 4 touching co-linear lines & 4 touching colinear holes
+		test_monotonate_trapezoids( "colinear#3", 14, 0 );				// 1; touching co-linear horizontal lines
 
 		test_monotonate_trapezoids( "three_error#1", 18, 0 );			// 1; 1.Error, integrating into Three.js
 		test_monotonate_trapezoids( "three_error#2", 12, 0 );			// 0.7; 2.Error, integrating into Three.js (letter "1")
@@ -1142,6 +1143,7 @@ function test_MonoSplitter() {
 		test_monotonate_trapezoids2( "with_unreg_and_star_hole", 0 );	// 0.7; square with unregular and star hole
 		test_monotonate_trapezoids2( "colinear#1", 0 );					// 1; 4 touching co-linear lines
 		test_monotonate_trapezoids2( "colinear#2", 0 );					// 1; 4 touching co-linear lines & 4 touching colinear holes
+		test_monotonate_trapezoids2( "colinear#3", 0 );					// 1; touching co-linear horizontal lines
 		test_monotonate_trapezoids2( "tree_error#1", 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
 		test_monotonate_trapezoids2( "tree_full", 0 );					// 0.22; from	Triangulation Error of Tree (TODO: Source)
 

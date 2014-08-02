@@ -18,14 +18,37 @@ PNLTRI.Math = {
 		return	inoutArray;
 	},
 
+
+	//	like compare (<=>)
+	//		yA > yB resp. xA > xB: 1, equal: 0, otherwise: -1
+	compare_pts_yx: function ( inPtA, inPtB ) {
+		var deltaY = inPtA.y - inPtB.y;
+		if ( deltaY < PNLTRI.Math.EPSILON_N ) {
+			return -1;
+		} else if ( deltaY > PNLTRI.Math.EPSILON_P ) {
+			return 1;
+		} else {
+			var deltaX = inPtA.x - inPtB.x;
+			if ( deltaX < PNLTRI.Math.EPSILON_N ) {
+				return -1;
+			} else if ( deltaX > PNLTRI.Math.EPSILON_P ) {
+				return  1;
+			} else {
+				return  0;
+			}
+		}
+	},
+
+
 	ptsCrossProd: function ( inPtVertex, inPtFrom, inPtTo ) {
-		// two vectors: ( inPtVertex -> inPtFrom ), ( inPtVertex -> inPtTo )
+		// two vectors: ( v0: inPtVertex -> inPtFrom ), ( v1: inPtVertex -> inPtTo )
+		// CROSS_SINE: sin(theta) * len(v0) * len(v1)
 		return	( inPtFrom.x - inPtVertex.x ) * ( inPtTo.y - inPtVertex.y ) -
 				( inPtFrom.y - inPtVertex.y ) * ( inPtTo.x - inPtVertex.x );
 		// <=> crossProd( inPtFrom-inPtVertex, inPtTo-inPtVertex )
 		// == 0: colinear (angle == 0 or 180 deg == PI rad)
-		// > 0:  v lies left of u
-		// < 0:  v lies right of u
+		// > 0:  v1 lies left of v0, CCW angle from v0 to v1 is convex ( < 180 deg )
+		// < 0:  v1 lies right of v0, CW angle from v0 to v1 is convex ( < 180 deg )
 	},
 
 
@@ -63,28 +86,6 @@ PNLTRI.Math = {
 		if ( PNLTRI.Math.crossProd(v0, v1) >= 0 )	return 1-cosine;	// to inPtTo <= 180 deg. (convex, to the left)
 		else										return 3+cosine;	// to inPtTo > 180 deg. (concave, to the right)
 	},
-
-
-	//	like compare (<=>)
-	//		yA > yB resp. xA > xB: 1, equal: 0, otherwise: -1
-	compare_pts_yx: function ( inPtA, inPtB ) {
-		var deltaY = inPtA.y - inPtB.y;
-		if ( deltaY < PNLTRI.Math.EPSILON_N ) {
-			return -1;
-		} else if ( deltaY > PNLTRI.Math.EPSILON_P ) {
-			return 1;
-		} else {
-			var deltaX = inPtA.x - inPtB.x;
-			if ( deltaX < PNLTRI.Math.EPSILON_N ) {
-				return -1;
-			} else if ( deltaX > PNLTRI.Math.EPSILON_P ) {
-				return  1;
-			} else {
-				return  0;
-			}
-		}
-	},
-
 
 }
 

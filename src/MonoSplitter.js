@@ -11,35 +11,39 @@
 
 /** @constructor */
 PNLTRI.MonoSplitter = function ( inPolygonData ) {
-	
+
 	this.polyData = inPolygonData;
-	
+
 	this.trapezoider = null;
-	
+
 	// trianglular trapezoid inside the polygon,
 	//	from which the monotonization is started
 	this.startTrap	= null;
-	
+
 };
 
-	
+
 PNLTRI.MonoSplitter.prototype = {
 
 	constructor: PNLTRI.MonoSplitter,
-	
-	
+
+
 	monotonate_trapezoids: function () {					// <<<<<<<<<< public
-		
+
 		// Trapezoidation
 		this.trapezoider = new PNLTRI.Trapezoider( this.polyData );
 		//	=> one triangular trapezoid which lies inside the polygon
 		this.trapezoider.trapezoide_polygon();
 		this.startTrap = this.trapezoider.find_first_inside();
-				
+
+/*		var vMap = this.trapezoider.create_visibility_map();
+		var myVertices = this.polyData.getVertices();
+		for ( var i=0; i<myVertices.length; i++ ) { myVertices[i].vMap = vMap[i] }		*/
+
 		// Generate the uni-y-monotone sub-polygons from
 		//	the trapezoidation of the polygon.
 		this.polyData.initMonoChains();
-		
+
 		var curStart = this.startTrap;
 		while (curStart) {
 			this.alyTrap(	this.polyData.newMonoChain( curStart.lseg ),
@@ -51,15 +55,15 @@ PNLTRI.MonoSplitter.prototype = {
 		return	this.polyData.normalize_monotone_chains();
 	},
 
-	
+
 	// Splits the current polygon (index: inCurrPoly) into two sub-polygons
-	//	using the diagonal (inVertLow, inVertHigh) either from low to high or high to low		// TODO: new explanation
+	//	using the diagonal (inVertLow, inVertHigh) either from low to high or high to low
 	// returns an index to the new sub-polygon
 	//
 	//	!! public for Mock-Tests only !!
 
-	doSplit: function ( inChain, inVertLow, inVertHigh, inLow2High ) {				// private
-		return this.polyData.splitPolygonChain( inChain, inVertLow, inVertHigh, inLow2High );
+	doSplit: function ( inChain, inVertLow, inVertHigh, inChainLiesToTheLeft ) {				// private
+		return this.polyData.splitPolygonChain( inChain, inVertLow, inVertHigh, inChainLiesToTheLeft );
 	},
 
 	// In a loop analyses all connected trapezoids for possible splitting diagonals
@@ -67,16 +71,16 @@ PNLTRI.MonoSplitter.prototype = {
 	//		rseg: always goes upwards
 	//		lseg: always goes downwards
 	//	This is preserved during the splitting.
-		
+
 	alyTrap: function ( inChain, inTrap, inFromUp, inFromLeft, inOneStep ) {		// private
 
 		var trapQueue = [];
 		var thisTrap, fromUp, fromLeft, curChain, newChain;
-		
+
 		function trapList_addItem( inTrap, inFromUp, inFromLeft, inChain ) {
 			if ( inTrap )	trapQueue.push( [ inTrap, inFromUp, inFromLeft, inChain ] );
 		}
-		
+
 		function trapList_getItem() {
 			var trapQItem;
 			if ( trapQItem = trapQueue.pop() ) {
@@ -87,11 +91,11 @@ PNLTRI.MonoSplitter.prototype = {
 				return	true;
 			} else	return	false;
 		}
-		
+
 		//
 		// main function body
 		//
-		
+
 		if ( inFromUp == null ) {
 			inFromLeft = true;
 			if ( inTrap.uL )		inFromUp = true;
@@ -103,11 +107,11 @@ PNLTRI.MonoSplitter.prototype = {
 			}
 		}
 		trapList_addItem( inTrap, inFromUp, inFromLeft, inChain );
-		
+
 		while ( trapList_getItem() ) {
 			if ( thisTrap.monoDone )	continue;
 			thisTrap.monoDone = true;
-		
+
 			if ( !thisTrap.lseg || !thisTrap.rseg ) {
 				console.log("ERR alyTrap: lseg/rseg missing", thisTrap);
 				return	trapQueue;

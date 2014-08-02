@@ -9,19 +9,19 @@
 
 /** @constructor */
 PNLTRI.MonoTriangulator = function ( inPolygonData ) {
-	
+
 	this.polyData	= inPolygonData;
-	
+
 };
 
-	
+
 PNLTRI.MonoTriangulator.prototype = {
 
 	constructor: PNLTRI.MonoTriangulator,
-	
+
 
 	// Pass each uni-y-monotone polygon with start at Y-max for greedy triangulation.
-	
+
 	triangulate_all_polygons: function () {					// <<<<<<<<<< public
 		var	normedMonoChains = this.polyData.getMonoSubPolys();
 		this.polyData.clearTriangles();
@@ -31,7 +31,7 @@ PNLTRI.MonoTriangulator.prototype = {
 			var monoPosmax = normedMonoChains[i];
 			var prevMono = monoPosmax.mprev;
 			var nextMono = monoPosmax.mnext;
-			
+
 			if ( nextMono.mnext == prevMono ) {		// already a triangle
 				this.polyData.addTriangle( monoPosmax.vFrom, nextMono.vFrom, prevMono.vFrom );
 			} else {								// triangulate the polygon
@@ -41,10 +41,10 @@ PNLTRI.MonoTriangulator.prototype = {
 	},
 
 	//	algorithm to triangulate an uni-y-monotone polygon in O(n) time.[FoM84]
-	 
+
 	triangulate_monotone_polygon: function ( monoPosmax ) {			// private
 		var scope = this;
-		
+
 		function error_cleanup() {
 			// Error in algorithm OR polygon is not uni-y-monotone
 			console.log( "ERR uni-y-monotone: only concave angles left", vertBackLog );
@@ -76,26 +76,23 @@ PNLTRI.MonoTriangulator.prototype = {
 
 		frontMono = frontMono.mnext;
 		var frontVert = frontMono.vFrom;
-		
+
 		// check for robustness		// TODO
 		if (frontVert == endVert)	return;		// Error: only 2 vertices
 
 		while ( (frontVert != endVert) || (vertBackLogIdx > 1) ) {
-			if (vertBackLogIdx > 0) {
+			if ( vertBackLogIdx > 0 ) {
 				// vertBackLog is not empty
-				var angle = PNLTRI.Math.ptsCrossProd( frontVert, vertBackLog[vertBackLogIdx-1], vertBackLog[vertBackLogIdx] );		// TODO !!
-				if ( Math.abs(angle) <= PNLTRI.Math.EPSILON_P ) {
+				var insideAngleCCW = PNLTRI.Math.ptsCrossProd( vertBackLog[vertBackLogIdx], frontVert, vertBackLog[vertBackLogIdx-1] );
+				if ( Math.abs(insideAngleCCW) <= PNLTRI.Math.EPSILON_P ) {
 					// co-linear
 					if ( (frontVert == endVert) ||		// all remaining triangles are co-linear (180 degree)
-						 ( PNLTRI.Math.compare_pts_yx( frontVert, vertBackLog[vertBackLogIdx] ) !=
+						 ( PNLTRI.Math.compare_pts_yx( vertBackLog[vertBackLogIdx], frontVert ) ==				// co-linear-reversal
 						   PNLTRI.Math.compare_pts_yx( vertBackLog[vertBackLogIdx], vertBackLog[vertBackLogIdx-1] ) ) ) {
-//						console.log("triangulate_monotone_polygon: colinear", frontVert.x - vertBackLog[vertBackLogIdx].x, frontVert.y - vertBackLog[vertBackLogIdx].y,
-//													vertBackLog[vertBackLogIdx].x - vertBackLog[vertBackLogIdx-1].x, vertBackLog[vertBackLogIdx].y - vertBackLog[vertBackLogIdx-1].y,
-//													frontVert, vertBackLog[vertBackLogIdx], vertBackLog[vertBackLogIdx-1] );
-						angle = 1;		// co-linear-reversal => create triangle
+						insideAngleCCW = 1;		// => create triangle
 					}
 				}
-				if ( angle > 0 ) {
+				if ( insideAngleCCW > 0 ) {
 					// convex corner: cut if off
 					this.polyData.addTriangle( vertBackLog[vertBackLogIdx-1], vertBackLog[vertBackLogIdx], frontVert );
 					vertBackLogIdx--;
@@ -119,6 +116,6 @@ PNLTRI.MonoTriangulator.prototype = {
 		// reached the last vertex. Add in the triangle formed
 		this.polyData.addTriangle( vertBackLog[vertBackLogIdx - 1], vertBackLog[vertBackLogIdx], frontVert );
 	},
-	
+
 };
 

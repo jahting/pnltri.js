@@ -182,6 +182,18 @@ function test_PnlTri_Math() {
 		equal( result, 1, "Middle > Low" );
 	}
 
+	function test_ptsCrossProd() {
+										// vertex		from			to
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:0, y:6 }, { x:-5.5, y:1 } ), 33, "ptsCrossProd: 0,6 -5.5,1" );				// from->to, CCW: < 180
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:0.5, y:1 }, { x:5.5, y:-1 } ), -6, "ptsCrossProd: 0.5,1 5.5,-1" );			// from->to, CCW: > 180
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:1, y:-0.5 }, { x:4, y:0.5 } ), 2.5, "ptsCrossProd: 1,-0.5 4,0.5" );
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:-2, y:0.5 }, { x:-4, y:-0.5 } ), 3, "ptsCrossProd: -2,0.5 -4,-0.5" );
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:0, y:-1 }, { x:-4.5, y:0.5 } ), -4.5, "ptsCrossProd: 0,-1 -4.5,0.5" );
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:0.5, y:1 }, { x:4.5, y:-0.5 } ), -4.75, "ptsCrossProd: 0.5,1 4.5,-0.5" );
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:1, y:-0.5 }, { x:-1, y:1 } ), 0.5, "ptsCrossProd: 1,-0.5 -1,1" );
+		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:0, y:-6 }, { x:1, y:-1 } ), 6, "ptsCrossProd: 0,-6 1,-1" );
+	}
+
 	function test_mapAngle() {
 		equal( PNLTRI.Math.vectorLength( { x:3, y:4 } ), 5, "vectorLength: 3,4" );
 		//
@@ -218,6 +230,7 @@ function test_PnlTri_Math() {
 
 	test( "PnlTri.Math", function() {
 		test_compare_pts_yx();
+		test_ptsCrossProd();
 		test_mapAngle();
 	});
 }

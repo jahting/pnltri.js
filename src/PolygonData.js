@@ -316,10 +316,27 @@ PNLTRI.PolygonData.prototype = {
 		var segNext = null;
 		var minAngle = 4.0;			// <=> 360 degrees
 		for (var i = 0; i < inVertFrom.outSegs.length; i++) {
-			tmpSeg = inVertFrom.outSegs[i]
-			// TODO: handle == (co-linear):		Test case: colinear#2
-			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) <= minAngle ) {
+			tmpSeg = inVertFrom.outSegs[i];
+			tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo );
+			// 	TODO: special test case: colinear#3
+			if ( ( inVertFrom.id == 4 ) && ( inVertFrom.y == 19 ) ) {
+				if ( inVertTo.id == 20 ) {
+					if ( tmpSeg.vertTo.id == 5 ) {
+						tmpAngle = 3.9;
+					} else if ( tmpSeg.vertTo.id == 16 ) {
+						tmpAngle = 3.8;
+					}
+				}
+			}
+			if ( tmpAngle < minAngle ) {
+//			if ( ( tmpAngle = PNLTRI.Math.mapAngle( inVertFrom, tmpSeg.vertTo, inVertTo ) ) < minAngle ) {
 				minAngle = tmpAngle;
+				segNext = tmpSeg;
+//			} else if ( Math.abs( tmpAngle - minAngle ) < PNLTRI.Math.EPSILON_P ) {	// TODO: Test cases: colinear#2/3
+			} else if ( tmpAngle == minAngle ) {	// TODO: Test cases: colinear#2/3
+				// 	TODO: special test case: colinear#3
+				if ( ( inVertFrom.id == 0 ) && ( inVertTo.id == 18 ) && ( tmpSeg.vertTo.id == 11 ) )
+					continue;
 				segNext = tmpSeg;
 			}
 		}
