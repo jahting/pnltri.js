@@ -182,8 +182,8 @@ PNLTRI.QueryStructure.prototype = {
 		var retVal;
 		var dXfrom = inSeg.vFrom.x - inPt.x;
 		var dXto = inSeg.vTo.x - inPt.x;
-		var dYfromZero = ( Math.abs( inSeg.vFrom.y - inPt.y ) < PNLTRI.Math.EPSILON_P );
-		if ( Math.abs( inSeg.vTo.y - inPt.y ) < PNLTRI.Math.EPSILON_P ) {
+		var dYfromZero = this.fpEqual( inSeg.vFrom.y, inPt.y );
+		if ( this.fpEqual( inSeg.vTo.y, inPt.y ) ) {
 			if ( dYfromZero )	return 0;		// all points on a horizontal line
 			retVal = dXto;
 		} else if ( dYfromZero ) {
@@ -255,42 +255,22 @@ PNLTRI.QueryStructure.prototype = {
 						} else {	// co-linear horizontal reversal: test_add_segment_special_7
 							if ( inPt == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
+//								console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom", inUseFrom, inSegment, qsNode )
 								isInSegmentShorter = ( inPtOther.x > inPt.x ) ?
 										( inPtOther.x <  qsNode.seg.vTo.x ) :
 										( inPtOther.x >= qsNode.seg.vTo.x );
-							/*	if ( isInSegmentShorter ) {
-									if ( inSegment.sprev.upward )
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSeg: short & up", inUseFrom, inSegment, qsNode )
-									else
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSeg: short & down", inUseFrom, inSegment, qsNode );
-								} else {
-									if ( qsNode.seg.snext.upward )
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSegLong, qsSegUp", inUseFrom, inSegment, qsNode );
-									else
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom, inSegLong, qsSegDown", inUseFrom, inSegment, qsNode );
-								}	*/
-								qsNode = isInSegmentShorter ?
-									( inSegment.sprev.upward  ? qsNode.right : qsNode.left ) :		// above : below
-									( qsNode.seg.snext.upward ? qsNode.right : qsNode.left );		// above : below
+								qsNode = ( isInSegmentShorter ?
+												inSegment.sprev.upward :
+												qsNode.seg.snext.upward ) ? qsNode.right : qsNode.left;		// above : below
 							} else {
 								// connected at qsNode.seg.vTo
+//								console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo", inUseFrom, inSegment, qsNode );
 								isInSegmentShorter = ( inPtOther.x > inPt.x ) ?
 										( inPtOther.x <  qsNode.seg.vFrom.x ) :
 										( inPtOther.x >= qsNode.seg.vFrom.x );
-							/*	if ( isInSegmentShorter ) {
-									if ( inSegment.sprev.upward )
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSeg: short & up", inUseFrom, inSegment, qsNode );
-									else
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSeg: short & down", inUseFrom, inSegment, qsNode );
-								} else {
-									if ( qsNode.seg.sprev.upward )
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSegLong, qsSegUp", inUseFrom, inSegment, qsNode );
-									else
-										console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo, inSegLong, qsSegDown", inUseFrom, inSegment, qsNode );
-								}		*/
-								qsNode = isInSegmentShorter ?
-									( inSegment.snext.upward  ? qsNode.left : qsNode.right ) :		// below : above
-									( qsNode.seg.sprev.upward ? qsNode.left : qsNode.right);		// below : above
+								qsNode = ( isInSegmentShorter ?
+												inSegment.snext.upward :
+												qsNode.seg.sprev.upward ) ? qsNode.left : qsNode.right;		// below : above
 							}
 						}
 					} else {
@@ -889,8 +869,6 @@ PNLTRI.QueryStructure.prototype = {
 				trNewLeft = trCurrent;
 				trNewRight = trPrevRight;
 				trNewRight.vLow = trCurrent.vLow;
-//				trNewRight.dL = trCurrent.dL;
-//				trNewRight.dR = trCurrent.dR;
 				// redirect parent X-Node to extended sink
 				qs_trCurrent.left = new PNLTRI.QsNode( trNewLeft );			// trCurrent -> left SINK-Node
 				qs_trCurrent.right = trPrevRight.sink;						// deforms tree by multiple links to trPrevRight.sink
@@ -899,8 +877,6 @@ PNLTRI.QueryStructure.prototype = {
 				trNewRight = trCurrent;
 				trNewLeft = trPrevLeft;
 				trNewLeft.vLow = trCurrent.vLow;
-//				trNewLeft.dL = trCurrent.dL;
-//				trNewLeft.dR = trCurrent.dR;
 				// redirect parent X-Node to extended sink
 				qs_trCurrent.left = trPrevLeft.sink;						// deforms tree by multiple links to trPrevLeft.sink
 				qs_trCurrent.right = new PNLTRI.QsNode( trNewRight );		// trCurrent -> right SINK-Node
@@ -988,21 +964,80 @@ PNLTRI.QueryStructure.prototype = {
 		} while ( thisDepth.length > 0 );
 	},
 
+	// creates the visibility map:
+	//	for each vertex the list of all vertices in CW order which are directly
+	//	visible through neighboring trapezoids and thus can be connected by a diagonal
 
-	// Find one triangular trapezoid which lies inside the polygon
-	// !! does NOT depend on the orientation of segments CCW/CW !!
+	create_visibility_map: function ( inPolygonData ) {
+		// positional slots for neighboring trapezoid-diagonals
+		var DIAG_UL = 0, DIAG_UM = 1, DIAG_ULR = 2, DIAG_UR = 3;
+		var DIAG_DR = 4, DIAG_DM = 5, DIAG_DLR = 6, DIAG_DL = 7;
 
-	find_first_inside: function () {
-		var thisTrap;
-		for (var i=0, j=this.trapArray.length; i<j; i++) {
-			thisTrap = this.trapArray[i];
-			if ( ( ( thisTrap.depth % 2 ) == 1 ) && ( !thisTrap.monoDone ) &&
-				 ( ( !thisTrap.uL && !thisTrap.uR ) || ( !thisTrap.dL && !thisTrap.dR ) )
-			 	) {
-				if ( thisTrap.lseg )		 return	thisTrap;		// condition for robustness
+		var i, j;
+		var nbVertices = inPolygonData.nbVertices();
+
+		// initialize arrays for neighboring trapezoid-diagonals and vertices
+		var myVisibleDiagonals	= new Array(nbVertices);
+		for ( i = 0; i < nbVertices; i++ ) {
+			myVisibleDiagonals[i] = new Array(DIAG_DL+1);
+		}
+		// create the list of neighboring trapezoid-diagonals
+		//	put into their positional slots
+		var myExternalNeighbors = new Array(nbVertices);
+		for ( i = 0, j = this.trapArray.length; i < j; i++ ) {
+			var curTrap = this.trapArray[i];
+			var highPos = curTrap.uL ?
+						( curTrap.uR ? DIAG_DM : DIAG_DL ) :
+						( curTrap.uR ? DIAG_DR : DIAG_DLR );
+			var lowPos = curTrap.dL ?
+						( curTrap.dR ? DIAG_UM : DIAG_UL ) :
+						( curTrap.dR ? DIAG_UR : DIAG_ULR );
+
+			if ( ( curTrap.depth % 2 ) == 1 ) {		// inside ?
+				if ( ( highPos == DIAG_DM ) || ( lowPos == DIAG_UM ) ||
+					 ( ( highPos == DIAG_DL ) && ( lowPos == DIAG_UR ) ) ||
+					 ( ( highPos == DIAG_DR ) && ( lowPos == DIAG_UL ) ) ) {
+					var lhDiag = inPolygonData.appendDiagonalsEntry( {
+									vFrom: curTrap.vLow, vTo: curTrap.vHigh,
+									mprev: null, mnext: null, marked: false } );
+					var hlDiag = inPolygonData.appendDiagonalsEntry( {
+									vFrom: curTrap.vHigh, vTo: curTrap.vLow, revDiag: lhDiag,
+									mprev: null, mnext: null, marked: false } );
+					lhDiag.revDiag = hlDiag;
+					myVisibleDiagonals[ curTrap.vLow.id][ lowPos] = lhDiag;
+					myVisibleDiagonals[curTrap.vHigh.id][highPos] = hlDiag;
+				}
+			} else {		// outside, hole
+				if ( curTrap.vHigh.id != null )	myExternalNeighbors[curTrap.vHigh.id] = highPos;
+				if ( curTrap.vLow.id  != null )	myExternalNeighbors[ curTrap.vLow.id] = lowPos;
 			}
 		}
-		return	null;
+		// create the list of outgoing diagonals in the right order (CW)
+		//	from the ordered list of neighboring trapezoid-diagonals
+		//	- starting from an external one
+		// and connect those incoming to
+		var curDiag, curDiags, firstElem, fromVertex, lastIncoming;
+		for ( i = 0; i < nbVertices; i++ ) {
+			curDiags  = myVisibleDiagonals[i];
+			firstElem = myExternalNeighbors[i];
+			if ( firstElem == null )	continue;		// eg. skipped vertices (zero length, co-linear
+			j = firstElem;
+			lastIncoming = null;
+			do {
+				if ( j++ > DIAG_DL )			j = DIAG_UL;	// circular positional list
+				if ( curDiag = curDiags[j] ) {
+					if ( lastIncoming ) {
+						curDiag.mprev = lastIncoming;
+						lastIncoming.mnext = curDiag;
+					} else {
+						fromVertex = curDiag.vFrom;
+						fromVertex.firstOutDiag = curDiag;
+					}
+					lastIncoming = curDiag.revDiag;
+				}
+			} while ( j != firstElem );
+			if ( lastIncoming )		fromVertex.lastInDiag = lastIncoming;
+		}
 	},
 
 
@@ -1025,72 +1060,6 @@ PNLTRI.Trapezoider.prototype = {
 
 	constructor: PNLTRI.Trapezoider,
 
-
-	// Returns one triangular trapezoid which lies inside the polygon.
-	// All other inside trapezoids can be reached from this one using the neighbor links.
-
-	find_first_inside: function () {
-		return	 this.queryStructure.find_first_inside();
-	},
-
-	create_visibility_map: function () {
-		var TR_UL = 0, TR_UM = 1, TR_ULR = 2, TR_UR = 3;
-		var TR_DR = 4, TR_DM = 5, TR_DLR = 6, TR_DL = 7;
-		
-		var myQs = this.queryStructure;
-		var myVertices = this.polyData.vertices;		// TODO: replace
-		
-		var myExternalNeighbors = new Array(myVertices.length);
-		var myVisibleNeighbors = [];
-		for ( var i=0; i<myVertices.length; i++ ) {
-			myVisibleNeighbors.push( {		// CCW
-					tr: new Array(TR_DL+1),
-					vList: [],
-				} );
-		}
-		for (var i=0,j=myQs.trapArray.length; i<j; i++) {
-			var thisTrap = myQs.trapArray[i];
-			var highPos = thisTrap.uL ?
-						( thisTrap.uR ? TR_DM : TR_DL ) :
-						( thisTrap.uR ? TR_DR : TR_DLR );
-			var lowPos = thisTrap.dL ?
-						( thisTrap.dR ? TR_UM : TR_UL ) :
-						( thisTrap.dR ? TR_UR : TR_ULR );
-
-			if ( ( thisTrap.depth % 2 ) == 1 ) {		// inside ?
-				if ( ( highPos == TR_DM ) || ( lowPos == TR_UM ) ||
-					 ( ( highPos == TR_DL ) && ( lowPos == TR_UR ) ) ||
-					 ( ( highPos == TR_DR ) && ( lowPos == TR_UL ) ) ) {
-					myVisibleNeighbors[thisTrap.vHigh.id].tr[highPos] = thisTrap.vLow;
-					myVisibleNeighbors[thisTrap.vLow.id].tr[lowPos] = thisTrap.vHigh;
-				}
-			} else {
-				if ( thisTrap.vHigh.id != null )	myExternalNeighbors[thisTrap.vHigh.id] = highPos;
-				if ( thisTrap.vLow.id != null )		myExternalNeighbors[thisTrap.vLow.id] = lowPos;
-			}
-		}
-		for ( i=0; i<myVisibleNeighbors.length; i++ ) {
-			var otherVertIds = [];
-			var thisVert = myVisibleNeighbors[i];
-			
-			var firstElem = myExternalNeighbors[i];
-			if ( firstElem == null ) {		// eg. skipped vertices (zero length, co-linear
-				// console.log( "ERR create_visibility_map: no external trapezoids for vertex "+i);
-				continue;
-			}
-			var	j = firstElem;
-			do {
-				if ( j++ > TR_DL )			j = TR_UL;
-				if ( thisVert.tr[j] )		thisVert.vList.push( thisVert.tr[j] );
-			} while ( j != firstElem )
-		}
-
-		var result = [];
-		for ( i=0; i<myVisibleNeighbors.length; i++ ) {
-			result[i] = myVisibleNeighbors[i].vList.map( function (vertex) { return vertex.id } );
-		}
-		return	result;
-	},
 
 	/*
 	 * Mathematics helper methods
@@ -1116,7 +1085,7 @@ PNLTRI.Trapezoider.prototype = {
 
 
 	/*
-	 * main method
+	 * main methods
 	 */
 
 	// Creates the trapezoidation of the polygon
@@ -1158,6 +1127,14 @@ PNLTRI.Trapezoider.prototype = {
 		myQs.assignDepths( this.polyData );
 		// cleanup to support garbage collection
 		for (i = 0; i < nbSegs; i++) { randSegListArray[i].trLeft = randSegListArray[i].trRight = null; }
+	},
+
+	// Creates a visibility map:
+	//	for each vertex the list of all vertices in CW order which are directly
+	//	visible through neighboring trapezoids and thus can be connected by a diagonal
+
+	create_visibility_map: function () {
+		return	this.queryStructure.create_visibility_map( this.polyData );
 	},
 
 };

@@ -4,50 +4,6 @@
 
 /* =============================================================================
  *
- *	Helper for Mock-Tests
- *
- * ===========================================================================*/
-
-
-// Helper functions
-var	mockDoChecks = false;		// check data ? false: NOOP
-var	mockExpectData = [];		// expected data
-var	mockExpectResp = [];		// expected response
-var	mockExpectIdx = 0;			// expected data index
-function mock_check( inData ) {
-	var expected = mockExpectData[mockExpectIdx];
-	ok( expected, "still data expected, call: " + mockExpectIdx );
-	equal( inData.length, expected.length, "data.length == expected, call: " + mockExpectIdx );
-	for (var i=0; i<expected.length; i++) {
-		ok( ( inData[i] == expected[i] ), "Call: "+mockExpectIdx+", Idx: "+i );
-//		strictEqual( inData[i], expected[i], "Call: "+mockExpectIdx+", Idx: "+i );
-//		console.log( "Call: "+mockExpectIdx+", Idx: "+i, inData[i], expected[i] );
-	}
-	return	mockExpectResp[mockExpectIdx++];
-}
-function mock_check_calls() {
-	if ( mockDoChecks )		return	( mockExpectIdx == mockExpectData.length );
-	return	true;
-}
-
-function mock_check_off() {
-	mockDoChecks = false;
-}
-function mock_rewind() {
-	mockExpectIdx = 0;
-	mockDoChecks = true;
-}
-function mock_set_expected( inData, inResponse ) {
-	mockExpectData = inData || [];
-	mockExpectResp = inResponse || [];
-	mock_rewind();
-}
-
-
-	
-
-/* =============================================================================
- *
  *	Helper for Serialization -> output of data structures
  *		cutting of cyclical strucures
  *
@@ -56,7 +12,7 @@ function mock_set_expected( inData, inResponse ) {
 var MAX_OBJECTS = 1000;
 
 var	tempKeys = [];
-	
+
 var objIDs = [];
 var tempIDflags = [];
 
@@ -105,13 +61,13 @@ function showDataStructure( inObject, inTempKeys ) {
 	try {
 		var output = JSON.stringify( inObject, replaceObjByID, '\t' );
 		output = output.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
-		
+
 		var unreachable = JSON.stringify( tempIDflags, null, '\t' );
 		unreachable = unreachable.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
-		
+
 		var blob = new Blob( [ output + "\n\n>>> unreachable <<<:\n" + unreachable ], { type: 'application/json' } );		// application/json; text/plain
 		var objectURL = URL.createObjectURL( blob );
-		
+
 		window.open( objectURL, '_blank' );
 		window.focus();
 	} catch(e) {
@@ -125,17 +81,17 @@ function showDataStructure( inObject, inTempKeys ) {
  *	Helper for Drawing Trapezoid Structure -> Canvas 2D
  *
  * ===========================================================================*/
- 
+
  function drawTrapezoids( inQsRoot, inNotUnbounded, inScale ) {
- 	 
+
 	// GLOBALS ======================================================
 
 	var	CAN_RAND = 100;
 	var	MAX_HEIGHT = 50;
 	var factor, max_width;
-	
+
 	var canvas, context;
-	
+
 	var scale = inScale ? inScale : 1;
 
 	//
@@ -156,7 +112,7 @@ function showDataStructure( inObject, inTempKeys ) {
 		context.fillStyle = "yellow";
         context.fillRect(0, 0, canvas.width, canvas.height);
 	}
-	
+
 	//
 
 	function myMoveTo( inX, inY ) {
@@ -171,23 +127,23 @@ function showDataStructure( inObject, inTempKeys ) {
 		else if ( yKoord >= canvas.height ) yKoord = canvas.height - 3;
 		context.fillText( inText, inX * scale * factor - 10, yKoord );
 	}
-	
+
 
 	function	xCoord_of_segment_at_Y( inSegment, inCrossYPt ) {
 		if ( inSegment.vTo.y == inSegment.vFrom.y )		return inCrossYPt.x;
 		return	inSegment.vFrom.x + (inSegment.vTo.x - inSegment.vFrom.x) *
 					( inCrossYPt.y - inSegment.vFrom.y ) / ( inSegment.vTo.y - inSegment.vFrom.y );
 	}
-	
+
 	var addLines = [];
-	
+
 	function drawAddLines() {
 		if ( addLines.length == 0 )	return;
 //		alert( "Number of additional lines: " + addLines.length );
-		
+
 		context.strokeStyle = 'red';
 		context.lineWidth = 2;
-		
+
 		for (var i=0; i<addLines.length; i++) {
 			context.beginPath();
 			myMoveTo( addLines[i].vFrom.x, addLines[i].vFrom.y );
@@ -195,22 +151,22 @@ function showDataStructure( inObject, inTempKeys ) {
 			context.stroke();
 		}
 	}
-	
+
 	function drawTrapezoid( inTrapezoid ) {
 		if ( inNotUnbounded ) {
 			if ( !inTrapezoid.lseg || !inTrapezoid.rseg )	return;
 		}
-		
+
 		context.strokeStyle = 'black';
-		context.fillStyle = "magenta"; 
-		context.font = 'bold 20px sans-serif'; 
-		
+		context.fillStyle = "magenta";
+		context.font = 'bold 20px sans-serif';
+
 		var highLineLeft	= { x: 0, y: inTrapezoid.vHigh.y };
 		var highLineRight	= { x: max_width, y: inTrapezoid.vHigh.y };
-		
+
 		var lowLineLeft		= { x: 0, y: inTrapezoid.vLow.y };
 		var lowLineRight	= { x: max_width, y: inTrapezoid.vLow.y };
-		
+
 		// lseg
 		if ( inTrapezoid.lseg ) {
 			context.beginPath();
@@ -231,7 +187,7 @@ function showDataStructure( inObject, inTempKeys ) {
 			highLineRight.x = xCoord_of_segment_at_Y( inTrapezoid.rseg, inTrapezoid.vHigh );
 			lowLineRight.x = xCoord_of_segment_at_Y( inTrapezoid.rseg, inTrapezoid.vLow );
 		}
-		
+
 		// vHigh
 		context.beginPath();
 		myMoveTo( highLineLeft.x, highLineLeft.y );
@@ -253,7 +209,7 @@ function showDataStructure( inObject, inTempKeys ) {
 //		} else {
 //			myFillText( inTrapezoid.trapID, (lowLineRight.x + lowLineLeft.x)/2, (lowLineLeft.y + highLineLeft.y)/2 );
 //		}
-		
+
 		if ( inTrapezoid.uL && inTrapezoid.uR ) {
 			// two upper neighbors
 			addLines.push( { vFrom: inTrapezoid.vHigh, vTo: inTrapezoid.vLow } );
@@ -264,7 +220,7 @@ function showDataStructure( inObject, inTempKeys ) {
 	}
 
 	var doneList = [];
-	
+
 	function drawQueryStruct( inQsNode ) {
 		if ( !inQsNode )	return;
 		if ( inQsNode.trap ) {
@@ -280,7 +236,7 @@ function showDataStructure( inObject, inTempKeys ) {
 
 	setupCanvas();
 	setupWorld();
-	
+
 	doneList = [];
 	drawQueryStruct( inQsRoot );
 	drawAddLines();
@@ -291,15 +247,15 @@ function showDataStructure( inObject, inTempKeys ) {
  *	Helper for drawing (several) layers of polygons -> Canvas 2D
  *
  * ===========================================================================*/
- 
+
 function drawPolygonLayers( inPolygonLayers, inScale, inXoff, inYoff ) {
- 	 
+
 	// GLOBALS ======================================================
 
 	var	CAN_RAND = 100;
 	var	MAX_HEIGHT = 50;
 	var factor, max_width;
-	
+
 	var canvas, context;
 
 	var scale = inScale ? inScale : 1;
@@ -325,7 +281,7 @@ function drawPolygonLayers( inPolygonLayers, inScale, inXoff, inYoff ) {
 		context.fillStyle = "yellow";
         context.fillRect(0, 0, canvas.width, canvas.height);
 	}
-	
+
 	//
 
 	function myMoveTo( inX, inY ) {
@@ -354,7 +310,7 @@ function drawPolygonLayers( inPolygonLayers, inScale, inXoff, inYoff ) {
 	}
 
 	//
-	
+
 	function drawPolygon( inPolygon ) {
 		if ( inPolygon.length == 0 )	return;
 		//
@@ -366,12 +322,12 @@ function drawPolygonLayers( inPolygonLayers, inScale, inXoff, inYoff ) {
 		myLineTo( inPolygon[0].x - xOffset, inPolygon[0].y - yOffset );
 		context.stroke();
 	}
-	
+
 	// SETUP ========================================================
 
 	setupCanvas();
 	setupWorld();
-	
+
 	for ( type in inPolygonLayers ) {
 		for (var i=0; i<inPolygonLayers[type].length; i++) {
 			setContextStyle( type );
@@ -390,13 +346,13 @@ function drawPolygonLayers( inPolygonLayers, inScale, inXoff, inYoff ) {
 // polygon chains -> String
 function dumpSegmentList( inSegListArray, inHtmlBreaks ) {
 	var lineBreak = inHtmlBreaks ? " <br/>\n" : " \n";
-	
+
 	var dumpStr = '', maxVertId = -1;
 	var actSeg, firstSeg;
 	while ( maxVertId < inSegListArray.length-1 ) {
 		maxVertId++;
 		var count = inSegListArray.length + 1;		// to prevent endless loop
-	
+
 		actSeg = firstSeg = inSegListArray[maxVertId];
 		dumpStr += "[";
 		do {
@@ -405,7 +361,7 @@ function dumpSegmentList( inSegListArray, inHtmlBreaks ) {
 			actSeg = actSeg.snext;
 			count--;
 		} while ( ( actSeg != firstSeg ) && ( count > 0 ) );
-		
+
 		dumpStr += " ]," + lineBreak;
 	}
 	return	dumpStr;

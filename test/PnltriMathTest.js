@@ -3,7 +3,7 @@
  */
 
 /*	Base class extensions - for testing only */
-	
+
 PNLTRI.Math.random_seed = 1;
 
 PNLTRI.Math.myRandom = function ( inSeed ) {
@@ -49,18 +49,18 @@ function test_random_with_seed() {
 		// compare rounded results - on 10 digits
 		if (! equal_on_x_digits(	[ PNLTRI.Math.myRandom( 5 ), PNLTRI.Math.myRandom( 27 ), PNLTRI.Math.myRandom( 19 ), PNLTRI.Math.myRandom( 11 ), PNLTRI.Math.myRandom( 14791 ) ],
 									[ 2427466314, 7592840450, 7720966295, 9020655070, 7930649786 ], 10 ))	return	false;
-		
+
 		return	true;
 	}
-	
+
 	function test_seed_sequence() {
 		// compare rounded results - on 10 digits
 		if (! equal_on_x_digits(	[ PNLTRI.Math.myRandom( 73 ), PNLTRI.Math.myRandom(), PNLTRI.Math.myRandom(), PNLTRI.Math.myRandom(), PNLTRI.Math.myRandom(), PNLTRI.Math.myRandom() ],
 									[ 7195688731, 4626046825, 8163540943, 763689818, 2015858073, 7845598754 ], 10 ))	return	false;
-		
+
 		return	true;
 	}
-	
+
 	test( "Pseudorandom with Seed", function() {
 		ok( test_different_seeds(), "different seeds" );
 		ok( test_seed_sequence(), "sequence for a seed" );
@@ -82,7 +82,7 @@ function test_array_shuffle() {
 				[ 3, 4, 8, 10, 5, 7, 2, 6, 1, 9 ], "Shuffle(97)" );
 	});
 }
-		
+
 function compute_array_shuffle( inResultTarget ) {
 	PNLTRI.Math.random = Math.random;
 	var array_to_shuffle = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
@@ -120,7 +120,7 @@ function test_array_shuffle_iterator() {
 		while ( next = iterator() ) { result.push( next ) }
 		deepEqual(	result, [ 3, 4, 8, 10, 5, 7, 2, 6, 1, 9 ], "Shuffle(97)" );
 	});
-}		
+}
 
 function compute_array_shuffle_iterator( inResultTarget ) {
 	PNLTRI.Math.random = Math.random;
@@ -194,44 +194,9 @@ function test_PnlTri_Math() {
 		equal( PNLTRI.Math.ptsCrossProd( { x:0, y:0 }, { x:0, y:-6 }, { x:1, y:-1 } ), 6, "ptsCrossProd: 0,-6 1,-1" );
 	}
 
-	function test_mapAngle() {
-		equal( PNLTRI.Math.vectorLength( { x:3, y:4 } ), 5, "vectorLength: 3,4" );
-		//
-		equal( PNLTRI.Math.vectorLength( { x:0, y:6 } ), 6, "vectorLength: 0,6" );
-		equal( PNLTRI.Math.dotProd( { x:0, y:6 }, { x:-5.5, y:1 } ), 6, "dotProd: 0,6 -5.5,1" );
-		equal( PNLTRI.Math.crossProd( { x:0, y:6 }, { x:-5.5, y:1 } ), 33, "crossProd: 0,6 -5.5,1" );
-		equal( PNLTRI.Math.mapAngle( { x:6, y:0 }, { x:6, y:6 }, { x:0.5, y:1 } ), 0.8211145618000169, "mapAngle: 6,0 6,6 0.5,1" );
-		//
-		equal( PNLTRI.Math.dotProd( { x:0.5, y:1 }, { x:5.5, y:-1 } ), 1.75, "dotProd: 0.5,1 5.5,-1" );
-		equal( PNLTRI.Math.crossProd( { x:0.5, y:1 }, { x:5.5, y:-1 } ), -6, "crossProd: 0.5,1 5.5,-1" );
-		equal( PNLTRI.Math.mapAngle( { x:0.5, y:1 }, { x:1, y:2 }, { x:6, y:0 } ), 3.28, "mapAngle: 0.5,1 1,2 6,0" );
-	
-		//
-		equal( PNLTRI.Math.crossProd( { x:1, y:-0.5 }, { x:4, y:0.5 } ), 2.5, "crossProd: 1,-0.5 4,0.5" );
-		equal( PNLTRI.Math.mapAngle( { x:1, y:2 }, { x:2, y:1.5 }, { x:5, y:2.5 } ), 0.16794970566215628, "mapAngle: 1,2 2,1.5 5,2.5" );
-		//
-		equal( PNLTRI.Math.crossProd( { x:-2, y:0.5 }, { x:-4, y:-0.5 } ), 3, "crossProd: -2,0.5 -4,-0.5" );
-		equal( PNLTRI.Math.mapAngle( { x:5, y:2.5 }, { x:3, y:3 }, { x:1, y:2 } ), 0.0674319017259104, "mapAngle: 5,2.5 3,3 1,2" );
-	
-		//
-		equal( PNLTRI.Math.crossProd( { x:0, y:-1 }, { x:-4.5, y:0.5 } ), -4.5, "crossProd: 0,-1 -4.5,0.5" );
-		equal( PNLTRI.Math.mapAngle( { x:5, y:3.5 }, { x:5, y:2.5 }, { x:0.5, y:4 } ), 2.8895684739251535, "mapAngle: 5,3.5 5,2.5 0.5,4" );
-		//
-		equal( PNLTRI.Math.crossProd( { x:0.5, y:1 }, { x:4.5, y:-0.5 } ), -4.75, "crossProd: 0.5,1 4.5,-0.5" );
-		equal( PNLTRI.Math.mapAngle( { x:0.5, y:4 }, { x:1, y:5 }, { x:5, y:3.5 } ), 3.3457053588273564, "mapAngle: 0.5,4 1,5 5,3.5" );
-	
-		//
-		equal( PNLTRI.Math.crossProd( { x:1, y:-0.5 }, { x:-1, y:1 } ), 0.5, "crossProd: 1,-0.5 -1,1" );
-		equal( PNLTRI.Math.mapAngle( { x:1, y:5 }, { x:2, y:4.5 }, { x:0, y:6 } ), 1.9486832980505138, "mapAngle: 1,5 2,4.5 0,6" );
-		//
-		equal( PNLTRI.Math.crossProd( { x:0, y:-6 }, { x:1, y:-1 } ), 6, "crossProd: 0,-6 1,-1" );
-		equal( PNLTRI.Math.mapAngle( { x:0, y:6 }, { x:0, y:0 }, { x:1, y:5 } ), 0.29289321881345254, "mapAngle: 0,6 0,0 1,5" );
-	}
-
 	test( "PnlTri.Math", function() {
 		test_compare_pts_yx();
 		test_ptsCrossProd();
-		test_mapAngle();
 	});
 }
 

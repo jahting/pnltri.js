@@ -32,9 +32,9 @@
 
 /** @constructor */
 PNLTRI.Triangulator = function () {
-	
+
 	this.lastPolyData = null;		// for Debug purposes only
-	
+
 };
 
 
@@ -46,7 +46,7 @@ PNLTRI.Triangulator.prototype = {
 	clear_lastData: function () {	// save memory after Debug
 		this.lastPolyData = null;
 	},
-	
+
 	// for the polygon data AFTER triangulation
 	//	returns an Array of flags, one flag for each polygon chain:
 	//		lies the inside of the polygon to the left?
@@ -92,17 +92,12 @@ PNLTRI.Triangulator.prototype = {
 			//
 			var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
 			myTriangulator.triangulate_all_polygons();
-			//
-			// cleanup
-			//
-			var segments = myPolygonData.getSegments();
-			for (var i = 0; i < segments.length; i++) { segments[i].vFrom.outSegs = null }
 		}
 		//
 		this.lastPolyData = myPolygonData;
 		return	myPolygonData.getTriangles();	// copy of triangle list
 	}
 
-	
+
 };
 

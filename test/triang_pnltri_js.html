@@ -37,15 +37,15 @@
 			var perfTarget = document.getElementById( "performance tests" );
 			var perfStr='';
 		</script>
-		
-		
+
+
 		<h4>Triangulator for Simple Polygons with Holes</h4>
 		<div id="simple polygon with holes"></div>
 
 		<script type="text/javascript">
 			var	testData = new PolygonTestdata();
 			var polyDataNames = [	"article_poly", "trap_2up_2down", "pt_3_diag_max",
-									"xy_bad_saw", "tree_full", "squares_perftest_max", 
+									"xy_bad_saw", "tree_full", "squares_perftest_max",
 								];
 
 			var myTriangulator = new PNLTRI.Triangulator();
@@ -58,7 +58,7 @@
 				durationTriang  = new Date().getTime();
 				triangList = myTriangulator.triangulate_polygon( example_data );
 				durationTriang -= new Date().getTime();
-				
+
 //				alert("Vertices: " + example_data.length + "/" + example_data[0].length + "/" + myTriangulator.lastPolyData.vertices.length );
 				resultStr += '<p/><p/>' + dataName + ':<br/>';
 				resultStr += ( triangList ) ?
@@ -72,10 +72,10 @@
 
 			var resultTarget = document.getElementById( "simple polygon with holes" );
 			resultTarget.innerHTML = resultStr;
-			
+
 			// display last result
 //			drawPolygonLayers( { "poly": example_data, "triang": myTriangulator.lastPolyData.triangles_2_polygons() }, 2 );
-			
+
 			function perfTriang() {
 				var idx;
 				var perf_test_data = [];
@@ -91,13 +91,13 @@
 				// free memory
 				myTriangulator.clear_lastData();
 				perf_test_data = [];
-	
+
 				perfStr += ';';
 				perfTarget.innerHTML = perfStr;
 			}
 		</script>
 
-		
+
 		<!-- h2><div id="counter"></div></h2>
 		<script type="text/javascript">
 			var counterTarget = document.getElementById( "counter" );

@@ -15,7 +15,8 @@ function test_Triangulator() {
 		//
 		// Main Test
 		//
-		equal( myMono.monotonate_trapezoids(), inExpectedMonoChains, "triangulate_polygon_details ("+inDataName+"): Number of MonoChains" );
+		myMono.monotonate_trapezoids();
+		equal( myPolygonData.nbMonoSubPolys(), inExpectedMonoChains, "triangulate_polygon_details ("+inDataName+"): Number of MonoChains" );
 		var checkResult;
 		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )
 			ok( false, "triangulate_polygon_details ("+inDataName+"): " + checkResult );

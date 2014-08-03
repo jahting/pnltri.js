@@ -60,7 +60,7 @@ function test_MonoTriangulator() {
 		// Helper function
 		function initSeglistMonoChain( inPtList ) {
 			myPolygonData = new PNLTRI.PolygonData( [ inPtList ] );
-			myPolygonData.initMonoChains();
+			myPolygonData.copyMonoChainsFromSegments();
 			myMonoTriang = new PNLTRI.MonoTriangulator( myPolygonData );
 			//
 			myMonoChain = myPolygonData.getSegments();
@@ -122,7 +122,7 @@ function test_MonoTriangulator() {
 		// 2-Vert MonoChain: Robustness, Error Case
 		myVertices = [ { x:8,y:14 }, { x:9,y:20 }, { x:6,y:18 } ];
 		initSeglistMonoChain( myVertices );
-		// shortens MonoChain to length 2, leaves outSegs unchanged (should not matter)
+		// shortens MonoChain to length 2
 		myMonoChain[1].mnext.mnext = myMonoChain[1];
 		myMonoChain[1].mnext.mprev = myMonoChain[1];
 		myMonoChain[1].mprev = myMonoChain[1].mnext;
@@ -132,7 +132,7 @@ function test_MonoTriangulator() {
 		// 1-Vert MonoChain: Robustness, Error Case
 		myVertices = [ { x:8,y:14 }, { x:9,y:20 }, { x:6,y:18 } ];
 		initSeglistMonoChain( myVertices );
-		// shortens MonoChain to length 1, leaves outSegs unchanged (should not matter)
+		// shortens MonoChain to length 1
 		myMonoChain[1].mnext = myMonoChain[1];
 		myMonoChain[1].mprev = myMonoChain[1];
 //		showDataStructure( myMonoChain, [ 'sprev', 'snext', 'mprev', 'mnext', 'vertTo', 'segOut' ] );
@@ -147,7 +147,7 @@ function test_MonoTriangulator() {
 		// Helper function
 		function initSeglistMonoChain( inPtList ) {
 			myPolygonData = new PNLTRI.PolygonData( [ inPtList ] );
-			myPolygonData.initMonoChains();
+			myPolygonData.copyMonoChainsFromSegments();
 			myMonoTriang = new PNLTRI.MonoTriangulator( myPolygonData );
 			//
 			myMonoChain = myPolygonData.getSegments();

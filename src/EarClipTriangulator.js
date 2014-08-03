@@ -106,7 +106,7 @@ PNLTRI.EarClipTriangulator.prototype = {
 
 		var vertex = startSeg;
 		var fullLoop = vertex;   // prevent infinite loop on "defective" polygons
-		
+
 		while ( vertex.mnext != vertex.mprev ) {
 			if ( isEarAt( vertex ) ) {
 				// found a triangle ear to cut off
@@ -247,7 +247,7 @@ PNLTRI.EarClipTriangulator.prototype = {
 					verts[ s ] = verts[ t ];
 
 				}
-				
+
 				nv --;
 
 				v --;

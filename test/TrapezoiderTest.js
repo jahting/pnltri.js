@@ -881,7 +881,7 @@ function test_QueryStructure() {
 		function check_one_case( inTestName, inTestPolygon, inBaseSeg, inResults ) {
 			check_one_ptNode_case( "ptNode_colinear_inside " + inTestName, inTestPolygon, inBaseSeg, inResults );
 		}
-	
+
 		// fully left side, CCW			// TODO: CW
 		//
 		//					0
@@ -950,7 +950,7 @@ function test_QueryStructure() {
 		function check_one_case( inTestName, inTestPolygon, inBaseSeg, inResults ) {
 			check_one_ptNode_case( "ptNode_colinear_overlapping " + inTestName, inTestPolygon, inBaseSeg, inResults );
 		}
-	
+
 		// overlapping left low, right high, CCW
 		//
 		//					0
@@ -996,7 +996,7 @@ function test_QueryStructure() {
 		function check_one_case( inTestName, inTestPolygon, inBaseSeg, inResults ) {
 			check_one_ptNode_case( "ptNode_colinear_reversal " + inTestName, inTestPolygon, inBaseSeg, inResults );
 		}
-	
+
 		// reversal low, left triang high
 		//
 		//					0
@@ -1129,10 +1129,6 @@ function test_QueryStructure() {
 		myQs.assignDepths(myPolygonData);			// marks outside trapezoids
 		equal( myQs.minDepth(), 0, "assign_depths: Min depth: 0" );
 		equal( myQs.maxDepth(), 1, "assign_depths: Max depth: 1" );
-		//
-		var startTrap = myQs.find_first_inside();
-		equal( startTrap.trapID, 1, "assign_depths: Start-Trap-ID" );
-		equal( startTrap.depth, 1, "assign_depths: Max depth of startTrap == 1" );
 		//
 //		showDataStructure( myQsRoot );
 //		drawTrapezoids( myQsRoot, false, 1 );
@@ -2115,60 +2111,6 @@ function test_QueryStructure() {
 	}
 
 
-	function test_equal_next_right_of() {
-		var inDebug = 1;
-
-		var example_data = [
-			[	// CCW
-				{ x: 5, y:35 }, { x:10, y:18 }, { x:31, y: 6 },
-				{ x:29, y:10 }, { x:27, y:18 }, { x:32, y:28 },
-			],
-			[ { x: 27.5, y: 19 }, { x: 25, y: 20.5 }, { x: 29, y: 22 } ],		// hole: CW
-							];
-		var myPolygonData = new PNLTRI.PolygonData( example_data );
-
-		var myQs = new PNLTRI.QueryStructure( myPolygonData );
-		var myQsRoot = myQs.getRoot();
-		var segListArray = myPolygonData.getSegments();
-		//
-		myQs.add_segment_consistently( segListArray[4], 'New#1' );
-		myQs.add_segment_consistently( segListArray[6], 'New#2' );
-		myQs.add_segment_consistently( segListArray[1], 'New#3' );
-		myQs.add_segment_consistently( segListArray[0], 'New#4' );
-		myQs.add_segment_consistently( segListArray[2], 'New#5' );
-		myQs.add_segment_consistently( segListArray[8], 'New#6' );
-		myQs.add_segment_consistently( segListArray[3], 'New#7' );
-		myQs.add_segment_consistently( segListArray[7], 'New#8' );
-		myQs.add_segment_consistently( segListArray[5], 'New#9' );
-
-		myQs.assignDepths(myPolygonData);			// marks outside trapezoids
-		equal( myQs.minDepth(), 0, "equal_next_right_of: Min depth == 0 (closed polygon)" );
-		//
-//		showDataStructure( myQsRoot );
-//		drawTrapezoids( myQsRoot, false, inDebug );
-		//
-		//	check following steps - OPTIONAL
-		var startTrap = myQs.find_first_inside();
-//		drawTrapezoids( startTrap.sink, false, inDebug );
-		//
-		var myMono = new PNLTRI.MonoSplitter( myPolygonData );
-		myPolygonData.initMonoChains();
-		myMono.alyTrap(	myPolygonData.newMonoChain( startTrap.lseg ), startTrap, null, null, null );
-		equal( myPolygonData.normalize_monotone_chains(), 4, "equal_next_right_of: Number of monotone chains" );
-		var checkResult;
-		if ( checkResult = myPolygonData.check_monoChains_noDoublePts() )
-			ok( false, "equal_next_right_of: " + checkResult );
-		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )
-			ok( false, "equal_next_right_of: " + checkResult );
-//		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
-		//
-		var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
-		myTriangulator.triangulate_all_polygons();
-		var triangList = myPolygonData.getTriangles();		// sorted results !!
-//		drawPolygonLayers( { "poly": example_data, "triang": myPolygonData.triangles_2_polygons() }, inDebug );
-	}
-
-
 	// temporary method to test polygons-chains before adding them
 	//  to the PolygonTestdata
 	function test_add_segment_NEW() {
@@ -2215,18 +2157,13 @@ function test_QueryStructure() {
 		drawTrapezoids( myQsRoot, false, inDebug );
 		//
 		//	check following steps - OPTIONAL
-/*		var startTrap = myQs.find_first_inside();
-		drawTrapezoids( startTrap.sink, false, inDebug );
-		//
-		var myMono = new PNLTRI.MonoSplitter( myPolygonData );
-		myPolygonData.initMonoChains();
-		myMono.alyTrap(	myPolygonData.newMonoChain( startTrap.lseg ), startTrap, null, null, null );
+/*		var myMono = new PNLTRI.MonoSplitter( myPolygonData );
+		myMono.create_mono_chains();
+		myPolygonData.unique_monotone_chains_max();
+		console.log( "MonoChains after normalization: ", testData.polygons_to_str( myPolygonData.monotone_chains_2_polygons() ) );
+		console.log( "MonoChains after normalization: ", myPolygonData.polygons_2_vertexIndexLists( myPolygonData.monotone_chains_2_polygons() ) );
+		console.log( "MonoChains after normalization: ", myPolygonData.monoChainStarts_2_vertexIndexLists() );
 		var checkResult;
-		if ( checkResult = myPolygonData.check_monoChains_noDoublePts() )	console.log("add_segment_NEW: " + checkResult );
-		console.log( "MonoChains before normalization: ", testData.polygons_to_str( myPolygonData.monotone_chains_2_polygons() ) );
-		console.log( "MonoChains before normalization: ", myPolygonData.polygons_2_vertexIndexLists( myPolygonData.monotone_chains_2_polygons() ) );
-		console.log( "MonoChains before normalization: ", myPolygonData.monoChainStarts_2_vertexIndexLists() );
-		myPolygonData.normalize_monotone_chains();
 		if ( checkResult = myPolygonData.check_normedMonoChains_consistency() )		console.log("add_segment_NEW: " + checkResult );
 		drawPolygonLayers( { "mono": myPolygonData.monotone_chains_2_polygons() }, inDebug );
 		//
@@ -2274,8 +2211,6 @@ function test_QueryStructure() {
 		test_add_segment_special_5();
 		test_add_segment_special_6();
 		test_add_segment_special_7();
-		//
-		test_equal_next_right_of();
 		// for testing new polygons
 //		test_add_segment_NEW();
 //		test_add_segment_Error();
@@ -2460,15 +2395,7 @@ function test_Trapezoider() {
 			deepEqual( myPolygonData.get_PolyLeftArr(), inPolyLeftArr, "trapezoide_polygon ("+inDataName+"): PolyLeftArr OK?" );
 		}
 		//
-		var startTrap = myTrapezoider.find_first_inside();
-		if ( startTrap ) {
-			equal( startTrap.trapID, inExpectedStartTrap, "trapezoide_polygon ("+inDataName+"): Start-Trap-ID" );
-		} else {
-			ok( false, "trapezoide_polygon ("+inDataName+"): Start-Trap found" );
-		}
-		//
 		if ( inDebug > 0 ) {
-			drawTrapezoids( startTrap.sink, false, inDebug );
 			var myQsRoot = myTrapezoider.getQsRoot();
 //			showDataStructure( myQsRoot );
 //			drawTrapezoids( myQsRoot, true, inDebug );
@@ -2481,71 +2408,34 @@ function test_Trapezoider() {
 		PNLTRI.Math.randomTestSetup();		// set specific random seed for repeatable testing
 		//
 		var myPolygonData = new PNLTRI.PolygonData( testData.get_polygon_with_holes( inDataName ) );
-		//
-		// Main Test
-		//
 		var myTrapezoider = new PNLTRI.Trapezoider( myPolygonData );
 		myTrapezoider.trapezoide_polygon();
 		//
-		var startTrap = myTrapezoider.find_first_inside();
-		ok( startTrap, "visibility_map ("+inDataName+"): Start-Trap found" );
-		//
 		if ( inDebug > 0 ) {
-//				drawTrapezoids( startTrap.sink, false, inDebug );
 			var myQsRoot = myTrapezoider.getQsRoot();
-//				showDataStructure( myQsRoot );
-//				drawTrapezoids( myQsRoot, true, inDebug );
+//			showDataStructure( myQsRoot );
+//			drawTrapezoids( myQsRoot, true, inDebug );
 			drawTrapezoids( myQsRoot, false, inDebug );
 		}
-
-		var sollMaps = {
-			"article_poly": [
-				[], [ 3 ], [], [ 1, 17, 8 ],
-				[ 6 ], [], [ 4, 8 ], [],
-				[ 6, 3 ], [ 17, 16 ], [ 16, 15 ], [],
-				[ 15, 14 ], [], [ 12 ], [ 12, 10 ],
-				[ 10, 9 ], [ 9, 3 ], [], []
-							],
-			"square_3triangholes": [
-				// contour
-				[], [ 4 ], [], [ 8 ],
-				// 3 holes
-				[ 1 ],[ 12 ],[],	[ 11 ],[ 3 ],[],	[],[ 7 ],[ 5 ]
-									],
-			"trap_2up_2down": [ [], [ 4 ], [], [], [ 1 ], [] ],
-			"pt_3_diag_max": [ [ 2 ], [], [ 0, 6, 4 ], [], [ 2 ], [], [ 2 ] ],
-			
-			"colinear#2": [
-				// contour
-				[ 6 ], [], [ 14 ], [ 16 ], [ 23 ], [ 25 ], [ 0 ], [],
-				[ 12, 11 ], [ 21 ], [ 20 ], [ 8 ], [ 8, 17 ], [ 19 ],
-				// holes
-				[ 2 ], [], [ 3 ],		[ 12 ], [], [ 13 ],
-				[ 10 ], [ 9 ], [],		[ 4 ], [], [ 5 ]
-							],
-			
-			"three_error#1": [
-				[ 24 ], [], [], [], [],
-				[ 23 ], [ 23 ], [], [], [], [],
-				[ 22 ], [ 22 ], [], [],
-				[ 21 ], [ 21 ], [], [], [], [],
-				[ 15, 16 ], [ 11, 12 ], [ 5, 6 ], [ 0 ],
-				[], [], [], [], [], [], [], [], [], [], [], [],
-				[ 71 ], [ 58, 59 ], [ 52, 53 ], [ 51 ],
-				[ 50 ], [], [ 49 ], [ 47 ], [ 47 ], [],
-				[ 44, 45 ], [], [ 43 ], [ 41 ], [ 40 ], [ 39 ], [ 39 ],
-				[], [], [], [],
-				[ 38 ], [ 38 ],
-				[], [], [], [], [], [], [], [], [], [], [],
-				[ 37 ],
-				[], [], [], [], [], [], [], [], [], [], [],
-				[], [], [], [], [], [], [], [], []
-								],
-		};
-		
-		var vMap = myTrapezoider.create_visibility_map();
-		var sollVisibilityMap = sollMaps[inDataName];
-		deepEqual( vMap, sollVisibilityMap, "visibility_map ("+inDataName+")" );
+		//
+		// Main Test
+		//
+		myTrapezoider.create_visibility_map( myPolygonData );
+		//
+		var myVertices = myPolygonData.getVertices();
+		var vMapIdxs = [], curOutDiag;
+		for ( var i = 0; i < myVertices.length; i++ ) {
+			vMapIdxs[i] = [];
+			var vertex = myVertices[i];
+			if ( curOutDiag = vertex.firstOutDiag ) {
+				do {
+					vMapIdxs[i].push( curOutDiag.vTo.id );
+					curOutDiag = curOutDiag.revDiag.mnext;
+				} while ( curOutDiag && ( curOutDiag.vFrom == vertex ) );
+			}
+		}
+		var sollVisibilityMap = testData.get_visibilityMap( inDataName );
+		deepEqual( vMapIdxs, sollVisibilityMap, "visibility_map ("+inDataName+")" );
 	}
 
 

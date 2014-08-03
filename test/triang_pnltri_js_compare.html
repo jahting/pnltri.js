@@ -22,13 +22,13 @@
 			var versionTarget = document.getElementById( "version" );
 			versionTarget.innerHTML = 'PnlTri.js Version: <em>' + PNLTRI.REVISION + '</em>';
 		</script>
-		
-		
+
+
 		<h4>Triangulator: Compare Three.js extract and Seidel</h4>
 		<div id="simple polygon without holes"></div>
 
 		<script type="text/javascript">
-		
+
 			var durationTriang, triangList, resultStr='';
 
 			function measure_seidel( inData ) {
@@ -38,7 +38,7 @@
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
 			}
-			
+
 			function measure_threejs( inData ) {
 				durationTriang  = new Date().getTime();
 //				console.profile();
@@ -46,7 +46,7 @@
 //				console.profileEnd();
 				durationTriang -= new Date().getTime();
 			}
-			
+
 			function append_result_str( inTestName ) {
 				resultStr += '<p/><p/>' + inTestName + ':<br/>';
 				resultStr += ( triangList ) ?
@@ -55,7 +55,7 @@
 				resultStr += '<p/>&nbsp;&nbsp;&nbsp;Number of Triangles: ' + triangList.length;
 				resultStr += '&nbsp;&nbsp;&nbsp;milliseconds: ' + -durationTriang + '/' + ( endSection.getTime()-startSection.getTime() );
 			}
-			
+
 			var example_data = [ [
 				{x:103.181,y:220.799},{x:104.364,y:190.337},{x:99.849,y:182.369},{x:104.803,y:183.405},{x:105.069,y:164.693},
 				{x:101.856,y:144.889},{x:96.602,y:131.47},{x:94.137,y:128.41},{x:87.938,y:126.121},{x:68.853,y:124.712},{x:55.191,y:137.809},
@@ -82,12 +82,12 @@
 				{x:146.422,y:122.475},{x:143.737,y:118.367},{x:132.696,y:126.829},{x:117.466,y:150.083},{x:112.725,y:162.23},{x:112.52,y:196.304},
 				{x:115.346,y:220.799}
 							] ];
-			
+
 			var myTriangulator = new PNLTRI.Triangulator();
 
 			measure_seidel( example_data );				// Seidel
 			measure_threejs( example_data );			// Three.js Extract
-			
+
 			var startSection = new Date(), endSection;
 
 			// Seidel
@@ -95,14 +95,14 @@
 			endSection = new Date();
 			append_result_str( 'Seidel' );
 			startSection = endSection;
-			
+
 			// Three.js Extract
 			measure_threejs( example_data );
 			endSection = new Date();
 			append_result_str( 'Three.js Extract' );
 			startSection = endSection;
 
-			
+
 			var resultTarget = document.getElementById( "simple polygon without holes" );
 			resultTarget.innerHTML = resultStr;
 		</script>

@@ -2,9 +2,9 @@
  * @author jahting / http://www.ameco.tv/
  */
 
- 
+
 /*	fix random number generation */
-	
+
 var random_seed = 1;
 
 var myRandom = function ( inSeed ) {
@@ -69,4 +69,4 @@ suite.on('complete', function() {
 });
 */
 
-suite.run({ 'async': false, 'queued': true });			
+suite.run({ 'async': false, 'queued': true });
