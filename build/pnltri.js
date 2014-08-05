@@ -951,17 +951,14 @@ PNLTRI.QueryStructure.prototype = {
 		while ( qsNode ) {
 			if ( qsNode.yval ) {			// Y-Node: horizontal line
 											// 4 times as often as X-Node
-				if ( inPt == qsNode.yval )	compPt = inPtOther;				// the point is already inserted.
-				else						compPt = inPt;
-				compRes = PNLTRI.Math.compare_pts_yx( compPt, qsNode.yval );
-/*				if ( compRes == 0 ) {			// TODO: Testcase
-					console.log("ptNode: Pts too close together#1: ", compPt, qsNode.yval );
-				}		*/
-				qsNode = ( compRes == -1 ) ? qsNode.left : qsNode.right;		// below : above
+				qsNode = ( PNLTRI.Math.compare_pts_yx( ( ( inPt == qsNode.yval ) ?	// is the point already inserted ?
+									inPtOther : inPt ), qsNode.yval ) == -1 ) ?
+									qsNode.left : qsNode.right;						// below : above
 			} else if ( qsNode.seg ) {		// X-Node: segment (~vertical line)
 											// 0.8 to 1.5 times as often as SINK-Node
-				if ( ( inPt == qsNode.seg.vFrom ) ||						// the point is already inserted.
+				if ( ( inPt == qsNode.seg.vFrom ) ||
 					 ( inPt == qsNode.seg.vTo ) ) {
+					// the point is already inserted
 					if ( this.fpEqual( inPt.y, inPtOther.y ) ) {
 						// horizontal segment
 						if ( !this.fpEqual( qsNode.seg.vFrom.y, qsNode.seg.vTo.y ) ) {
@@ -970,16 +967,16 @@ PNLTRI.QueryStructure.prototype = {
 							if ( inPt == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
 //								console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom", inUseFrom, inSegment, qsNode )
-								isInSegmentShorter = ( inPtOther.x > inPt.x ) ?
-										( inPtOther.x <  qsNode.seg.vTo.x ) :
-										( inPtOther.x >= qsNode.seg.vTo.x );
+								isInSegmentShorter = inSegment.upward ?
+										( inPtOther.x >= qsNode.seg.vTo.x ) :
+										( inPtOther.x <  qsNode.seg.vTo.x );
 								qsNode = ( isInSegmentShorter ?
 												inSegment.sprev.upward :
 												qsNode.seg.snext.upward ) ? qsNode.right : qsNode.left;		// above : below
 							} else {
 								// connected at qsNode.seg.vTo
 //								console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo", inUseFrom, inSegment, qsNode );
-								isInSegmentShorter = ( inPtOther.x > inPt.x ) ?
+								isInSegmentShorter = inSegment.upward ?
 										( inPtOther.x <  qsNode.seg.vFrom.x ) :
 										( inPtOther.x >= qsNode.seg.vFrom.x );
 								qsNode = ( isInSegmentShorter ?
@@ -987,14 +984,11 @@ PNLTRI.QueryStructure.prototype = {
 												qsNode.seg.sprev.upward ) ? qsNode.left : qsNode.right;		// below : above
 							}
 						}
+						continue;
 					} else {
 						compRes = this.is_left_of( qsNode.seg, inPtOther, false );
-						if ( compRes > 0 ) {
-							qsNode = qsNode.left;
-						} else if ( compRes < 0 ) {
-							qsNode = qsNode.right;
-						} else {
-							// co-linear reversal
+						if ( compRes == 0 ) {
+							// co-linear reversal (not horizontal)
 							//	a co-linear continuation would not reach this point
 							//  since the previous Y-node comparison would have led to a sink instead
 //							console.log("ptNode: co-linear, going back on previous segment", inPt, inPtOther, qsNode );
@@ -1004,31 +998,21 @@ PNLTRI.QueryStructure.prototype = {
 							if ( inPt == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
 //								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vFrom", inPt, inPtOther, qsNode );
-								isInSegmentShorter = qsNode.seg.upward ?
-										( inPtOther.y <  qsNode.seg.vTo.y ) :
-										( inPtOther.y >= qsNode.seg.vTo.y );
+								isInSegmentShorter = inSegment.upward ?
+										( inPtOther.y >= qsNode.seg.vTo.y ) :
+										( inPtOther.y <  qsNode.seg.vTo.y );
 								compRes = isInSegmentShorter ?
 										this.is_left_of( qsNode.seg, inSegment.sprev.vFrom, false ) :
 										-this.is_left_of( qsNode.seg, qsNode.seg.snext.vTo, false );
 							} else {
 								// connected at qsNode.seg.vTo
 //								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vTo", inPt, inPtOther, qsNode );
-								isInSegmentShorter = qsNode.seg.upward ?
-										( inPtOther.y >= qsNode.seg.vFrom.y ) :
-										( inPtOther.y <  qsNode.seg.vFrom.y );
+								isInSegmentShorter = inSegment.upward ?
+										( inPtOther.y <  qsNode.seg.vFrom.y ) :
+										( inPtOther.y >= qsNode.seg.vFrom.y );
 								compRes = isInSegmentShorter ?
 										this.is_left_of( qsNode.seg, inSegment.snext.vTo, false ) :
 										-this.is_left_of( qsNode.seg, qsNode.seg.sprev.vFrom, false );
-							}
-							if ( compRes > 0 ) {
-								qsNode = qsNode.left;
-							} else if ( compRes < 0 ) {
-								qsNode = qsNode.right;
-							} else {
-								// ???	TODO - not reached with current tests
-								return qsNode;
-								// qsNode = qsNode.left;		// left
-								// qsNode = qsNode.right;		// right
 							}
 						}
 					}
@@ -1039,36 +1023,28 @@ PNLTRI.QueryStructure.prototype = {
 						console.log("ptNode: Pts too close together#2: ", inPt, qsNode.seg );
 					}		*/
 					compRes = this.is_left_of( qsNode.seg, inPt, true );
-					if ( compRes > 0 ) {
-						qsNode = qsNode.left;
-					} else if ( compRes < 0 ) {
-						qsNode = qsNode.right;
-					} else {
+					if ( compRes == 0 ) {
 						// touching: inPt lies on qsNode.seg but is none of its endpoints
 						//	should happen quite seldom
 						compRes = this.is_left_of( qsNode.seg, inPtOther, false );
-						if ( compRes > 0 ) {
-							qsNode = qsNode.left;
-						} else if ( compRes < 0 ) {
-							qsNode = qsNode.right;
-						} else {
+						if ( compRes == 0 ) {
 							// co-linear: inSegment and qsNode.seg
 							//	includes case with inPtOther connected to qsNode.seg
 							var tmpPtOther = inUseFrom ? inSegment.sprev.vFrom : inSegment.snext.vTo;
 							compRes = this.is_left_of( qsNode.seg, tmpPtOther, false );
-							if ( compRes > 0 ) {
-								qsNode = qsNode.left;
-							} else if ( compRes < 0 ) {
-								qsNode = qsNode.right;
-							} else {
-								// ???	TODO - not reached with current tests
-								//				possible at all ?
-								return qsNode;
-								// qsNode = qsNode.left;		// left
-								// qsNode = qsNode.right;		// right
-							}
 						}
 					}
+				}
+				if ( compRes > 0 ) {
+					qsNode = qsNode.left;
+				} else if ( compRes < 0 ) {
+					qsNode = qsNode.right;
+				} else {
+					// ???	TODO - not reached with current tests
+					//				possible at all ?
+					return qsNode;
+					// qsNode = qsNode.left;		// left
+					// qsNode = qsNode.right;		// right
 				}
 			} else {		// SINK-Node: trapezoid area
 							// least often
