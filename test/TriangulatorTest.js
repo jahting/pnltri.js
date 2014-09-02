@@ -43,7 +43,7 @@ function test_Triangulator() {
 	}
 
 
-	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inPolyLeftArr, inDebug ) {
+	function test_triangulate_polygon( inDataName, inForceTrapezoidation, inBasicAlgorithm, inPolyLeftArr, inDebug, inXoff, inYoff ) {
 		var polygonChains = testData.get_polygon_with_holes( inDataName );
 		var	expectedTriangList = testData.get_triangles( inDataName, inBasicAlgorithm );
 		//
@@ -59,7 +59,7 @@ function test_Triangulator() {
 		//
 		if ( inDebug > 0 ) {
 			var myPolygonData = new PNLTRI.PolygonData( polygonChains );
-			drawPolygonLayers( { "poly": polygonChains, "triang": myPolygonData.triangles_2_polygons( triangList ) }, inDebug );
+			drawPolygonLayers( { "poly": polygonChains, "triang": myPolygonData.triangles_2_polygons( triangList ) }, inDebug, inXoff, inYoff );
 		}
 	}
 
