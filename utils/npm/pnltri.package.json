@@ -1,0 +1,47 @@
+{
+
+    "name" : "pnltri",
+
+    "version" : "%VERSION%",
+
+    "description" : "Polygon near-linear time triangulation (based on Seidel's algorithm) with ear clip for small cases. Handles degenerate cases of colinear edges and vertices touching edges.",
+
+    "keywords" : [
+        "Seidel",
+        "polygon",
+        "triangulation",
+        "tesselation",
+        "ear clipping",
+        "linear",
+        "geometry"
+    ],
+
+    "homepage" : "https://github.com/jahting/pnltri.js",
+
+    "bugs" : {
+        "url" : "https://github.com/jahting/pnltri.js/issues"
+    },
+
+    "author" : "Juergen Ahting",
+
+    "main" : "./pnltri.js",
+
+    "repository" : {
+        "type" : "git",
+        "url" : "git://github.com/jahting/pnltri.js.git"
+    },
+
+    "license" : {
+        "type" : "The MIT License",
+        "url" : "https://raw.github.com/jahting/pnltri.js/master/LICENSE"
+    },
+
+    "engines" : {
+        "node" : "*"
+    },
+
+    "help" : {
+        "web" : "https://github.com/jahting/pnltri.js/issues"
+    }
+
+}
