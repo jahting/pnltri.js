@@ -208,27 +208,27 @@ PNLTRI.QueryStructure.prototype = {
 	 * Query structure main methods
 	 */
 
-	//	This method finds the Node in the QueryStructure corresponding
-	//   to the trapezoid that contains inPt, starting from Node rootFrom/rootTo.
-	//  If inPt lies on a border (y-line or segment) inPtOther is used
-	//	 to determine on which side.
-
-	// TODO: may need to prevent infinite loop in case of messed up
-	//	trapezoid structure (s. test_add_segment_special_6)
+	//	This method finds the Nodes in the QueryStructure corresponding
+	//   to the trapezoids that contain the endpoints of inSegment,
+	//	 starting from Nodes rootFrom/rootTo and replacing them with the results.
 
 	segNodes: function ( inSegment ) {
 		this.ptNode( inSegment, true );
 		this.ptNode( inSegment, false );
 	},
 
+	// TODO: may need to prevent infinite loop in case of messed up
+	//	trapezoid structure (s. test_add_segment_special_6)
+
 	ptNode: function ( inSegment, inUseFrom ) {
+		var ptMain, ptOther, qsNode;
 		if ( inUseFrom ) {
-			var inPt = inSegment.vFrom;
-			var inPtOther = inSegment.vTo;
-			var	qsNode = inSegment.rootFrom;
+			ptMain = inSegment.vFrom;
+			ptOther = inSegment.vTo;		// used if ptMain is not sufficient
+			qsNode = inSegment.rootFrom;
 		} else {
-			inPt = inSegment.vTo;
-			inPtOther = inSegment.vFrom;
+			ptMain = inSegment.vTo;
+			ptOther = inSegment.vFrom;
 			qsNode = inSegment.rootTo;
 		}
 		var compPt, compRes;
@@ -237,25 +237,25 @@ PNLTRI.QueryStructure.prototype = {
 		while ( qsNode ) {
 			if ( qsNode.yval ) {			// Y-Node: horizontal line
 											// 4 times as often as X-Node
-				qsNode = ( PNLTRI.Math.compare_pts_yx( ( ( inPt == qsNode.yval ) ?	// is the point already inserted ?
-									inPtOther : inPt ), qsNode.yval ) == -1 ) ?
+				qsNode = ( PNLTRI.Math.compare_pts_yx( ( ( ptMain == qsNode.yval ) ?	// is the point already inserted ?
+									ptOther : ptMain ), qsNode.yval ) == -1 ) ?
 									qsNode.left : qsNode.right;						// below : above
 			} else if ( qsNode.seg ) {		// X-Node: segment (~vertical line)
 											// 0.8 to 1.5 times as often as SINK-Node
-				if ( ( inPt == qsNode.seg.vFrom ) ||
-					 ( inPt == qsNode.seg.vTo ) ) {
+				if ( ( ptMain == qsNode.seg.vFrom ) ||
+					 ( ptMain == qsNode.seg.vTo ) ) {
 					// the point is already inserted
-					if ( this.fpEqual( inPt.y, inPtOther.y ) ) {
+					if ( this.fpEqual( ptMain.y, ptOther.y ) ) {
 						// horizontal segment
 						if ( !this.fpEqual( qsNode.seg.vFrom.y, qsNode.seg.vTo.y ) ) {
-							qsNode = ( inPtOther.x < inPt.x ) ? qsNode.left : qsNode.right;		// left : right
+							qsNode = ( ptOther.x < ptMain.x ) ? qsNode.left : qsNode.right;		// left : right
 						} else {	// co-linear horizontal reversal: test_add_segment_special_7
-							if ( inPt == qsNode.seg.vFrom ) {
+							if ( ptMain == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
 //								console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vFrom", inUseFrom, inSegment, qsNode )
 								isInSegmentShorter = inSegment.upward ?
-										( inPtOther.x >= qsNode.seg.vTo.x ) :
-										( inPtOther.x <  qsNode.seg.vTo.x );
+										( ptOther.x >= qsNode.seg.vTo.x ) :
+										( ptOther.x <  qsNode.seg.vTo.x );
 								qsNode = ( isInSegmentShorter ?
 												inSegment.sprev.upward :
 												qsNode.seg.snext.upward ) ? qsNode.right : qsNode.left;		// above : below
@@ -263,8 +263,8 @@ PNLTRI.QueryStructure.prototype = {
 								// connected at qsNode.seg.vTo
 //								console.log("ptNode: co-linear horizontal reversal, connected at qsNode.seg.vTo", inUseFrom, inSegment, qsNode );
 								isInSegmentShorter = inSegment.upward ?
-										( inPtOther.x <  qsNode.seg.vFrom.x ) :
-										( inPtOther.x >= qsNode.seg.vFrom.x );
+										( ptOther.x <  qsNode.seg.vFrom.x ) :
+										( ptOther.x >= qsNode.seg.vFrom.x );
 								qsNode = ( isInSegmentShorter ?
 												inSegment.snext.upward :
 												qsNode.seg.sprev.upward ) ? qsNode.left : qsNode.right;		// below : above
@@ -272,30 +272,30 @@ PNLTRI.QueryStructure.prototype = {
 						}
 						continue;
 					} else {
-						compRes = this.is_left_of( qsNode.seg, inPtOther, false );
-						if ( compRes == 0 ) {
+						compRes = this.is_left_of( qsNode.seg, ptOther, false );
+						if ( compRes === 0 ) {
 							// co-linear reversal (not horizontal)
 							//	a co-linear continuation would not reach this point
 							//  since the previous Y-node comparison would have led to a sink instead
-//							console.log("ptNode: co-linear, going back on previous segment", inPt, inPtOther, qsNode );
+//							console.log("ptNode: co-linear, going back on previous segment", ptMain, ptOther, qsNode );
 							// now as we have two consecutive co-linear segments we have to avoid a cross-over
 							//	for this we need the far point on the "next" segment to the SHORTER of our two
 							//	segments to avoid that "next" segment to cross the longer of our two segments
-							if ( inPt == qsNode.seg.vFrom ) {
+							if ( ptMain == qsNode.seg.vFrom ) {
 								// connected at qsNode.seg.vFrom
-//								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vFrom", inPt, inPtOther, qsNode );
+//								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vFrom", ptMain, ptOther, qsNode );
 								isInSegmentShorter = inSegment.upward ?
-										( inPtOther.y >= qsNode.seg.vTo.y ) :
-										( inPtOther.y <  qsNode.seg.vTo.y );
+										( ptOther.y >= qsNode.seg.vTo.y ) :
+										( ptOther.y <  qsNode.seg.vTo.y );
 								compRes = isInSegmentShorter ?
 										this.is_left_of( qsNode.seg, inSegment.sprev.vFrom, false ) :
 										-this.is_left_of( qsNode.seg, qsNode.seg.snext.vTo, false );
 							} else {
 								// connected at qsNode.seg.vTo
-//								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vTo", inPt, inPtOther, qsNode );
+//								console.log("ptNode: co-linear, going back on previous segment, connected at qsNode.seg.vTo", ptMain, ptOther, qsNode );
 								isInSegmentShorter = inSegment.upward ?
-										( inPtOther.y <  qsNode.seg.vFrom.y ) :
-										( inPtOther.y >= qsNode.seg.vFrom.y );
+										( ptOther.y <  qsNode.seg.vFrom.y ) :
+										( ptOther.y >= qsNode.seg.vFrom.y );
 								compRes = isInSegmentShorter ?
 										this.is_left_of( qsNode.seg, inSegment.snext.vTo, false ) :
 										-this.is_left_of( qsNode.seg, qsNode.seg.sprev.vFrom, false );
@@ -303,19 +303,19 @@ PNLTRI.QueryStructure.prototype = {
 						}
 					}
 				} else {
-/*					if ( ( PNLTRI.Math.compare_pts_yx( inPt, qsNode.seg.vFrom ) *			// TODO: Testcase
-							PNLTRI.Math.compare_pts_yx( inPt, qsNode.seg.vTo )
+/*					if ( ( PNLTRI.Math.compare_pts_yx( ptMain, qsNode.seg.vFrom ) *			// TODO: Testcase
+							PNLTRI.Math.compare_pts_yx( ptMain, qsNode.seg.vTo )
 						   ) == 0 ) {
-						console.log("ptNode: Pts too close together#2: ", inPt, qsNode.seg );
+						console.log("ptNode: Pts too close together#2: ", ptMain, qsNode.seg );
 					}		*/
-					compRes = this.is_left_of( qsNode.seg, inPt, true );
-					if ( compRes == 0 ) {
-						// touching: inPt lies on qsNode.seg but is none of its endpoints
+					compRes = this.is_left_of( qsNode.seg, ptMain, true );
+					if ( compRes === 0 ) {
+						// touching: ptMain lies on qsNode.seg but is none of its endpoints
 						//	should happen quite seldom
-						compRes = this.is_left_of( qsNode.seg, inPtOther, false );
-						if ( compRes == 0 ) {
+						compRes = this.is_left_of( qsNode.seg, ptOther, false );
+						if ( compRes === 0 ) {
 							// co-linear: inSegment and qsNode.seg
-							//	includes case with inPtOther connected to qsNode.seg
+							//	includes case with ptOther connected to qsNode.seg
 							var tmpPtOther = inUseFrom ? inSegment.sprev.vFrom : inSegment.snext.vTo;
 							compRes = this.is_left_of( qsNode.seg, tmpPtOther, false );
 						}
@@ -334,11 +334,9 @@ PNLTRI.QueryStructure.prototype = {
 				}
 			} else {		// SINK-Node: trapezoid area
 							// least often
-				if ( !qsNode.trap ) {
-					console.log("ptNode: unknown type", qsNode);
-				}
-				if ( inUseFrom )	inSegment.rootFrom = qsNode
-				else				inSegment.rootTo = qsNode;
+				if ( !qsNode.trap )	{ console.log("ptNode: unknown type", qsNode); }
+				if ( inUseFrom )	{ inSegment.rootFrom = qsNode; }
+				else				{ inSegment.rootTo = qsNode; }
 				return qsNode;
 			}
 		}	// end while - should not exit here
@@ -917,7 +915,7 @@ PNLTRI.QueryStructure.prototype = {
 		do {
 			// rseg should exactely go upward on trapezoids inside the polygon (odd depth)
 			var expectedRsegUpward = ( ( curDepth % 2 ) == 1 );
-			while ( thisTrap = thisDepth.pop() ) {
+			while ( thisTrap = thisDepth.pop() ) {			// assignment !
 				if ( thisTrap.depth != -1 )	continue;
 				thisTrap.depth = curDepth;
 				//
@@ -926,9 +924,9 @@ PNLTRI.QueryStructure.prototype = {
 				if ( thisTrap.dL )	thisDepth.push( thisTrap.dL );
 				if ( thisTrap.dR )	thisDepth.push( thisTrap.dR );
 				//
-				if ( ( borderSeg = thisTrap.lseg ) && ( borderSeg.trLeft.depth == -1 ) )
+				if ( ( borderSeg = thisTrap.lseg ) && ( borderSeg.trLeft.depth == -1 ) )	// assignment !
 					nextDepth.push( borderSeg.trLeft );
-				if ( borderSeg = thisTrap.rseg ) {
+				if ( borderSeg = thisTrap.rseg ) {											// assignment !
 					if ( borderSeg.trRight.depth == -1 )
 						nextDepth.push( borderSeg.trRight );
 					if ( borderSeg.upward != expectedRsegUpward )
@@ -984,8 +982,8 @@ PNLTRI.QueryStructure.prototype = {
 					myVisibleDiagonals[curTrap.vHigh.id][highPos] = hlDiag;
 				}
 			} else {		// outside, hole
-				if ( curTrap.vHigh.id != null )	myExternalNeighbors[curTrap.vHigh.id] = highPos;
-				if ( curTrap.vLow.id  != null )	myExternalNeighbors[ curTrap.vLow.id] = lowPos;
+				if ( curTrap.vHigh.id !== null )	myExternalNeighbors[curTrap.vHigh.id] = highPos;
+				if ( curTrap.vLow.id  !== null )	myExternalNeighbors[ curTrap.vLow.id] = lowPos;
 			}
 		}
 		// create the list of outgoing diagonals in the right order (CW)
@@ -996,7 +994,7 @@ PNLTRI.QueryStructure.prototype = {
 		for ( i = 0; i < nbVertices; i++ ) {
 			curDiags  = myVisibleDiagonals[i];
 			firstElem = myExternalNeighbors[i];
-			if ( firstElem == null )	continue;		// eg. skipped vertices (zero length, co-linear
+			if ( firstElem == null )	continue;		// eg. skipped vertices (zero length, co-linear		// NOT: === !
 			j = firstElem;
 			lastIncoming = null;
 			do {
@@ -1077,7 +1075,7 @@ PNLTRI.Trapezoider.prototype = {
 		var nbSegs = randSegListArray.length;
 		var myQs = this.queryStructure;
 
-		var current = 0, logstar = nbSegs;
+		var i, current = 0, logstar = nbSegs;
 		while ( current < nbSegs ) {
 			// The CENTRAL mechanism for the near-linear performance:
 			//	stratefies the loop through all segments into log* parts
@@ -1087,7 +1085,7 @@ PNLTRI.Trapezoider.prototype = {
 			var partEnd = ( logstar > 1 ) ? Math.floor( nbSegs / logstar ) : nbSegs;
 
 			// Core: adds next partition of the segments
-			for (; current < partEnd; current++ ) { myQs.add_segment( randSegListArray[current] ) }
+			for (; current < partEnd; current++ ) { myQs.add_segment( randSegListArray[current] ); }
 //			console.log( nbSegs, current );
 
 			// To speed up the segment insertion into the trapezoidation
@@ -1097,7 +1095,7 @@ PNLTRI.Trapezoider.prototype = {
 			//	appropriate sub-tree instead of the root of the whole
 			//	query structure.
 			//
-			for (var i = current; i < nbSegs; i++) { this.queryStructure.segNodes( randSegListArray[i] ) }
+			for (i = current; i < nbSegs; i++) { this.queryStructure.segNodes( randSegListArray[i] ); }
 		}
 
 		myQs.assignDepths( this.polyData );

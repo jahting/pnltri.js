@@ -67,18 +67,19 @@ PNLTRI.Triangulator.prototype = {
 
 
 		this.clear_lastData();
-		if ( ( !inPolygonChains ) || ( inPolygonChains.length == 0 ) )		return	[];
+		if ( ( !inPolygonChains ) || ( inPolygonChains.length === 0 ) )		return	[];
 		//
 		// initializes general polygon data structure
 		//
 		var myPolygonData = new PNLTRI.PolygonData( inPolygonChains );
 		//
 		var basicPolygon = is_basic_polygon();
+		var	myTriangulator;
 		if ( basicPolygon ) {
 			//
 			// triangulates single polygon without holes
 			//
-			var	myTriangulator = new PNLTRI.EarClipTriangulator( myPolygonData );
+			myTriangulator = new PNLTRI.EarClipTriangulator( myPolygonData );
 			basicPolygon = myTriangulator.triangulate_polygon_no_holes();
 		}
 		if ( !basicPolygon ) {
@@ -90,7 +91,7 @@ PNLTRI.Triangulator.prototype = {
 			//
 			// triangulates all uni-y-monotone sub-polygons
 			//
-			var	myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
+			myTriangulator = new PNLTRI.MonoTriangulator( myPolygonData );
 			myTriangulator.triangulate_all_polygons();
 		}
 		//

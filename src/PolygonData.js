@@ -281,12 +281,12 @@ PNLTRI.PolygonData.prototype = {
 				newMono.mprev = newMono.snext;
 				newMono.mnext = newMono.sprev;
 			}
-			if ( fromRevSeg = newMono.vFrom.lastInDiag ) {
+			if ( fromRevSeg = newMono.vFrom.lastInDiag ) {		// assignment !
 				fromRevSeg.mnext = newMono;
 				newMono.mprev = fromRevSeg;
 				newMono.vFrom.lastInDiag = null;		// cleanup
 			}
-			if ( toFirstOutSeg = newMonoTo.firstOutDiag ) {
+			if ( toFirstOutSeg = newMonoTo.firstOutDiag ) {		// assignment !
 				toFirstOutSeg.mprev = newMono;
 				newMono.mnext = toFirstOutSeg;
 				newMonoTo.firstOutDiag = null;			// cleanup
@@ -307,7 +307,7 @@ PNLTRI.PolygonData.prototype = {
 
 			frontMono.marked = true;
 			frontMono = frontMono.mnext;
-			while ( frontPt = frontMono.vFrom ) {
+			while ( frontPt = frontMono.vFrom ) {				// assignment !
 				if (frontMono.marked) {
 					if ( frontPt == firstPt )	break;	// mono chain completed
 					console.log("ERR unique_monotone: segment in two chains", firstPt, frontMono );

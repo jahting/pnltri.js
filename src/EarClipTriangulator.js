@@ -66,11 +66,11 @@ PNLTRI.EarClipTriangulator.prototype = {
 
 				var poX = otherX - prevX,  poY = otherY - prevY;
 					// just in case there are several vertices with the same coordinate
-					if ( ( poX == 0 ) && ( poY == 0 ) )		continue;	// vOther == vertex.mprev
+					if ( ( poX === 0 ) && ( poY === 0 ) )		continue;	// vOther == vertex.mprev
 				var voX = otherX - vertX,  voY = otherY - vertY;
-					if ( ( voX == 0 ) && ( voY == 0 ) )		continue;	// vOther == vertex
+					if ( ( voX === 0 ) && ( voY === 0 ) )		continue;	// vOther == vertex
 				var noX = otherX - nextX,  noY = otherY - nextY;
-					if ( ( noX == 0 ) && ( noY == 0 ) )		continue;	// vOther == vertex.mnext
+					if ( ( noX === 0 ) && ( noY === 0 ) )		continue;	// vOther == vertex.mnext
 
 				// if vOther is inside triangle abc -> not an ear to cut off
 				if ( ( ( vnX * voY - vnY * voX ) >= PNLTRI.Math.EPSILON_N ) &&
@@ -79,7 +79,7 @@ PNLTRI.EarClipTriangulator.prototype = {
 			}
 			return true;
 
-		};
+		}
 
 		var myPolyData = this.polyData;
 		var startSeg = myPolyData.getFirstSegment();

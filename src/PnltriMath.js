@@ -51,7 +51,7 @@ PNLTRI.Math = {
 		// < 0:  v1 lies right of v0, CW angle from v0 to v1 is convex ( < 180 deg )
 	},
 
-}
+};
 
 // precision of floating point arithmetic
 //	PNLTRI.Math.EPSILON_P = Math.pow(2,-32);	// ~ 0.0000000001
