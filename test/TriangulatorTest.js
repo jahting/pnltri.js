@@ -108,6 +108,8 @@ function test_Triangulator() {
 		test_triangulate_polygon( "square_3triangholes", true, false, [ true, true, true, true ], 0 );		// 5; holes => uses Trapezoidation in any case
 		test_triangulate_polygon( "three_error#1", false, true, [ false ], 0 );				// 1; autom. switches to EarClipTriangulator
 		test_triangulate_polygon( "three_error#1", true, false, [ false ], 0 );				// 1; forced not to switch to EarClipTriangulator
+		test_triangulate_polygon( "three_error#4", false, true, [ true ], 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
+		test_triangulate_polygon( "three_error#4", true, false, [ true ], 0 );				// 1; 4.Error, integrating into Three.js (USA Maine)
 		test_triangulate_polygon( "hole_short_path", false, false, [ false, false ], 0 );	// 0.8; holes => uses Trapezoidation in any case
 		test_triangulate_polygon( "hole_short_path", true, false, [ false, false ], 0 );	// 0.8; holes => uses Trapezoidation in any case
 	});
@@ -115,15 +117,21 @@ function test_Triangulator() {
 
 
 function compute_Triangulator( inResultTarget ) {
-		var polygonChains = [ [
-			{ x:10, y:34 }, { x:36, y:12 }, { x:32, y:20 }, { x:28, y:24 },
-			{ x:27, y:30 }, { x:38, y: 8 }, { x:40, y:32 },
-			] ];
-		//
-		var myTriangulator = new PNLTRI.Triangulator();
-		var triangList = myTriangulator.triangulate_polygon( polygonChains, true );		// sorted results !!
-		//
-		var myPolygonData = myTriangulator.lastPolyData;
-		drawPolygonLayers( { "poly": polygonChains, "triang": myPolygonData.triangles_2_polygons( triangList ) }, 1 );
+	var polygonChains = [ [
+		{ x:10, y:34 }, { x:36, y:12 }, { x:32, y:20 }, { x:28, y:24 },
+		{ x:27, y:30 }, { x:38, y: 8 }, { x:40, y:32 },
+		] ];
+	//
+	var myTriangulator = new PNLTRI.Triangulator();
+	var triangList = myTriangulator.triangulate_polygon( polygonChains, true );		// sorted results !!
+	//
+	var myPolygonData = myTriangulator.lastPolyData;
+	drawPolygonLayers( { "poly": polygonChains, "triang": myPolygonData.triangles_2_polygons( triangList ) }, 1 );
+	//
+/*	if ( inResultTarget ) {
+		inResultTarget.innerHTML = "PolygonChains: " + testData.polygons_to_str(polygonChains);
+	} else {
+		alert( "PolygonChains: " + testData.polygons_to_str(polygonChains) );
+	}	*/
 }
 

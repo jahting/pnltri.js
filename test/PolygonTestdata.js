@@ -159,9 +159,9 @@ PolygonTestdata = function () {
 				{ x: 1, y:21 },
 			],
 			[ { x: 4, y: 21 }, { x: 6, y: 23 }, { x: 7, y: 25 }, { x: 9, y: 21 } ],		// hole#1: CW
-			[ { x: 5, y: 21 }, { x:11, y: 21 }, { x:10, y: 18 }, { x: 8, y: 17 } ],		// hole#1: CW
-			[ { x:27, y: 19 }, { x:29, y: 20 }, { x:31, y: 22 }, { x:33, y: 19 } ],		// hole#1: CW
-			[ { x:28, y: 19 }, { x:34, y: 19 }, { x:32, y: 16 }, { x:30, y: 15 } ],		// hole#1: CW
+			[ { x: 5, y: 21 }, { x:11, y: 21 }, { x:10, y: 18 }, { x: 8, y: 17 } ],		// hole#2: CW
+			[ { x:27, y: 19 }, { x:29, y: 20 }, { x:31, y: 22 }, { x:33, y: 19 } ],		// hole#3: CW
+			[ { x:28, y: 19 }, { x:34, y: 19 }, { x:32, y: 16 }, { x:30, y: 15 } ],		// hole#4: CW
 						],
 		//
 		"tree_error#1": [					// from	Triangulation Error of Tree (http://jsbin.com/odufih/5/edit)
