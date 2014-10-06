@@ -163,6 +163,13 @@ PolygonTestdata = function () {
 			[ { x:27, y: 19 }, { x:29, y: 20 }, { x:31, y: 22 }, { x:33, y: 19 } ],		// hole#3: CW
 			[ { x:28, y: 19 }, { x:34, y: 19 }, { x:32, y: 16 }, { x:30, y: 15 } ],		// hole#4: CW
 						],
+		"dot_hole": [			// my#9: square with a dot inside
+			// Contour: CCW
+			[ { x:0, y:50 }, { x: 0, y: 0 }, { x:50, y: 0 }, { x:50, y:50 } ],
+			// dot hole: CW
+		//	[ { x:45, y:32 }, { x:45, y:32 }, { x:45, y:32 } ],						// real dot
+			[ { x:45, y:32 }, { x:45, y:32.00001 }, { x:45.00001, y:32 } ],			// hole: almost dot
+						],
 		//
 		"tree_error#1": [					// from	Triangulation Error of Tree (http://jsbin.com/odufih/5/edit)
 			// Contour: CCW
@@ -730,6 +737,10 @@ PolygonTestdata = function () {
 			[ 6, 7, 10 ], [ 6, 10, 18 ], [ 7, 8, 9 ], [ 7, 9, 10 ],
 			[ 10, 11, 18 ], [ 13, 14, 17 ]
 						],
+		"dot_hole": [
+			[ 0, 1, 5 ], [ 0, 5, 3 ], [ 1, 2, 4 ], [ 1, 4, 5 ],
+			[ 2, 3, 6 ], [ 2, 6, 4 ], [ 3, 5, 6 ]
+						],
 		"tree_error#1": [
 			[ 0, 1, 7 ], [ 0, 3, 2 ], [ 0, 7, 3 ], [ 1, 2, 13 ],
 			[ 1, 9, 10 ], [ 1, 10, 11 ], [ 1, 11, 7 ], [ 1, 13, 9 ],
@@ -1290,6 +1301,7 @@ PolygonTestdata = function () {
 						],
 		"colinear#2": [],
 		"colinear#3": [],
+		"dot_hole": [],
 		"tree_error#1": [],
 		"tree_full": [],
 		// Performance Test

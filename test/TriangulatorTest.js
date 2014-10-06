@@ -84,6 +84,7 @@ function test_Triangulator() {
 		test_triangulate_polygon_details( "colinear#1", 2, 0 );					// 1; 4 touching co-linear lines
 		test_triangulate_polygon_details( "colinear#2", 8, 0 );					// 1; 4 touching co-linear lines & 4 touching colinear holes
 		test_triangulate_polygon_details( "colinear#3", 14, 0 );				// 1; touching co-linear horizontal lines
+		test_triangulate_polygon_details( "dot_hole", 2, 1 );					// 1; square with a dot inside
 		test_triangulate_polygon_details( "tree_error#1", 4, 0 );				// 1; from	Triangulation Error of Tree (TODO: Source)
 		test_triangulate_polygon_details( "tree_full", 183, 0 );				// 0.22; from	Triangulation Error of Tree (TODO: Source)
 		//
